@@ -42,7 +42,7 @@ jobs:
       - name: 📋 後端 - 生成 OpenAPI 文檔
         run: |
           cd packages/backend
-          pnpm run gen:openapi
+          pnpm run openapi
 
       - name: 📋 後端 - OpenAPI Spectral 驗證
         run: |
