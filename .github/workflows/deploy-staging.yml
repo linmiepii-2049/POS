@@ -83,11 +83,22 @@ jobs:
       - name: 🔍 驗證部署
         run: |
           echo "等待部署生效..."
-          sleep 15
-          echo "測試健康檢查..."
-          curl -f https://pos-backend-staging.survey-api.workers.dev/health || echo "⚠️ 健康檢查失敗，但繼續部署"
+          sleep 20
+          
+          echo "測試健康檢查（重試 3 次）..."
+          for i in 1 2 3; do
+            if curl -f https://pos-backend-staging.survey-api.workers.dev/health; then
+              echo "✅ 健康檢查成功！"
+              break
+            else
+              echo "⚠️ 健康檢查失敗（第 $i 次），10 秒後重試..."
+              sleep 10
+            fi
+          done
+          
           echo "測試版本資訊..."
-          curl -f https://pos-backend-staging.survey-api.workers.dev/version || echo "⚠️ 版本檢查失敗，但繼續部署"
+          curl -f https://pos-backend-staging.survey-api.workers.dev/version || echo "⚠️ 版本檢查失敗"
+          
           echo "✅ 後端部署完成！"
 
   # 部署前端
