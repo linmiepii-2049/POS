@@ -224,7 +224,7 @@ jobs:
         run: |
           npx wrangler pages deploy dist \
             --project-name=pos-frontend-prod \
-            --branch=production
+            --branch=main
 
       - name: ✅ 前端部署完成
         run: echo "🎉 前端部署成功！"
