@@ -17,46 +17,10 @@ permissions:
   deployments: write
 
 jobs:
-  # 第一層審核
-  approval-stage-1:
-    name: 🔐 第一層審核（技術負責人）
-    runs-on: ubuntu-latest
-    environment:
-      name: production-approval-tech
-    steps:
-      - name: 📋 記錄部署資訊
-        run: |
-          echo "================================"
-          echo "🚨 Production 部署請求"
-          echo "================================"
-          echo "版本: ${{ github.event.inputs.version }}"
-          echo "部署原因: ${{ github.event.inputs.reason }}"
-          echo "觸發者: ${{ github.actor }}"
-          echo "分支: ${{ github.ref_name }}"
-          echo "Commit: ${{ github.sha }}"
-          echo "時間: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-          echo "================================"
-          echo ""
-          echo "⚠️  請技術負責人審核此部署請求"
-
-  # 第二層審核
-  approval-stage-2:
-    name: 🔐 第二層審核（專案負責人）
-    runs-on: ubuntu-latest
-    needs: approval-stage-1
-    environment:
-      name: production-approval-pm
-    steps:
-      - name: 📋 確認部署
-        run: |
-          echo "✅ 技術審核已通過"
-          echo "⚠️  等待專案負責人最終批准..."
-
   # 品質檢查
   pre-deploy-check:
     name: Production 部署前檢查
     runs-on: ubuntu-latest
-    needs: approval-stage-2
     
     steps:
       - name: 📥 Checkout 程式碼

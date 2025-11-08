@@ -14,32 +14,10 @@ permissions:
   deployments: write
 
 jobs:
-  # 審核閘門
-  approval:
-    name: 🔐 等待審核批准
-    runs-on: ubuntu-latest
-    environment:
-      name: staging-approval
-      # 在 GitHub Settings > Environments 設定審核者
-    steps:
-      - name: 📋 記錄部署資訊
-        run: |
-          echo "================================"
-          echo "🚀 Staging 部署請求"
-          echo "================================"
-          echo "部署環境: Staging"
-          echo "部署原因: ${{ github.event.inputs.reason }}"
-          echo "觸發者: ${{ github.actor }}"
-          echo "分支: ${{ github.ref_name }}"
-          echo "Commit: ${{ github.sha }}"
-          echo "時間: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-          echo "================================"
-
   # 品質檢查
   pre-deploy-check:
     name: 部署前品質檢查
     runs-on: ubuntu-latest
-    needs: approval
     
     steps:
       - name: 📥 Checkout 程式碼
