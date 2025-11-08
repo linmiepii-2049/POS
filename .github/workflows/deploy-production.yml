@@ -201,6 +201,13 @@ jobs:
       - name: 📚 安裝依賴
         run: pnpm install --frozen-lockfile
 
+      - name: 🔨 建置 SDK
+        working-directory: packages/sdk
+        run: |
+          echo "開始建置 SDK..."
+          pnpm run build
+          echo "✅ SDK 建置完成"
+
       - name: 🏗️ 建置前端（Production）
         working-directory: packages/frontend
         env:
