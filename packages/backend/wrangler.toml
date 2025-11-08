@@ -64,7 +64,7 @@ vars = { ENV_NAME = "production", API_BASE = "https://pos-backend-prod.survey-ap
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "pos-db-prod"
-database_id = "REPLACE_WITH_PROD_D1_DATABASE_ID"  # ⚠️ 需要執行: wrangler d1 create pos-db-prod
+database_id = "f3aa95e5-594c-4d68-a588-19dc6f7962f0"
 migrations_dir = "migrations"
 
 # R2 儲存桶綁定（Production）
