@@ -33,7 +33,7 @@ local_protocol = "http"
 # ================================
 [env.staging]
 name = "pos-backend-staging"
-vars = { ENV_NAME = "staging", API_BASE = "https://pos-backend-staging.survey-api.workers.dev", CORS_ORIGINS = "http://localhost:3000,https://f11121a9.pos-frontend-staging.pages.dev,https://614cac12.pos-frontend-staging.pages.dev,https://7a1d4c70.pos-frontend-staging.pages.dev,https://5994aaa7.pos-frontend-staging.pages.dev,https://ef09ff09.pos-frontend-staging.pages.dev,https://pos-frontend-staging.pages.dev" }
+vars = { ENV_NAME = "staging", API_BASE = "https://pos-backend-staging.survey-api.workers.dev", CORS_ORIGINS = "http://localhost:3000,https://pos-frontend-staging.pages.dev" }
 
 # D1 資料庫綁定（Staging）
 [[env.staging.d1_databases]]
