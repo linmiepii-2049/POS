@@ -14,6 +14,8 @@ export const AvailableCouponItemSchema = z.object({
   percent_off_bps: z.number().int().min(0).max(10000).nullable().describe('折扣百分比 (基點)'),
   amount_off_twd: z.number().int().min(0).nullable().describe('固定折扣金額 (元)'),
   min_order_twd: z.number().int().min(0).describe('最低消費金額 (元)'),
+  coupon_starts_at: z.string().nullable().describe('優惠券開始時間 (UTC)'),
+  coupon_ends_at: z.string().nullable().describe('優惠券結束時間 (UTC)'),
   allowed_uses: z.number().int().min(0).describe('允許使用次數'),
   used_count: z.number().int().min(0).describe('已使用次數'),
   remaining_uses: z.number().int().min(0).describe('剩餘可用次數'),

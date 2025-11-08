@@ -317,6 +317,7 @@ const updateOrderStatusRoute = createRoute({
   },
 });
 
+// @ts-expect-error - Hono OpenAPI 型別推導問題
 ordersRouter.openapi(updateOrderStatusRoute, async (c) => {
   try {
     const { id } = c.req.valid('param');
@@ -391,6 +392,7 @@ const cancelOrderRoute = createRoute({
   },
 });
 
+// @ts-expect-error - Hono OpenAPI 型別推導問題
 ordersRouter.openapi(cancelOrderRoute, async (c) => {
   try {
     const { id } = c.req.valid('param');

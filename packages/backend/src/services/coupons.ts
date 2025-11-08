@@ -971,7 +971,7 @@ export class CouponService {
     let grantedAt = nowStr;
     
     // 首先檢查代碼的開始時間
-    if (couponResult?.code_starts_at) {
+    if (couponResult?.code_starts_at && typeof couponResult.code_starts_at === 'string') {
       const codeStartsAtDate = new Date(couponResult.code_starts_at);
       const nowDate = new Date(nowStr);
       
@@ -981,7 +981,7 @@ export class CouponService {
       }
     }
     // 如果代碼沒有開始時間，檢查父級的開始時間
-    else if (couponResult?.coupon_starts_at) {
+    else if (couponResult?.coupon_starts_at && typeof couponResult.coupon_starts_at === 'string') {
       const couponStartsAtDate = new Date(couponResult.coupon_starts_at);
       const nowDate = new Date(nowStr);
       
@@ -1006,22 +1006,22 @@ export class CouponService {
       let calculatedExpiresAt = null;
       
       // 首先檢查代碼是否有結束時間
-      if (couponResult?.code_ends_at) {
+      if (couponResult?.code_ends_at && typeof couponResult.code_ends_at === 'string') {
         calculatedExpiresAt = couponResult.code_ends_at;
       }
       // 如果代碼沒有結束時間，但有 expires_after_days，則計算
-      else if (couponResult?.expires_after_days) {
+      else if (couponResult?.expires_after_days && typeof couponResult.expires_after_days === 'number') {
         const grantedDate = new Date(grantedAt);
         const expiresDate = new Date(grantedDate.getTime() + (couponResult.expires_after_days * 24 * 60 * 60 * 1000));
         calculatedExpiresAt = expiresDate.toISOString();
       }
       // 如果都沒有，使用父級優惠券的結束時間
-      else if (couponResult?.coupon_ends_at) {
+      else if (couponResult?.coupon_ends_at && typeof couponResult.coupon_ends_at === 'string') {
         calculatedExpiresAt = couponResult.coupon_ends_at;
       }
       
       // 如果計算出的過期時間晚於父級優惠券結束時間，以父級結束時間為主
-      if (calculatedExpiresAt && couponResult?.coupon_ends_at) {
+      if (calculatedExpiresAt && couponResult?.coupon_ends_at && typeof couponResult.coupon_ends_at === 'string') {
         const calculatedDate = new Date(calculatedExpiresAt);
         const couponEndDate = new Date(couponResult.coupon_ends_at);
         if (calculatedDate > couponEndDate) {
