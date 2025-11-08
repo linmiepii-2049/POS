@@ -1,7 +1,6 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
-import { cors } from 'hono/cors';
 import { getCurrentTimeInfo } from './utils/time.js';
-import { parseCorsOrigins, getLogPrefix } from './utils/env.js';
+import { parseCorsOrigins } from './utils/env.js';
 import type { Env } from './env.d.ts';
 import { docsRouter } from './routes/docs.js';
 import { dataRouter } from './routes/data.js';

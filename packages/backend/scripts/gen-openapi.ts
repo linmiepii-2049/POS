@@ -20,7 +20,9 @@ const OUTPUT_FILE = join(OUTPUT_DIR, 'openapi.json');
 
 /**
  * 將 JSON 轉換為 YAML 格式
+ * @deprecated 目前未使用，保留供未來需求
  */
+/*
 function jsonToYaml(json: any): string {
   const yamlLines: string[] = [];
   
@@ -56,6 +58,7 @@ function jsonToYaml(json: any): string {
   
   return yamlLines.join('\n');
 }
+*/
 
 /**
  * 修正 OpenAPI JSON 格式問題
@@ -115,7 +118,7 @@ async function generateOpenAPI(): Promise<void> {
   // 建立 docs 目錄
   try {
     mkdirSync(OUTPUT_DIR, { recursive: true });
-  } catch (error) {
+  } catch {
     // 目錄已存在，忽略錯誤
   }
   

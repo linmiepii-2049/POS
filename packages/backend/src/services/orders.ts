@@ -3,7 +3,6 @@ import type {
   Order, 
   OrderDetail,
   OrderItem,
-  CouponRedemption,
   CreateOrderRequest, 
   OrderQuery, 
   Pagination 
@@ -284,7 +283,7 @@ export class OrderService {
     // 建立 WHERE 條件
     const conditions: string[] = [];
     const params: unknown[] = [];
-    let paramIndex = 1;
+    let _paramIndex = 1;
 
     if (status) {
       conditions.push(`o.status = ?`);
@@ -549,6 +548,7 @@ export class OrderService {
 
     } catch (error) {
       // 如果發生錯誤，交易會自動回滾（因為沒有明確的 BEGIN/COMMIT）
+      console.error('建立訂單失敗:', error);
       throw error;
     }
   }

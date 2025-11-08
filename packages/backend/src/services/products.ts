@@ -33,7 +33,7 @@ export class ProductService {
     // 建立 WHERE 條件
     const conditions: string[] = [];
     const params: unknown[] = [];
-    let paramIndex = 1;
+    let _paramIndex = 1;
 
     if (search) {
       conditions.push(`(sku LIKE ? OR name LIKE ?)`);
@@ -196,7 +196,7 @@ export class ProductService {
     // 建立更新欄位
     const updateFields: string[] = [];
     const params: unknown[] = [];
-    let paramIndex = 1;
+    let _paramIndex = 1;
 
     if (data.sku !== undefined) {
       updateFields.push(`sku = ?`);

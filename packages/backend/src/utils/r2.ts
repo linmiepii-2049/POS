@@ -87,7 +87,7 @@ export class R2Service {
       }
 
       throw new Error('無法取得公開 URL');
-    } catch (error) {
+    } catch {
       throw new Error('檔案不存在或無法存取');
     }
   }
@@ -132,7 +132,7 @@ export class R2Service {
     try {
       const object = await this.bucket.head(key);
       return object !== null;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

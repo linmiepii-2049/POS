@@ -36,7 +36,7 @@ export class UserService {
     // 建立 WHERE 條件
     const conditions: string[] = [];
     const params: unknown[] = [];
-    let paramIndex = 1;
+    let _paramIndex = 1;
 
     if (nameOrPhone) {
       conditions.push(`(name LIKE ? OR phone LIKE ?)`);
@@ -217,7 +217,7 @@ export class UserService {
     // 建立更新欄位
     const updateFields: string[] = [];
     const params: unknown[] = [];
-    let paramIndex = 1;
+    let _paramIndex = 1;
 
     if (line_id !== undefined) {
       updateFields.push(`line_id = ?`);

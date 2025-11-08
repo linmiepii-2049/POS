@@ -200,7 +200,7 @@ export class CouponService {
     // 建立 WHERE 條件
     const conditions: string[] = [];
     const params: unknown[] = [];
-    let paramIndex = 1;
+    let _paramIndex = 1;
 
     if (search) {
       conditions.push(`name LIKE ?`);
@@ -377,7 +377,7 @@ export class CouponService {
     // 建立更新欄位
     const updateFields: string[] = [];
     const params: unknown[] = [];
-    let paramIndex = 1;
+    let _paramIndex = 1;
 
     if (data.name !== undefined) {
       updateFields.push(`name = ?`);
@@ -530,7 +530,7 @@ export class CouponService {
     // 建立 WHERE 條件
     const conditions: string[] = [];
     const params: unknown[] = [];
-    let paramIndex = 1;
+    let _paramIndex = 1;
 
     if (search) {
       conditions.push(`code LIKE ?`);
@@ -798,7 +798,7 @@ export class CouponService {
     // 建立更新欄位
     const updateFields: string[] = [];
     const params: unknown[] = [];
-    let paramIndex = 1;
+    let _paramIndex = 1;
 
     if (data.code !== undefined) {
       // 檢查新代碼是否已存在
@@ -958,7 +958,7 @@ export class CouponService {
     const couponResult = await this.db.prepare(couponQuery).bind(coupon_code_id).first();
     
     // 決定實際的開始時間（優先使用代碼的開始時間，其次使用優惠券的開始時間）
-    const effectiveStartsAt = couponResult?.code_starts_at || couponResult?.coupon_starts_at;
+    const _effectiveStartsAt = couponResult?.code_starts_at || couponResult?.coupon_starts_at;
     
     // 取得當前時間
     const now = new Date();
@@ -1149,7 +1149,7 @@ export class CouponService {
   }): Promise<any> {
     const updateFields: string[] = [];
     const params: unknown[] = [];
-    let paramIndex = 1;
+    let _paramIndex = 1;
 
     if (data.granted_at !== undefined) {
       updateFields.push(`granted_at = ?`);
