@@ -72,15 +72,20 @@ function fixOpenAPIJson(json: any): any {
     };
   }
   
-  // 修正 components 結構
-  if (!json.components) {
-    json.components = {};
-  }
-  if (!json.components.schemas) {
-    json.components.schemas = {};
-  }
-  if (!json.components.parameters) {
-    json.components.parameters = {};
+  // 移除空的 components
+  if (json.components) {
+    // 移除空的 schemas
+    if (json.components.schemas && Object.keys(json.components.schemas).length === 0) {
+      delete json.components.schemas;
+    }
+    // 移除空的 parameters
+    if (json.components.parameters && Object.keys(json.components.parameters).length === 0) {
+      delete json.components.parameters;
+    }
+    // 如果 components 完全空了，也移除它
+    if (Object.keys(json.components).length === 0) {
+      delete json.components;
+    }
   }
   
   // 添加 tags 定義

@@ -53,10 +53,6 @@
       "description": "檔案存取端點"
     }
   ],
-  "components": {
-    "schemas": {},
-    "parameters": {}
-  },
   "paths": {
     "/health": {
       "get": {
@@ -2081,6 +2077,16 @@
                             "minimum": 0,
                             "description": "最低消費金額 (元)"
                           },
+                          "coupon_starts_at": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "優惠券開始時間 (UTC)"
+                          },
+                          "coupon_ends_at": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "優惠券結束時間 (UTC)"
+                          },
                           "allowed_uses": {
                             "type": "integer",
                             "minimum": 0,
@@ -2132,6 +2138,8 @@
                           "percent_off_bps",
                           "amount_off_twd",
                           "min_order_twd",
+                          "coupon_starts_at",
+                          "coupon_ends_at",
                           "allowed_uses",
                           "used_count",
                           "remaining_uses",
@@ -3838,6 +3846,13 @@
                             "exclusiveMinimum": true,
                             "description": "全站總可用次數"
                           },
+                          "max_redemptions": {
+                            "type": "integer",
+                            "nullable": true,
+                            "minimum": 0,
+                            "exclusiveMinimum": true,
+                            "description": "所有代碼的總量限制"
+                          },
                           "starts_at": {
                             "type": "string",
                             "nullable": true,
@@ -3917,6 +3932,7 @@
                           "amount_off_twd",
                           "min_order_twd",
                           "max_uses_total",
+                          "max_redemptions",
                           "starts_at",
                           "ends_at",
                           "is_active",
@@ -4196,6 +4212,13 @@
                           "exclusiveMinimum": true,
                           "description": "全站總可用次數"
                         },
+                        "max_redemptions": {
+                          "type": "integer",
+                          "nullable": true,
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "description": "所有代碼的總量限制"
+                        },
                         "starts_at": {
                           "type": "string",
                           "nullable": true,
@@ -4275,6 +4298,7 @@
                         "amount_off_twd",
                         "min_order_twd",
                         "max_uses_total",
+                        "max_redemptions",
                         "starts_at",
                         "ends_at",
                         "is_active",
@@ -5220,6 +5244,13 @@
                           "exclusiveMinimum": true,
                           "description": "全站總可用次數"
                         },
+                        "max_redemptions": {
+                          "type": "integer",
+                          "nullable": true,
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "description": "所有代碼的總量限制"
+                        },
                         "starts_at": {
                           "type": "string",
                           "nullable": true,
@@ -5299,6 +5330,7 @@
                         "amount_off_twd",
                         "min_order_twd",
                         "max_uses_total",
+                        "max_redemptions",
                         "starts_at",
                         "ends_at",
                         "is_active",
@@ -5556,6 +5588,13 @@
                           "exclusiveMinimum": true,
                           "description": "全站總可用次數"
                         },
+                        "max_redemptions": {
+                          "type": "integer",
+                          "nullable": true,
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "description": "所有代碼的總量限制"
+                        },
                         "starts_at": {
                           "type": "string",
                           "nullable": true,
@@ -5635,6 +5674,7 @@
                         "amount_off_twd",
                         "min_order_twd",
                         "max_uses_total",
+                        "max_redemptions",
                         "starts_at",
                         "ends_at",
                         "is_active",

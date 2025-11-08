@@ -47,7 +47,7 @@ jobs:
       - name: 📋 後端 - OpenAPI Spectral 驗證
         run: |
           cd packages/backend
-          npx @stoplight/spectral-cli lint docs/openapi.yaml --ruleset docs/.spectral.yaml || true
+          npx @stoplight/spectral-cli lint docs/openapi.json --ruleset docs/.spectral.yaml || true
 
       - name: 🧪 後端 - 執行測試
         run: |

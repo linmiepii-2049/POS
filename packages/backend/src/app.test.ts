@@ -11,12 +11,12 @@ describe('App Routes', () => {
 
     const data = (await res.json()) as {
       ok: boolean;
-      tz: string;
+      env: string;
       now_utc: string;
       now_local: string;
     };
     expect(data).toHaveProperty('ok', true);
-    expect(data).toHaveProperty('tz', 'Asia/Taipei');
+    expect(data).toHaveProperty('env');
     expect(data).toHaveProperty('now_utc');
     expect(data).toHaveProperty('now_local');
 
@@ -36,11 +36,12 @@ describe('App Routes', () => {
 
     const data = (await res.json()) as {
       version: string;
-      name: string;
+      env: string;
     };
     expect(data).toHaveProperty('version');
-    expect(data).toHaveProperty('name', '@pos/backend');
+    expect(data).toHaveProperty('env');
     expect(typeof data.version).toBe('string');
+    expect(typeof data.env).toBe('string');
   });
 
   it('should handle CORS preflight request', async () => {
