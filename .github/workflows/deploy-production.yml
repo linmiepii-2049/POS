@@ -86,13 +86,72 @@ jobs:
       - name: 📚 安裝依賴
         run: pnpm install --frozen-lockfile
 
-      - name: 🚀 部署後端到 Production
+      - name: 🗄️ 檢查 D1 資料庫狀態
         working-directory: packages/backend
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
+          echo "檢查 Production D1 資料庫..."
+          npx wrangler d1 info pos-db-prod || echo "⚠️ 資料庫資訊查詢失敗，但繼續執行"
+
+      - name: 🔄 執行 D1 Migrations
+        working-directory: packages/backend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "檢查是否有 pending migrations..."
+          if npx wrangler d1 migrations list DB --env production 2>&1 | grep -q "Migrations to be applied"; then
+            echo "⚠️ 發現 pending migrations！"
+            echo "Pending migrations:"
+            npx wrangler d1 migrations list DB --env production
+            echo ""
+            echo "開始執行 Production migrations..."
+            npx wrangler d1 migrations apply DB --env production --batch-size 5
+            echo "✅ Migrations 執行完成"
+          else
+            echo "✅ 所有 migrations 已是最新"
+          fi
+
+      - name: 📦 檢查 R2 Bucket 狀態
+        working-directory: packages/backend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "檢查 Production R2 bucket..."
+          if npx wrangler r2 bucket list | grep -q "pos-assets-prod"; then
+            echo "✅ R2 bucket 'pos-assets-prod' 存在"
+          else
+            echo "❌ R2 bucket 'pos-assets-prod' 不存在"
+            echo "請先建立: npx wrangler r2 bucket create pos-assets-prod"
+            exit 1
+          fi
+
+      - name: 💾 備份資料庫（可選）
+        working-directory: packages/backend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "📦 建議在部署前備份資料庫"
+          echo "備份指令: npx wrangler d1 backup create pos-db-prod"
+          echo "⚠️ 自動備份功能需要額外配置，此步驟僅為提醒"
+
+      - name: 🚀 部署後端到 Production
+        working-directory: packages/backend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GIT_SHA: ${{ github.sha }}
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          echo "開始部署到 Production..."
+          echo "版本: $VERSION"
+          echo "Commit: $GIT_SHA"
           npx wrangler deploy --env production
+          echo "✅ Workers 部署完成"
 
       - name: 🔍 驗證部署
         run: |

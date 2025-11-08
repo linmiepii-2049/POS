@@ -72,13 +72,55 @@ jobs:
       - name: 📚 安裝依賴
         run: pnpm install --frozen-lockfile
 
-      - name: 🚀 部署後端到 Staging
+      - name: 🗄️ 檢查 D1 資料庫狀態
         working-directory: packages/backend
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
+          echo "檢查 Staging D1 資料庫..."
+          npx wrangler d1 info pos-db-staging || echo "⚠️ 資料庫資訊查詢失敗，但繼續執行"
+
+      - name: 🔄 執行 D1 Migrations
+        working-directory: packages/backend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "檢查是否有 pending migrations..."
+          if npx wrangler d1 migrations list DB --env staging 2>&1 | grep -q "Migrations to be applied"; then
+            echo "發現 pending migrations，開始執行..."
+            npx wrangler d1 migrations apply DB --env staging --batch-size 10
+            echo "✅ Migrations 執行完成"
+          else
+            echo "✅ 所有 migrations 已是最新"
+          fi
+
+      - name: 📦 檢查 R2 Bucket 狀態
+        working-directory: packages/backend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "檢查 Staging R2 bucket..."
+          if npx wrangler r2 bucket list | grep -q "pos-assets-staging"; then
+            echo "✅ R2 bucket 'pos-assets-staging' 存在"
+          else
+            echo "⚠️ R2 bucket 'pos-assets-staging' 不存在，請先建立"
+            echo "執行: npx wrangler r2 bucket create pos-assets-staging"
+            exit 1
+          fi
+
+      - name: 🚀 部署後端到 Staging
+        working-directory: packages/backend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          echo "開始部署到 Staging..."
           npx wrangler deploy --env staging
+          echo "✅ Workers 部署完成"
 
       - name: 🔍 驗證部署
         run: |
