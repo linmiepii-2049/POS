@@ -32,6 +32,7 @@ export const CouponSchema = z.object({
   amount_off_twd: z.number().int().min(0).nullable().describe('固定折扣金額 (元)'),
   min_order_twd: z.number().int().min(0).describe('最低消費金額 (元)'),
   max_uses_total: z.number().int().positive().nullable().describe('全站總可用次數'),
+  max_redemptions: z.number().int().positive().nullable().describe('所有代碼的總量限制'),
   starts_at: z.string().nullable().describe('開始時間 (UTC)'),
   ends_at: z.string().nullable().describe('結束時間 (UTC)'),
   is_active: z.number().int().min(0).max(1).describe('是否啟用 (0: 停用, 1: 啟用)'),

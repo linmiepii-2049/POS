@@ -38,31 +38,31 @@ export class ProductService {
     if (search) {
       conditions.push(`(sku LIKE ? OR name LIKE ?)`);
       params.push(`%${search}%`, `%${search}%`);
-      paramIndex += 2;
+      _paramIndex += 2;
     }
 
     if (category) {
       conditions.push(`category = ?`);
       params.push(category);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (is_active !== undefined) {
       conditions.push(`is_active = ?`);
       params.push(is_active);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (from) {
       conditions.push(`created_at >= ?`);
       params.push(this.taipeiToUtc(from));
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (to) {
       conditions.push(`created_at <= ?`);
       params.push(this.taipeiToUtc(to));
-      paramIndex++;
+      _paramIndex++;
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -201,50 +201,50 @@ export class ProductService {
     if (data.sku !== undefined) {
       updateFields.push(`sku = ?`);
       params.push(data.sku);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.category !== undefined) {
       updateFields.push(`category = ?`);
       params.push(data.category);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.name !== undefined) {
       updateFields.push(`name = ?`);
       params.push(data.name);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.description !== undefined) {
       updateFields.push(`description = ?`);
       // 如果 description 是空字串，則設為 NULL
       params.push(data.description === '' ? null : data.description);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.img_url !== undefined) {
       updateFields.push(`img_url = ?`);
       params.push(data.img_url);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.list_price_twd !== undefined) {
       updateFields.push(`list_price_twd = ?`);
       params.push(data.list_price_twd);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.unit_price_twd !== undefined) {
       updateFields.push(`unit_price_twd = ?`);
       params.push(data.unit_price_twd);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.is_active !== undefined) {
       updateFields.push(`is_active = ?`);
       params.push(data.is_active);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (updateFields.length === 0) {

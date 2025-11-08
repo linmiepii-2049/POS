@@ -413,8 +413,9 @@ productsRouter.openapi(updateProductRoute, async (c) => {
     }, 200);
   } catch (error) {
     console.error('更新產品時發生錯誤:', error);
-    console.error('錯誤詳情:', error.message);
-    console.error('錯誤堆疊:', error.stack);
+    const err = error as Error;
+    console.error('錯誤詳情:', err.message);
+    console.error('錯誤堆疊:', err.stack);
     return c.json({
       success: false,
       error: '更新產品時發生錯誤',

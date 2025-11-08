@@ -255,11 +255,11 @@ export const createApp = () => {
     console.error('全域錯誤處理器:', err);
     
     // 處理 Zod 驗證錯誤
-    if (err.name === 'ZodError') {
+    if (err.name === 'ZodError' && 'issues' in err) {
       return c.json({
         success: false,
         error: '請求參數驗證失敗',
-        details: err.issues?.map(issue => ({
+        details: (err as { issues: Array<{ path: (string | number)[]; message: string }> }).issues.map((issue: { path: (string | number)[]; message: string }) => ({
           field: issue.path.join('.'),
           message: issue.message,
         })),

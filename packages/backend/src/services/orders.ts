@@ -288,25 +288,25 @@ export class OrderService {
     if (status) {
       conditions.push(`o.status = ?`);
       params.push(status);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (user_id) {
       conditions.push(`o.user_id = ?`);
       params.push(user_id);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (from) {
       conditions.push(`o.created_at >= ?`);
       params.push(this.taipeiToUtc(from));
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (to) {
       conditions.push(`o.created_at <= ?`);
       params.push(this.taipeiToUtcEnd(to));
-      paramIndex++;
+      _paramIndex++;
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';

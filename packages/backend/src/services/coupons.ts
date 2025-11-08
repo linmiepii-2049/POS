@@ -205,31 +205,31 @@ export class CouponService {
     if (search) {
       conditions.push(`name LIKE ?`);
       params.push(`%${search}%`);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (discount_type) {
       conditions.push(`discount_type = ?`);
       params.push(discount_type);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (is_active !== undefined) {
       conditions.push(`is_active = ?`);
       params.push(is_active);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (from) {
       conditions.push(`created_at >= ?`);
       params.push(this.taipeiToUtc(from));
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (to) {
       conditions.push(`created_at <= ?`);
       params.push(this.taipeiToUtc(to));
-      paramIndex++;
+      _paramIndex++;
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -382,19 +382,19 @@ export class CouponService {
     if (data.name !== undefined) {
       updateFields.push(`name = ?`);
       params.push(data.name);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.description !== undefined) {
       updateFields.push(`description = ?`);
       params.push(data.description);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.discount_type !== undefined) {
       updateFields.push(`discount_type = ?`);
       params.push(data.discount_type);
-      paramIndex++;
+      _paramIndex++;
     }
 
     // 處理折扣相關欄位
@@ -404,62 +404,62 @@ export class CouponService {
         updateFields.push(`percent_off_bps = ?`);
         params.push(data.percent_off_bps || null);
         updateFields.push(`amount_off_twd = NULL`);
-        paramIndex++;
+        _paramIndex++;
       } else if (data.discount_type === 'FIXED') {
         updateFields.push(`amount_off_twd = ?`);
         params.push(data.amount_off_twd || null);
         updateFields.push(`percent_off_bps = NULL`);
-        paramIndex++;
+        _paramIndex++;
       }
     } else {
       // 如果沒有改變折扣類型，只更新有值的欄位
       if (data.percent_off_bps !== undefined) {
         updateFields.push(`percent_off_bps = ?`);
         params.push(data.percent_off_bps);
-        paramIndex++;
+        _paramIndex++;
       }
 
       if (data.amount_off_twd !== undefined) {
         updateFields.push(`amount_off_twd = ?`);
         params.push(data.amount_off_twd);
-        paramIndex++;
+        _paramIndex++;
       }
     }
 
     if (data.min_order_twd !== undefined) {
       updateFields.push(`min_order_twd = ?`);
       params.push(data.min_order_twd);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.max_uses_total !== undefined) {
       updateFields.push(`max_uses_total = ?`);
       params.push(data.max_uses_total);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.max_redemptions !== undefined) {
       updateFields.push(`max_redemptions = ?`);
       params.push(data.max_redemptions);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.starts_at !== undefined) {
       updateFields.push(`starts_at = ?`);
       params.push(data.starts_at ? this.taipeiToUtc(data.starts_at) : null);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.ends_at !== undefined) {
       updateFields.push(`ends_at = ?`);
       params.push(data.ends_at ? this.taipeiToUtc(data.ends_at) : null);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.is_active !== undefined) {
       updateFields.push(`is_active = ?`);
       params.push(data.is_active);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (updateFields.length === 0) {
@@ -535,37 +535,37 @@ export class CouponService {
     if (search) {
       conditions.push(`code LIKE ?`);
       params.push(`%${search}%`);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (coupon_id) {
       conditions.push(`cc.coupon_id = ?`);
       params.push(coupon_id);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (user_id) {
       conditions.push(`cg.user_id = ?`);
       params.push(user_id);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (is_active !== undefined) {
       conditions.push(`cc.is_active = ?`);
       params.push(is_active);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (from) {
       conditions.push(`created_at >= ?`);
       params.push(this.taipeiToUtc(from));
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (to) {
       conditions.push(`created_at <= ?`);
       params.push(this.taipeiToUtc(to));
-      paramIndex++;
+      _paramIndex++;
     }
 
     // 決定是否使用 JOIN
@@ -809,7 +809,7 @@ export class CouponService {
       
       updateFields.push(`code = ?`);
       params.push(data.code);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.max_redemptions !== undefined) {
@@ -830,7 +830,7 @@ export class CouponService {
       
       updateFields.push(`max_redemptions = ?`);
       params.push(data.max_redemptions);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.starts_at !== undefined) {
@@ -839,7 +839,7 @@ export class CouponService {
       
       updateFields.push(`starts_at = ?`);
       params.push(finalStartsAt);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.ends_at !== undefined) {
@@ -849,13 +849,13 @@ export class CouponService {
       
       updateFields.push(`ends_at = ?`);
       params.push(finalEndsAt);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.is_active !== undefined) {
       updateFields.push(`is_active = ?`);
       params.push(data.is_active);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (updateFields.length === 0) {
@@ -1154,13 +1154,13 @@ export class CouponService {
     if (data.granted_at !== undefined) {
       updateFields.push(`granted_at = ?`);
       params.push(data.granted_at);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (data.expires_at !== undefined) {
       updateFields.push(`expires_at = ?`);
       params.push(data.expires_at);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (updateFields.length === 0) {

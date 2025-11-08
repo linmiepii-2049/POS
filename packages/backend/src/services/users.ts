@@ -41,25 +41,25 @@ export class UserService {
     if (nameOrPhone) {
       conditions.push(`(name LIKE ? OR phone LIKE ?)`);
       params.push(`%${nameOrPhone}%`, `%${nameOrPhone}%`);
-      paramIndex += 2;
+      _paramIndex += 2;
     }
 
     if (is_active !== undefined) {
       conditions.push(`is_active = ?`);
       params.push(is_active);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (from) {
       conditions.push(`created_at >= ?`);
       params.push(this.taipeiToUtc(from));
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (to) {
       conditions.push(`created_at <= ?`);
       params.push(this.taipeiToUtc(to));
-      paramIndex++;
+      _paramIndex++;
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -222,31 +222,31 @@ export class UserService {
     if (line_id !== undefined) {
       updateFields.push(`line_id = ?`);
       params.push(line_id);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (name !== undefined) {
       updateFields.push(`name = ?`);
       params.push(name);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (phone !== undefined) {
       updateFields.push(`phone = ?`);
       params.push(phone);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (role !== undefined) {
       updateFields.push(`role = ?`);
       params.push(role);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (is_active !== undefined) {
       updateFields.push(`is_active = ?`);
       params.push(is_active);
-      paramIndex++;
+      _paramIndex++;
     }
 
     if (updateFields.length === 0) {
