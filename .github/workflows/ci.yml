@@ -95,6 +95,11 @@ jobs:
       - name: 📚 安裝依賴
         run: pnpm install --frozen-lockfile
 
+      - name: 🔨 建置 SDK
+        run: |
+          cd packages/sdk
+          pnpm run build
+
       - name: 🏗️ 前端 - 建置檢查
         run: |
           cd packages/frontend
