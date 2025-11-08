@@ -1,0 +1,281 @@
+/* Admin 專用樣式 */
+
+/* 側邊欄動畫 */
+.admin-sidebar {
+  transition: transform 0.3s ease-in-out;
+}
+
+.admin-sidebar.collapsed {
+  transform: translateX(-100%);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+  }
+  
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .admin-main-content {
+    margin-left: 0;
+  }
+  
+  .admin-mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 5;
+  }
+}
+
+/* 表格響應式 */
+@media (max-width: 640px) {
+  .admin-table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .admin-table-responsive table {
+    min-width: 600px;
+  }
+}
+
+/* 表單響應式 */
+@media (max-width: 768px) {
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .admin-form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .admin-form-actions button {
+    width: 100%;
+  }
+}
+
+/* 卡片間距調整 */
+.admin-card {
+  margin-bottom: 1.5rem;
+}
+
+.admin-card:last-child {
+  margin-bottom: 0;
+}
+
+/* 載入狀態 */
+.admin-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.admin-loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 空狀態 */
+.admin-empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+}
+
+.admin-empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+/* 狀態標籤 */
+.admin-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* 操作按鈕組 */
+.admin-action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .admin-action-buttons {
+    flex-direction: column;
+  }
+  
+  .admin-action-buttons button {
+    width: 100%;
+  }
+}
+
+/* 篩選器樣式 */
+.admin-filters {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* 統計卡片 */
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-stat-card {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.admin-stat-value {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.admin-stat-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* 圖片上傳區域 */
+.admin-upload-area {
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  transition: border-color 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.admin-upload-area:hover {
+  border-color: #3b82f6;
+}
+
+.admin-upload-area.dragover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+/* 圖片預覽 */
+.admin-image-preview {
+  position: relative;
+  display: inline-block;
+  margin-top: 1rem;
+}
+
+.admin-image-preview img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.admin-image-remove {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.admin-image-remove:hover {
+  background: #dc2626;
+}
+
+/* 表單驗證錯誤 */
+.admin-form-error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.admin-form-field-error input,
+.admin-form-field-error select,
+.admin-form-field-error textarea {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* 成功/錯誤訊息 */
+.admin-toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 50;
+  max-width: 20rem;
+}
+
+/* 響應式文字大小 */
+@media (max-width: 640px) {
+  .admin-title {
+    font-size: 1.5rem;
+  }
+  
+  .admin-subtitle {
+    font-size: 0.875rem;
+  }
+}
+
+/* 深色模式支援 */
+@media (prefers-color-scheme: dark) {
+  .admin-card {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+  
+  .admin-filters {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+  
+  .admin-stat-card {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+}

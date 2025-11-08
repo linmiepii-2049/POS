@@ -1,0 +1,55 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+你是專案機器人，請嚴格遵守以下規則與品質門檻。
+
+[總則]
+- 只修改「本次任務允許的檔案清單」，禁止動其他檔案與任何未授權的 config。
+- 一律使用 ESM（"type":"module"）。Workers 端嚴禁使用 Node-only 全域與 API（process、fs、net、path…）。
+- 專案技術：
+  - 後端：Cloudflare Workers + Hono + D1（SQLite）
+  - 前端：Vite + React + TypeScript + Tailwind
+  - SDK：由 orval 依 OpenAPI 自動產生；產物資料夾務必列入 .gitignore，嚴禁手改。
+- 規格單一真相（SSOT）= Zod（@hono/zod-openapi）。OpenAPI 與 SDK 一律由 Zod 衍生，禁止手寫/手改 OpenAPI/SDK。
+- 時區策略：資料層與 API 內部一律使用 UTC；UI 顯示使用 Asia/Taipei。
+  - 提供共用 time util；「查詢區間」由台北時間轉成 UTC 後再查。
+- 錯誤格式統一：`ErrorResponse = { code: string; message: string; details?: unknown }`。所有 4xx/5xx 必回此結構。
+- 列表 API 必支援分頁/排序/篩選：`page, limit, sortBy, sortDir, filter*`；不得一次吐整表。
+- 金額與規則：前端計算僅作展示；最終金額以後端為準（避免浮點誤差）。
+- 影像：WebP 轉檔在前端完成（Canvas/Offscreen 等）；後端僅接收 WebP 並上傳 R2。
+- 建立訂單：服務層必做「先行檢查」（授權、時窗、使用次數、最低消費、重複品項）後才寫 DB；全流程包在交易中（BEGIN/COMMIT；失敗 ROLLBACK）。DB 觸發器是最後防線，不是唯一防線。
+- 依賴版本：使用穩定的最新版本（latest stable），並僅安裝到當前 workspace 的 package.json；Root 保持最小化。Scripts 一律使用 pnpm。
+
+[提交/輸出格式]
+- 除非任務另有指定，請**以 unified diff（git apply 可套用）**輸出變更；新增檔請使用 `--- /dev/null` → `+++ <path>` 格式。
+- Diff 只包含「允許的檔案清單」內的變更。
+- 如需新增套件，務必同步更新對應 workspace 的 package.json 與 scripts。
+
+[OpenAPI / SDK 流程]
+- 僅由 `@hono/zod-openapi` 自動曝光 `/openapi.json`；用腳本轉存 `docs/openapi.yaml`。
+- 必跑 Spectral（`docs/.spectral.yaml`）且 **0 error** 後，才能執行 orval 產生 SDK。
+- OpenAPI 規範要求：
+  - 每個 operation 必須有 `operationId`（PascalCase，例如：`Users_List`、`Users_Get`、`Orders_Create`）
+  - 必填 `tags`、`summary`、`description`；Schema 要有描述與 example
+- 嚴禁手寫/手改 openapi.yaml 與 SDK 產物；若需修改，請調整 Zod 定義並重新產生。
+
+[測試策略]
+- 單元測試：Vitest。
+- 路由整合測試：優先使用 `app.request()`（不開 TCP）。
+- Smoke/E2E：僅在任務指示時啟動 `wrangler dev` 做實打。
+- D1（SQLite）：
+  - 測試使用本地臨時 DB 綁定，避免污染正式資料。
+  - Migrations 必可多次重跑；Seeds 冪等。
+  - 交易測試需覆蓋成功與失敗路徑（驗證 ROLLBACK）。
+
+[品質門檻]
+- 所有提交必須通過：ESLint（lint）、TypeScript（typecheck）、Vitest（unit/integration）、必要時的 smoke/E2E，以及 OpenAPI 的 Spectral。
+- 若未通過，請先自行修正，僅在全部綠燈後回覆 diff。
+
+[文件]
+- README 與 ARCHITECTURE.md 必同步更新關鍵變更，特別是：
+  - 「如何更新 SDK」流程（openapi → spectral → orval）
+  - 環境綁定（Workers/D1/R2）與本地開發指令

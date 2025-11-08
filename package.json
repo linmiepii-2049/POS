@@ -1,0 +1,32 @@
+{
+  "name": "pos-monorepo",
+  "version": "1.0.0",
+  "description": "POS 系統 Monorepo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@8.15.0",
+  "scripts": {
+    "lint": "eslint .",
+    "fmt": "prettier --write .",
+    "test": "vitest run",
+    "preflight": "pnpm run lint && pnpm run test",
+    "backup": "./scripts/backup.sh",
+    "restore": "./scripts/restore.sh",
+    "auto-backup": "./scripts/auto-backup.sh"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

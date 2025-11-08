@@ -1,0 +1,116 @@
+# 生成的 SDK 客戶端
+src/client/
+
+# 依賴
+node_modules/
+
+# 建置輸出
+dist/
+build/
+
+# 環境變數
+.env
+.env.local
+.env.*.local
+
+# 日誌
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 運行時資料
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage 目錄
+coverage/
+*.lcov
+
+# nyc 測試覆蓋率
+.nyc_output
+
+# Grunt 中繼檔案
+.grunt
+
+# Bower 依賴目錄
+bower_components
+
+# node-waf 配置
+.lock-wscript
+
+# 編譯的二進制插件
+build/Release
+
+# 依賴目錄
+node_modules/
+jspm_packages/
+
+# TypeScript 快取
+*.tsbuildinfo
+
+# 可選 npm 快取目錄
+.npm
+
+# 可選 eslint 快取
+.eslintcache
+
+# Microbundle 快取
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# 可選 REPL 歷史
+.node_repl_history
+
+# 輸出
+*.tgz
+
+# Yarn 完整性檔案
+.yarn-integrity
+
+# dotenv 環境變數檔案
+.env
+.env.test
+
+# parcel-bundler 快取
+.cache
+.parcel-cache
+
+# Next.js 建置輸出
+.next
+
+# Nuxt.js 建置/生成輸出
+.nuxt
+dist
+
+# Gatsby 檔案
+.cache/
+public
+
+# Storybook 建置輸出
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

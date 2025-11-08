@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SDK 測試</title>
+</head>
+<body>
+    <h1>SDK 測試</h1>
+    <div id="result"></div>
+    
+    <script type="module">
+        // 測試直接 fetch
+        async function testDirectFetch() {
+            try {
+                console.log('測試直接 fetch /health...');
+                const response = await fetch('/health');
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Health data:', data);
+                document.getElementById('result').innerHTML = `
+                    <h2>直接 Fetch 測試</h2>
+                    <p>狀態: ${response.status}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('Direct fetch error:', error);
+                document.getElementById('result').innerHTML = `
+                    <h2>直接 Fetch 測試 - 錯誤</h2>
+                    <p>錯誤: ${error.message}</p>
+                `;
+            }
+        }
+        
+        testDirectFetch();
+    </script>
+</body>
+</html>

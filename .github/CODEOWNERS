@@ -1,0 +1,53 @@
+# 程式碼擁有者（Code Owners）
+# 這些人員會自動被指派為 PR 審核者
+# 
+# 格式: <檔案路徑模式> <GitHub 使用者名稱>
+# 範例: /path/to/file @username
+
+# ================================
+# 全域預設擁有者
+# ================================
+* @linmiepii-2049
+
+# ================================
+# 後端相關
+# ================================
+/packages/backend/ @linmiepii-2049
+/packages/backend/src/ @linmiepii-2049
+/packages/backend/migrations/ @linmiepii-2049
+/packages/backend/wrangler.toml @linmiepii-2049
+
+# ================================
+# 前端相關
+# ================================
+/packages/frontend/ @linmiepii-2049
+/packages/frontend/src/ @linmiepii-2049
+
+# ================================
+# SDK 相關
+# ================================
+/packages/sdk/ @linmiepii-2049
+
+# ================================
+# 基礎設施與部署
+# ================================
+/.github/ @linmiepii-2049
+/.github/workflows/ @linmiepii-2049
+/wrangler.toml @linmiepii-2049
+/deploy-staging.sh @linmiepii-2049
+
+# ================================
+# 文件
+# ================================
+/*.md @linmiepii-2049
+/DEPLOYMENT_GUIDE.md @linmiepii-2049
+/README.md @linmiepii-2049
+
+# ================================
+# 設定檔
+# ================================
+/package.json @linmiepii-2049
+/pnpm-workspace.yaml @linmiepii-2049
+/eslint.config.js @linmiepii-2049
+/tsconfig.json @linmiepii-2049
+

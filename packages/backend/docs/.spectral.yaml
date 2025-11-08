@@ -1,0 +1,54 @@
+extends: ["spectral:oas"]
+
+rules:
+  # 基本資訊規則
+  info-required:
+    description: "API 基本資訊必須完整"
+    given: "$.info"
+    then:
+      - field: "title"
+        function: "truthy"
+      - field: "description"
+        function: "truthy"
+      - field: "version"
+        function: "truthy"
+
+  # 操作規則
+  operation-operationId:
+    description: "每個操作都必須有 operationId"
+    given: "$.paths.*.*"
+    then:
+      field: "operationId"
+      function: "truthy"
+
+  # 標籤規則
+  operation-tags:
+    description: "每個操作都必須有標籤"
+    given: "$.paths.*.*"
+    then:
+      field: "tags"
+      function: "truthy"
+
+  # 描述規則
+  operation-description:
+    description: "每個操作都必須有描述"
+    given: "$.paths.*.*"
+    then:
+      field: "description"
+      function: "truthy"
+
+  # Schema 描述規則
+  schema-description:
+    description: "Schema 屬性必須有描述"
+    given: "$.components.schemas.*.properties.*"
+    then:
+      field: "description"
+      function: "truthy"
+
+  # 回應規則
+  operation-responses:
+    description: "每個操作都必須有回應定義"
+    given: "$.paths.*.*"
+    then:
+      field: "responses"
+      function: "truthy"

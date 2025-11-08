@@ -1,0 +1,188 @@
+name: Deploy to Staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: '部署原因'
+        required: true
+        type: string
+
+# 設定權限
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  # 審核閘門
+  approval:
+    name: 🔐 等待審核批准
+    runs-on: ubuntu-latest
+    environment:
+      name: staging-approval
+      # 在 GitHub Settings > Environments 設定審核者
+    steps:
+      - name: 📋 記錄部署資訊
+        run: |
+          echo "================================"
+          echo "🚀 Staging 部署請求"
+          echo "================================"
+          echo "部署環境: Staging"
+          echo "部署原因: ${{ github.event.inputs.reason }}"
+          echo "觸發者: ${{ github.actor }}"
+          echo "分支: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "時間: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "================================"
+
+  # 品質檢查
+  pre-deploy-check:
+    name: 部署前品質檢查
+    runs-on: ubuntu-latest
+    needs: approval
+    
+    steps:
+      - name: 📥 Checkout 程式碼
+        uses: actions/checkout@v4
+
+      - name: 📦 安裝 pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: 🔧 設定 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: 📚 安裝依賴
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 執行 Preflight 檢查
+        run: |
+          cd packages/backend
+          bash scripts/preflight.sh
+
+      - name: ✅ 品質檢查通過
+        run: echo "🎉 部署前檢查已通過！"
+
+  # 部署後端
+  deploy-backend:
+    name: 部署後端到 Staging
+    runs-on: ubuntu-latest
+    needs: pre-deploy-check
+    environment:
+      name: staging
+      url: https://pos-backend-staging.survey-api.workers.dev
+    
+    steps:
+      - name: 📥 Checkout 程式碼
+        uses: actions/checkout@v4
+
+      - name: 📦 安裝 pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: 🔧 設定 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: 📚 安裝依賴
+        run: pnpm install --frozen-lockfile
+
+      - name: 🚀 部署後端到 Staging
+        working-directory: packages/backend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx wrangler deploy --env staging
+
+      - name: 🔍 驗證部署
+        run: |
+          echo "等待部署生效..."
+          sleep 10
+          echo "測試健康檢查..."
+          curl -f https://pos-backend-staging.survey-api.workers.dev/health || exit 1
+          echo "測試版本資訊..."
+          curl -f https://pos-backend-staging.survey-api.workers.dev/version || exit 1
+          echo "✅ 後端部署驗證成功！"
+
+  # 部署前端
+  deploy-frontend:
+    name: 部署前端到 Staging
+    runs-on: ubuntu-latest
+    needs: deploy-backend
+    environment:
+      name: staging
+      url: https://pos-frontend-staging.pages.dev
+    
+    steps:
+      - name: 📥 Checkout 程式碼
+        uses: actions/checkout@v4
+
+      - name: 📦 安裝 pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: 🔧 設定 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: 📚 安裝依賴
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ 建置前端（Staging）
+        working-directory: packages/frontend
+        env:
+          VITE_API_BASE_URL: https://pos-backend-staging.survey-api.workers.dev
+        run: |
+          echo "VITE_API_BASE_URL=$VITE_API_BASE_URL" > .env.production
+          pnpm run build
+
+      - name: 🚀 部署到 Cloudflare Pages
+        working-directory: packages/frontend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx wrangler pages deploy dist \
+            --project-name=pos-frontend-staging \
+            --branch=staging
+
+      - name: ✅ 前端部署完成
+        run: echo "🎉 前端部署成功！"
+
+  # 部署通知
+  notify:
+    name: 📢 部署通知
+    runs-on: ubuntu-latest
+    needs: [deploy-backend, deploy-frontend]
+    if: always()
+    
+    steps:
+      - name: 📊 部署結果
+        run: |
+          echo "================================"
+          echo "🎉 Staging 部署完成！"
+          echo "================================"
+          echo ""
+          echo "🔗 後端: https://pos-backend-staging.survey-api.workers.dev"
+          echo "🔗 前端: https://pos-frontend-staging.pages.dev"
+          echo ""
+          echo "📋 部署資訊:"
+          echo "  - 部署者: ${{ github.actor }}"
+          echo "  - 部署原因: ${{ github.event.inputs.reason }}"
+          echo "  - Commit: ${{ github.sha }}"
+          echo "  - 分支: ${{ github.ref_name }}"
+          echo ""
+          echo "✅ 請驗證部署結果"
+          echo "================================"
+

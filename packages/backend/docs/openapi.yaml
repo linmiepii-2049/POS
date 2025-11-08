@@ -1,0 +1,76 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: "POS 系統後端 API"
+  description: "POS 系統後端 API 文檔"
+  contact:
+    name: "POS 系統開發團隊"
+    email: "dev@pos-system.com"
+servers:
+  -
+    url: "http://localhost:8787"
+    description: "開發環境"
+components:
+  schemas:
+  parameters:
+paths:
+  /health:
+    get:
+      tags:
+        - System
+      summary: "健康檢查"
+      description: "檢查系統健康狀態並回傳時間資訊"
+      responses:
+        200:
+          description: "健康狀態資訊"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  ok:
+                    type: "boolean"
+                    description: "健康狀態"
+                  timestamp:
+                    type: "string"
+                    description: "當前時間戳（UTC）"
+                  timezone:
+                    type: "string"
+                    description: "時區"
+                  localTime:
+                    type: "string"
+                    description: "本地時間（Asia/Taipei）"
+                required:
+                  - ok
+                  - timestamp
+                  - timezone
+                  - localTime
+      operationId: "get--health"
+  /version:
+    get:
+      tags:
+        - System
+      summary: "版本資訊"
+      description: "取得系統版本資訊"
+      responses:
+        200:
+          description: "版本資訊"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  version:
+                    type: "string"
+                    description: "版本號"
+                  name:
+                    type: "string"
+                    description: "套件名稱"
+                required:
+                  - version
+                  - name
+      operationId: "get--version"
+tags:
+  -
+    name: "System"
+    description: "系統相關端點"

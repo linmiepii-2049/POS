@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>SDK 環境變數測試</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #00ff00;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #2a2a2a;
+      border-radius: 8px;
+    }
+    .success { color: #00ff00; }
+    .error { color: #ff0000; }
+    .warning { color: #ffaa00; }
+    pre {
+      background: #0a0a0a;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 SDK 環境變數測試</h1>
+  
+  <div class="test-section">
+    <h2>📌 當前環境</h2>
+    <pre id="current-env"></pre>
+  </div>
+
+  <div class="test-section">
+    <h2>🔗 SDK URL 生成測試</h2>
+    <pre id="url-test"></pre>
+  </div>
+
+  <div class="test-section">
+    <h2>✅ 環境判斷邏輯</h2>
+    <pre id="logic-test"></pre>
+  </div>
+
+  <script type="module">
+    // 模擬 SDK 的 getBaseURL 函數
+    function getBaseURL() {
+      // 瀏覽器環境：使用 Vite 環境變數
+      if (typeof window !== 'undefined') {
+        try {
+          // 在瀏覽器中，import.meta.env 會被 Vite 替換
+          const viteEnv = import.meta.env?.VITE_API_BASE_URL;
+          if (viteEnv) {
+            return viteEnv;
+          }
+        } catch (e) {
+          // Fallback
+        }
+      }
+      
+      // 預設值：本地開發
+      return 'http://localhost:8787';
+    }
+
+    function createFullURL(path) {
+      const baseURL = getBaseURL();
+      return `${baseURL}${path}`;
+    }
+
+    // 顯示當前環境
+    const currentEnv = document.getElementById('current-env');
+    const viteApiBaseUrl = import.meta.env?.VITE_API_BASE_URL;
+    currentEnv.innerHTML = `
+<span class="success">當前環境變數:</span>
+VITE_API_BASE_URL = ${viteApiBaseUrl ? `"${viteApiBaseUrl}"` : '<span class="warning">undefined (使用預設值)</span>'}
+
+<span class="success">getBaseURL() 回傳:</span>
+${getBaseURL()}
+
+<span class="success">判斷依據:</span>
+${viteApiBaseUrl ? '使用 VITE_API_BASE_URL' : '使用預設值 http://localhost:8787'}
+`;
+
+    // URL 生成測試
+    const urlTest = document.getElementById('url-test');
+    urlTest.innerHTML = `
+<span class="success">Health URL:</span>    ${createFullURL('/health')}
+<span class="success">Version URL:</span>   ${createFullURL('/version')}
+<span class="success">Data URL:</span>      ${createFullURL('/api/data')}
+<span class="success">Users URL:</span>     ${createFullURL('/api/users')}
+<span class="success">Products URL:</span>  ${createFullURL('/api/products')}
+`;
+
+    // 環境判斷邏輯說明
+    const logicTest = document.getElementById('logic-test');
+    logicTest.innerHTML = `
+<span class="success">✅ 模式 B: SDK 透過 env 決定 URL</span>
+
+<span class="success">環境配置:</span>
+1. <span class="warning">Development (.env.local 或無 .env)</span>
+   VITE_API_BASE_URL = undefined 或 "http://localhost:8787"
+   → 使用預設值: http://localhost:8787
+
+2. <span class="warning">Staging (.env.staging)</span>
+   VITE_API_BASE_URL = "https://api-staging.example.com"
+   → 使用環境變數: https://api-staging.example.com
+
+3. <span class="warning">Production (.env.production)</span>
+   VITE_API_BASE_URL = "https://api.example.com"
+   → 使用環境變數: https://api.example.com
+
+<span class="success">優點:</span>
+- ✅ 一份 SDK，多環境共用
+- ✅ 不需要為每個環境重新生成 SDK
+- ✅ 只需修改 .env.* 檔案
+- ✅ 符合 SSOT 原則
+`;
+
+    // 實際測試 API 調用
+    setTimeout(async () => {
+      try {
+        const healthUrl = createFullURL('/health');
+        const response = await fetch(healthUrl);
+        const data = await response.json();
+        
+        currentEnv.innerHTML += `
+
+<span class="success">🎉 實際 API 測試:</span>
+請求 URL: ${healthUrl}
+回應: ${JSON.stringify(data, null, 2)}
+<span class="${data.ok ? 'success' : 'error'}">狀態: ${data.ok ? '✅ 正常' : '❌ 異常'}</span>
+`;
+      } catch (error) {
+        currentEnv.innerHTML += `
+
+<span class="error">❌ API 測試失敗:</span>
+${error.message}
+`;
+      }
+    }, 500);
+  </script>
+</body>
+</html>

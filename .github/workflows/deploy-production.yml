@@ -1,0 +1,247 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: '部署原因'
+        required: true
+        type: string
+      version:
+        description: '版本號（例如：v1.0.0）'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  # 第一層審核
+  approval-stage-1:
+    name: 🔐 第一層審核（技術負責人）
+    runs-on: ubuntu-latest
+    environment:
+      name: production-approval-tech
+    steps:
+      - name: 📋 記錄部署資訊
+        run: |
+          echo "================================"
+          echo "🚨 Production 部署請求"
+          echo "================================"
+          echo "版本: ${{ github.event.inputs.version }}"
+          echo "部署原因: ${{ github.event.inputs.reason }}"
+          echo "觸發者: ${{ github.actor }}"
+          echo "分支: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "時間: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "================================"
+          echo ""
+          echo "⚠️  請技術負責人審核此部署請求"
+
+  # 第二層審核
+  approval-stage-2:
+    name: 🔐 第二層審核（專案負責人）
+    runs-on: ubuntu-latest
+    needs: approval-stage-1
+    environment:
+      name: production-approval-pm
+    steps:
+      - name: 📋 確認部署
+        run: |
+          echo "✅ 技術審核已通過"
+          echo "⚠️  等待專案負責人最終批准..."
+
+  # 品質檢查
+  pre-deploy-check:
+    name: Production 部署前檢查
+    runs-on: ubuntu-latest
+    needs: approval-stage-2
+    
+    steps:
+      - name: 📥 Checkout 程式碼
+        uses: actions/checkout@v4
+
+      - name: 📦 安裝 pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: 🔧 設定 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: 📚 安裝依賴
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 執行完整檢查
+        run: |
+          cd packages/backend
+          bash scripts/preflight.sh
+          pnpm run test
+
+      - name: 📋 驗證版本號格式
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          if [[ ! $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ 版本號格式錯誤: $VERSION"
+            echo "正確格式: v1.0.0"
+            exit 1
+          fi
+          echo "✅ 版本號格式正確: $VERSION"
+
+      - name: ✅ 品質檢查通過
+        run: echo "🎉 Production 部署前檢查已通過！"
+
+  # 部署後端
+  deploy-backend:
+    name: 部署後端到 Production
+    runs-on: ubuntu-latest
+    needs: pre-deploy-check
+    environment:
+      name: production
+      url: https://pos-backend-prod.survey-api.workers.dev
+    
+    steps:
+      - name: 📥 Checkout 程式碼
+        uses: actions/checkout@v4
+
+      - name: 📦 安裝 pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: 🔧 設定 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: 📚 安裝依賴
+        run: pnpm install --frozen-lockfile
+
+      - name: 🚀 部署後端到 Production
+        working-directory: packages/backend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx wrangler deploy --env production
+
+      - name: 🔍 驗證部署
+        run: |
+          echo "等待部署生效..."
+          sleep 15
+          echo "測試健康檢查..."
+          curl -f https://pos-backend-prod.survey-api.workers.dev/health || exit 1
+          echo "測試版本資訊..."
+          curl -f https://pos-backend-prod.survey-api.workers.dev/version || exit 1
+          echo "✅ 後端部署驗證成功！"
+
+  # 部署前端
+  deploy-frontend:
+    name: 部署前端到 Production
+    runs-on: ubuntu-latest
+    needs: deploy-backend
+    environment:
+      name: production
+      url: https://pos-frontend-prod.pages.dev
+    
+    steps:
+      - name: 📥 Checkout 程式碼
+        uses: actions/checkout@v4
+
+      - name: 📦 安裝 pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: 🔧 設定 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: 📚 安裝依賴
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ 建置前端（Production）
+        working-directory: packages/frontend
+        env:
+          VITE_API_BASE_URL: https://pos-backend-prod.survey-api.workers.dev
+        run: |
+          echo "VITE_API_BASE_URL=$VITE_API_BASE_URL" > .env.production
+          pnpm run build
+
+      - name: 🚀 部署到 Cloudflare Pages
+        working-directory: packages/frontend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx wrangler pages deploy dist \
+            --project-name=pos-frontend-prod \
+            --branch=production
+
+      - name: ✅ 前端部署完成
+        run: echo "🎉 前端部署成功！"
+
+  # 建立 Git Tag
+  create-tag:
+    name: 建立版本標籤
+    runs-on: ubuntu-latest
+    needs: [deploy-backend, deploy-frontend]
+    if: success()
+    
+    steps:
+      - name: 📥 Checkout 程式碼
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🏷️ 建立 Git Tag
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          VERSION="${{ github.event.inputs.version }}"
+          
+          # 檢查 tag 是否已存在
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "⚠️  Tag $VERSION 已存在，跳過建立"
+          else
+            git tag -a "$VERSION" -m "Release $VERSION - ${{ github.event.inputs.reason }}"
+            git push origin "$VERSION"
+            echo "✅ Tag $VERSION 已建立並推送"
+          fi
+
+  # 部署通知
+  notify:
+    name: 📢 Production 部署通知
+    runs-on: ubuntu-latest
+    needs: [deploy-backend, deploy-frontend, create-tag]
+    if: always()
+    
+    steps:
+      - name: 📊 部署結果
+        run: |
+          echo "================================"
+          echo "🎉 Production 部署完成！"
+          echo "================================"
+          echo ""
+          echo "🏷️  版本: ${{ github.event.inputs.version }}"
+          echo "🔗 後端: https://pos-backend-prod.survey-api.workers.dev"
+          echo "🔗 前端: https://pos-frontend-prod.pages.dev"
+          echo ""
+          echo "📋 部署資訊:"
+          echo "  - 部署者: ${{ github.actor }}"
+          echo "  - 部署原因: ${{ github.event.inputs.reason }}"
+          echo "  - Commit: ${{ github.sha }}"
+          echo "  - 分支: ${{ github.ref_name }}"
+          echo "  - 時間: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo ""
+          echo "✅ 請驗證 Production 環境"
+          echo "================================"
+

@@ -1,0 +1,79 @@
+name = "pos-backend"
+main = "src/index.ts"
+compatibility_date = "2024-12-18"
+compatibility_flags = ["nodejs_compat"]
+
+# ================================
+# 開發環境（本地）
+# ================================
+[vars]
+ENV_NAME = "development"
+API_BASE = "http://localhost:8787"
+CORS_ORIGINS = "http://localhost:3000"
+
+# D1 資料庫綁定（本地）
+[[d1_databases]]
+binding = "DB"
+database_name = "pos-local"
+database_id = "local-development"
+migrations_dir = "migrations"
+
+# R2 儲存桶綁定（本地）
+[[r2_buckets]]
+binding = "ASSETS"
+bucket_name = "pos-assets"
+
+# 開發環境設定
+[dev]
+port = 8787
+local_protocol = "http"
+
+# ================================
+# Staging 環境
+# ================================
+[env.staging]
+name = "pos-backend-staging"
+vars = { ENV_NAME = "staging", API_BASE = "https://pos-backend-staging.survey-api.workers.dev", CORS_ORIGINS = "http://localhost:3000,https://f11121a9.pos-frontend-staging.pages.dev,https://614cac12.pos-frontend-staging.pages.dev,https://7a1d4c70.pos-frontend-staging.pages.dev,https://5994aaa7.pos-frontend-staging.pages.dev,https://ef09ff09.pos-frontend-staging.pages.dev,https://pos-frontend-staging.pages.dev" }
+
+# D1 資料庫綁定（Staging）
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "pos-db-staging"
+database_id = "e4719617-39ba-44b8-890b-6cc08c9c778a"
+migrations_dir = "migrations"
+
+# R2 儲存桶綁定（Staging）
+[[env.staging.r2_buckets]]
+binding = "ASSETS"
+bucket_name = "pos-assets-staging"
+
+# Staging 路由（需要在 Cloudflare Dashboard 手動設定自訂域名）
+# 部署後使用 workers.dev 域名，或在 Dashboard 中新增自訂域名
+# [[env.staging.routes]]
+# pattern = "api-staging.example.com/*"
+# zone_name = "example.com"
+
+# ================================
+# Production 環境
+# ================================
+[env.production]
+name = "pos-backend-prod"
+vars = { ENV_NAME = "production", API_BASE = "https://pos-backend-prod.survey-api.workers.dev", CORS_ORIGINS = "https://pos-frontend-prod.pages.dev" }
+
+# D1 資料庫綁定（Production）
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "pos-db-prod"
+database_id = "REPLACE_WITH_PROD_D1_DATABASE_ID"  # ⚠️ 需要執行: wrangler d1 create pos-db-prod
+migrations_dir = "migrations"
+
+# R2 儲存桶綁定（Production）
+[[env.production.r2_buckets]]
+binding = "ASSETS"
+bucket_name = "pos-assets-prod"
+
+# Production 路由（需要在 Cloudflare Dashboard 手動設定自訂域名）
+# 部署後使用 workers.dev 域名，或在 Dashboard 中新增自訂域名
+# [[env.production.routes]]
+# pattern = "api.example.com/*"
+# zone_name = "example.com"

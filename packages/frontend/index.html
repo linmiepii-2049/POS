@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
+    
+    <!-- Meta Tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="description" content="真真家 POS 系統 - 專業的點餐與管理系統" />
+    
+    <!-- iOS PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="真真家" />
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- Android PWA Support -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="真真家" />
+    
+    <!-- Windows PWA Support -->
+    <meta name="msapplication-TileColor" content="#0f172a" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    
+    <title>真真家 - POS 系統</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/src/main.tsx" as="script" crossorigin="anonymous" />
+  </head>
+  <body>
+    <div id="root"></div>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      // Register Service Worker
+      if ('serviceWorker' in navigator) {
+        // Use requestIdleCallback for better performance
+        const registerSW = async () => {
+          try {
+            const registration = await navigator.serviceWorker.register('/sw.js', {
+              scope: '/',
+              updateViaCache: 'none' // Always check for updates
+            });
+            
+            console.log('✅ Service Worker registered:', registration);
+            
+            // Handle updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // New content is available
+                  console.log('🔄 New version available');
+                  
+                  // Show update prompt with better UX
+                  const shouldUpdate = confirm('發現新版本，是否立即更新？\n\n更新後將重新載入頁面。');
+                  if (shouldUpdate) {
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                    // Wait a bit for the message to be processed
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 100);
+                  }
+                }
+              });
+            });
+            
+            // Handle service worker messages
+            navigator.serviceWorker.addEventListener('message', (event) => {
+              const { type, payload } = event.data;
+              
+              switch (type) {
+                case 'SW_UPDATED':
+                  console.log('🔄 Service Worker updated');
+                  break;
+                case 'SW_OFFLINE':
+                  console.log('📱 App is offline');
+                  break;
+                case 'SW_ONLINE':
+                  console.log('🌐 App is online');
+                  break;
+              }
+            });
+            
+            // Check for updates periodically (only if not in development)
+            if (window.location.hostname !== 'localhost') {
+              setInterval(() => {
+                registration.update().catch(err => {
+                  console.log('SW update check failed:', err);
+                });
+              }, 60000); // Check every minute
+            }
+            
+          } catch (error) {
+            console.error('❌ Service Worker registration failed:', error);
+          }
+        };
+        
+        // Register immediately if page is already loaded
+        if (document.readyState === 'complete') {
+          registerSW();
+        } else {
+          // Otherwise wait for load event
+          window.addEventListener('load', registerSW);
+        }
+      }
+      
+      // PWA Install Prompt
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('📱 PWA install prompt triggered');
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Show install button or notification
+        const installButton = document.createElement('button');
+        installButton.textContent = '安裝應用程式';
+        installButton.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          background: #3b82f6;
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-size: 14px;
+          cursor: pointer;
+          z-index: 1000;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        `;
+        
+        installButton.addEventListener('click', async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log('PWA install outcome:', outcome);
+            deferredPrompt = null;
+            installButton.remove();
+          }
+        });
+        
+        document.body.appendChild(installButton);
+        
+        // Auto-hide after 10 seconds
+        setTimeout(() => {
+          if (installButton.parentNode) {
+            installButton.remove();
+          }
+        }, 10000);
+      });
+      
+      // Handle PWA install success
+      window.addEventListener('appinstalled', () => {
+        console.log('🎉 PWA installed successfully');
+        deferredPrompt = null;
+      });
+      
+      // Network status monitoring
+      window.addEventListener('online', () => {
+        console.log('🌐 Network connected');
+        document.body.classList.remove('offline');
+      });
+      
+      window.addEventListener('offline', () => {
+        console.log('📱 Network disconnected');
+        document.body.classList.add('offline');
+      });
+      
+      // Initial network status
+      if (!navigator.onLine) {
+        document.body.classList.add('offline');
+      }
+    </script>
+    
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
