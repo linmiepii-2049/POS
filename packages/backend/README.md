@@ -66,6 +66,20 @@ pnpm run d1:console
 - 測試資料: `seeds/0001_seed.sql`
 - 本地資料庫: `.wrangler/state/v3/d1/`
 
+### 快速設置（推薦）
+
+如果您是第一次設置本地開發環境，或遇到 health check 失敗的問題，請執行：
+
+```bash
+# 自動檢查並修復常見問題
+bash scripts/setup-local.sh
+```
+
+此腳本會自動：
+- 檢查並釋放被佔用的 8787 端口
+- 套用所有 pending 的 D1 migrations
+- 檢查資料庫是否需要 seed 資料
+
 ### 本地開發
 
 ```bash
@@ -343,6 +357,22 @@ pnpm run d1:seed:staging
 - DB 觸發器是最後防線，服務層應先行檢查
 
 ### 常見問題
+
+#### Health Check 失敗（d1_status: error）
+
+**原因**: 本地 D1 資料庫的 migrations 尚未套用，或資料庫檔案損壞
+
+**解決方案**:
+1. 執行快速設置腳本：`bash scripts/setup-local.sh`
+2. 或手動套用 migrations：`pnpm wrangler d1 migrations apply DB --local`
+3. 確認沒有其他進程佔用 8787 端口：`lsof -ti:8787`
+4. 重新啟動開發伺服器：`pnpm run dev`
+
+**驗證修復**:
+```bash
+curl http://localhost:8787/health
+# 應該回傳: {"ok": true, "d1_status": "ok", ...}
+```
 
 #### 部署後 API 回傳 HTML 而非 JSON
 
