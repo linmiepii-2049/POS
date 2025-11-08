@@ -50,11 +50,11 @@
 
 2. **執行 migrations**（如有需要）
    ```bash
-   # Staging: batch-size 10
-   wrangler d1 migrations apply DB --env staging --batch-size 10
+   # Staging
+   wrangler d1 migrations apply DB --env staging
    
-   # Production: batch-size 5（更保守）
-   wrangler d1 migrations apply DB --env production --batch-size 5
+   # Production
+   wrangler d1 migrations apply DB --env production
    ```
 
 3. **確認執行結果**

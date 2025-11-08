@@ -103,13 +103,13 @@
 wrangler d1 migrations list DB --env staging
 
 # 執行（如有需要）
-wrangler d1 migrations apply DB --env staging --batch-size 10
+wrangler d1 migrations apply DB --env staging
 ```
 
 **Production**:
 ```bash
-# 更保守的批次大小
-wrangler d1 migrations apply DB --env production --batch-size 5
+# 執行 migrations
+wrangler d1 migrations apply DB --env production
 ```
 
 ### R2 Bucket 驗證
