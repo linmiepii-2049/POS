@@ -7,7 +7,8 @@ import { dataRouter } from './routes/data.js';
 import { usersRouter } from './routes/users.js';
 import { usersAggregateRouter } from './routes/users-aggregate.js';
 import { productsRouter } from './routes/products.js';
-import { couponsRouter } from './routes/coupons.js';
+// COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11) - May be restored in the future
+// import { couponsRouter } from './routes/coupons.js';
 import { ordersRouter } from './routes/orders.js';
 import { r2UploadRouter } from './routes/r2-upload.js';
 import localUploadRouter from './routes/local-upload.js';
@@ -200,14 +201,15 @@ export const createApp = () => {
         name: 'Products',
         description: '產品管理端點',
       },
-      {
-        name: 'Coupons',
-        description: '優惠券管理端點',
-      },
-      {
-        name: 'CouponCodes',
-        description: '優惠券代碼管理端點',
-      },
+      // COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11) - May be restored in the future
+      // {
+      //   name: 'Coupons',
+      //   description: '優惠券管理端點',
+      // },
+      // {
+      //   name: 'CouponCodes',
+      //   description: '優惠券代碼管理端點',
+      // },
       {
         name: 'Orders',
         description: '訂單管理端點',
@@ -238,8 +240,8 @@ export const createApp = () => {
   // 掛載產品路由
   app.route('/api', productsRouter);
 
-  // 掛載優惠券路由
-  app.route('/api', couponsRouter);
+  // COUPON FEATURE HIDDEN - 優惠券路由已隱藏 (2024-11-11) - May be restored in the future
+  // app.route('/api', couponsRouter);
 
   // 掛載訂單路由
   app.route('/api', ordersRouter);

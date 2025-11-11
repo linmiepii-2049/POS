@@ -4,13 +4,15 @@ import { clsx } from 'clsx';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminUsers } from './AdminUsers';
 import { AdminProducts } from './AdminProducts';
-import { AdminCoupons } from './AdminCoupons';
+// Coupon feature hidden - 優惠券功能已隱藏 (2024-11-11) - May be restored in the future
+// import { AdminCoupons } from './AdminCoupons';
 import { AdminOrders } from './AdminOrders';
 
 /**
  * Admin 子路由類型
+ * Note: 'coupons' route removed - may be restored in the future
  */
-type AdminRoute = 'users' | 'products' | 'coupons' | 'orders';
+type AdminRoute = 'users' | 'products' | 'orders';
 
 /**
  * Admin 主要布局元件
@@ -20,7 +22,8 @@ export function AdminLayout() {
   const getCurrentRouteFromURL = (): AdminRoute => {
     const urlParams = new URLSearchParams(window.location.search);
     const route = urlParams.get('tab') as AdminRoute;
-    return route && ['users', 'products', 'coupons', 'orders'].includes(route) ? route : 'users';
+    // Coupon route removed - 優惠券路由已移除
+    return route && ['users', 'products', 'orders'].includes(route) ? route : 'users';
   };
 
   const [currentRoute, setCurrentRoute] = useState<AdminRoute>(getCurrentRouteFromURL());
@@ -46,8 +49,9 @@ export function AdminLayout() {
         return <AdminUsers />;
       case 'products':
         return <AdminProducts />;
-      case 'coupons':
-        return <AdminCoupons />;
+      // Coupon route hidden - 優惠券路由已隱藏 (2024-11-11)
+      // case 'coupons':
+      //   return <AdminCoupons />;
       case 'orders':
         return <AdminOrders />;
       default:

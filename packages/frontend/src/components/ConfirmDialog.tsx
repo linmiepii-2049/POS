@@ -1,17 +1,21 @@
 /**
  * 確認對話框組件
- * 顯示訂單確認資訊、會員查詢、優惠券選擇
+ * 顯示訂單確認資訊、會員查詢
+ * Note: 優惠券功能已隱藏 (2024-11-11) - May be restored in the future
  */
 
 import { useState, useEffect, useCallback, useRef, useImperativeHandle, forwardRef } from 'react';
 import { useCart } from '../hooks/useCart';
 import { CartItem } from '../store/cart.tsx';
 import { formatMoney, calculateDiscountedAmount } from '../utils/money';
-import { useUsersGetByPhone, useUsersGetAvailableCoupons } from '../api/posClient';
+import { useUsersGetByPhone } from '../api/posClient';
+// Coupon feature hidden - 優惠券功能已隱藏 (2024-11-11)
+// import { useUsersGetAvailableCoupons } from '../api/posClient';
 
 /**
- * 優惠券介面
+ * 優惠券介面 (Hidden - may be restored)
  */
+/* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11)
 export interface AvailableCoupon {
   id: number;
   name: string;
@@ -22,6 +26,7 @@ export interface AvailableCoupon {
   isAvailable: boolean;
   reason?: string;
 }
+*/
 
 /**
  * 確認對話框 Props
@@ -32,7 +37,7 @@ export interface ConfirmDialogProps {
   onConfirm: (orderData: {
     items: CartItem[];
     userId?: number;
-    couponIds: number[];
+    // couponIds: number[]; // Coupon feature hidden
     totalAmount: number;
     finalAmount: number;
   }) => void;
@@ -45,8 +50,9 @@ export interface ConfirmDialogProps {
 export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onClose, onConfirm }, ref) => {
   const { state } = useCart();
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [selectedCoupons, setSelectedCoupons] = useState<number[]>([]);
-  const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>([]);
+  // Coupon feature hidden - 優惠券功能已隱藏 (2024-11-11)
+  // const [selectedCoupons, setSelectedCoupons] = useState<number[]>([]);
+  // const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>([]);
   const [userData, setUserData] = useState<any>(null);
   
   // 查詢會員
@@ -55,12 +61,14 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
     { query: { enabled: false } }
   );
   
+  /* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11)
   // 查詢可用優惠券
   const { data: couponsData, refetch: refetchCoupons } = useUsersGetAvailableCoupons(
     userData?.data?.data?.id || 0,
     { order_amount: Math.round(state.totalAmount) }, // 使用元
     { query: { enabled: false } }
   );
+  */
 
   /**
    * 查詢會員
@@ -88,6 +96,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
     }
   }, [phoneNumber, refetchUser]);
 
+  /* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11)
   // 當 userData 變化時，自動查詢優惠券
   useEffect(() => {
     if (userData?.data?.data?.id) {
@@ -95,6 +104,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
       refetchCoupons();
     }
   }, [userData, refetchCoupons]);
+  */
 
   // 自動偵測手機號碼輸入
   useEffect(() => {
@@ -109,6 +119,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
     resetForm
   }), []);
 
+  /* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11)
   // 當優惠券數據變化時，轉換並設置到狀態
   useEffect(() => {
     if (couponsData?.data?.data) {
@@ -136,14 +147,15 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
       setAvailableCoupons(coupons);
     }
   }, [couponsData?.data]);
+  */
 
   /**
    * 重置表單
    */
   const resetForm = () => {
     setPhoneNumber('');
-    setSelectedCoupons([]);
-    setAvailableCoupons([]);
+    // setSelectedCoupons([]); // Coupon feature hidden
+    // setAvailableCoupons([]); // Coupon feature hidden
     setUserData(null);
   };
 
@@ -152,13 +164,12 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
    */
   const handleClose = () => {
     // 只清空選中的優惠券，保留會員查詢結果
-    setSelectedCoupons([]);
+    // setSelectedCoupons([]); // Coupon feature hidden
     onClose();
   };
 
-  /**
-   * 切換優惠券選擇
-   */
+  /* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11)
+  // 切換優惠券選擇
   const toggleCoupon = (couponId: number) => {
     setSelectedCoupons(prev => 
       prev.includes(couponId)
@@ -167,9 +178,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
     );
   };
 
-  /**
-   * 計算優惠金額
-   */
+  // 計算優惠金額
   const calculateDiscount = () => {
     let totalDiscount = 0;
     
@@ -186,11 +195,13 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
     
     return Math.min(totalDiscount, state.totalAmount);
   };
+  */
 
   /**
-   * 計算最終金額
+   * 計算最終金額 (No discount applied - coupon feature hidden)
    */
-  const discountAmount = calculateDiscount();
+  // const discountAmount = calculateDiscount(); // Coupon feature hidden
+  const discountAmount = 0; // No discount when coupon feature is hidden
   const finalAmount = calculateDiscountedAmount(state.totalAmount, discountAmount);
 
   /**
@@ -200,7 +211,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
     onConfirm({
       items: state.items,
       userId: userData?.data?.data?.id,
-      couponCodeId: selectedCoupons.length > 0 ? selectedCoupons[0] : undefined, // 只傳遞第一個選中的優惠券代碼 ID
+      // couponCodeId: selectedCoupons.length > 0 ? selectedCoupons[0] : undefined, // Coupon feature hidden
       totalAmount: finalAmount, // 使用折扣後的最終金額
       finalAmount,
     });
@@ -275,6 +286,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
                     <h4 className="text-lg font-semibold text-green-800">
                       很高興看到你, {userData.data.data.name}
                     </h4>
+                    {/* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11)
                     {availableCoupons.length > 0 && (
                       <div className="mt-2 flex items-center space-x-2">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -290,6 +302,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
                         )}
                       </div>
                     )}
+                    */}
                   </div>
                 </div>
               </div>
@@ -297,7 +310,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
             
           </div>
 
-          {/* 優惠券選擇 */}
+          {/* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11) - May be restored in the future
           {availableCoupons.length > 0 && (
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-3">優惠券</h3>
@@ -355,20 +368,23 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
               </div>
             </div>
           )}
+          */}
 
           {/* 金額計算 */}
           <div className="bg-gray-50 p-4 rounded-md">
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-gray-600">優惠前金額</span>
+                <span className="text-gray-600">訂單金額</span>
                 <span className="text-gray-900">{formatMoney(state.totalAmount)}</span>
               </div>
+              {/* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11)
               {discountAmount > 0 && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">優惠折扣</span>
                   <span className="text-red-600">-{formatMoney(discountAmount)}</span>
                 </div>
               )}
+              */}
               <div className="flex justify-between items-center pt-2 border-t border-gray-200">
                 <span className="text-lg font-semibold text-gray-900">最終金額</span>
                 <span className="text-xl font-bold text-green-600">

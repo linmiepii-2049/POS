@@ -16,7 +16,8 @@ interface NavItem {
 const navItems: NavItem[] = [
   { id: 'users', label: '用戶管理', icon: '👥' },
   { id: 'products', label: '商品管理', icon: '📦' },
-  { id: 'coupons', label: '優惠券管理', icon: '🎫' },
+  // Coupon feature hidden - 優惠券功能已隱藏 (2024-11-11) - May be restored in the future
+  // { id: 'coupons', label: '優惠券管理', icon: '🎫' },
   { id: 'orders', label: '訂單管理', icon: '📋' },
 ];
 
