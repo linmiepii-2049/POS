@@ -9,6 +9,8 @@ import { useCart } from '../hooks/useCart';
 import { CartItem } from '../store/cart.tsx';
 import { formatMoney, calculateDiscountedAmount } from '../utils/money';
 import { useUsersGetByPhone, useUsersGetByLineId } from '../api/posClient';
+import jsQR from 'jsqr';
+import toast from 'react-hot-toast';
 // Coupon feature hidden - 優惠券功能已隱藏 (2024-11-11)
 // import { useUsersGetAvailableCoupons } from '../api/posClient';
 
@@ -53,6 +55,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
   const [phoneNumber, setPhoneNumber] = useState('');
   const [lineId, setLineId] = useState('');
   const [redeemAmount, setRedeemAmount] = useState(0); // 要折抵的金額（元）
+  const fileInputRef = useRef<HTMLInputElement>(null); // QR code 掃描檔案輸入
   // Coupon feature hidden - 優惠券功能已隱藏 (2024-11-11)
   // const [selectedCoupons, setSelectedCoupons] = useState<number[]>([]);
   // const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>([]);
@@ -139,6 +142,79 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
       return () => clearTimeout(timer);
     }
   }, [lineId, searchType, handleSearchUser]);
+
+  /**
+   * 處理 QR code 掃描
+   */
+  const handleQRScan = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      // 讀取圖片檔案
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const imageData = e.target?.result as string;
+        
+        // 創建圖片元素
+        const img = new Image();
+        img.onload = () => {
+          // 創建 canvas 來處理圖片
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          if (!context) {
+            toast.error('無法處理圖片');
+            return;
+          }
+
+          canvas.width = img.width;
+          canvas.height = img.height;
+          context.drawImage(img, 0, 0);
+
+          // 獲取圖片數據
+          const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+          
+          // 解析 QR code
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+          
+          if (code) {
+            console.log('QR code 解析成功:', code.data);
+            setLineId(code.data);
+            toast.success('QR code 掃描成功');
+          } else {
+            toast.error('無法識別 QR code，請重試');
+          }
+        };
+        
+        img.onerror = () => {
+          toast.error('圖片載入失敗');
+        };
+        
+        img.src = imageData;
+      };
+      
+      reader.onerror = () => {
+        toast.error('檔案讀取失敗');
+      };
+      
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('QR code 掃描錯誤:', error);
+      toast.error('掃描失敗，請重試');
+    }
+
+    // 重置檔案輸入，允許重複掃描同一個檔案
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  /**
+   * 觸發 QR code 掃描
+   */
+  const handleScanClick = () => {
+    fileInputRef.current?.click();
+  };
 
   /* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11)
   // 當 userData 變化時，自動查詢優惠券
@@ -340,30 +416,59 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
               </button>
             </div>
 
-            <div className="flex space-x-3">
+            <div className="flex space-x-2">
               {searchType === 'phone' ? (
-                <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="請輸入手機號碼"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <>
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="請輸入手機號碼"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={handleSearchUser}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    查詢
+                  </button>
+                </>
               ) : (
-                <input
-                  type="text"
-                  value={lineId}
-                  onChange={(e) => setLineId(e.target.value)}
-                  placeholder="請輸入 LINE ID"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <>
+                  <input
+                    type="text"
+                    value={lineId}
+                    onChange={(e) => setLineId(e.target.value)}
+                    placeholder="請輸入 LINE ID"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={handleScanClick}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 flex items-center space-x-2"
+                    title="掃描 QR Code"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                    </svg>
+                    <span>掃描</span>
+                  </button>
+                  <button
+                    onClick={handleSearchUser}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    查詢
+                  </button>
+                  {/* 隱藏的檔案輸入，用於觸發相機 */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleQRScan}
+                    className="hidden"
+                  />
+                </>
               )}
-              <button
-                onClick={handleSearchUser}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                查詢
-              </button>
             </div>
             
             {userData?.data?.data && (
