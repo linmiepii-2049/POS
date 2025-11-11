@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { Input, FormField, Textarea, Select, Button } from './Form';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import type { CouponsList200DataItem } from '../api/posClient';
-import { useCouponCodesList } from '../api/posClient';
+// import { useCouponCodesList } from '../api/posClient'; // TODO: 此 API 尚未實現
 import { convertToUTCISO, validateDateRange, formatDateOnly } from '../utils/time';
 
 interface CouponFormData {
@@ -50,21 +50,12 @@ export function CouponDialog({
 
   const discountType = watch('discount_type');
 
-  // 檢查優惠券是否有代碼
-  const shouldCheckCodes = editingCoupon?.id && editingCoupon.id > 0;
-  const { data: codesData } = useCouponCodesList(
-    shouldCheckCodes ? {
-      page: 1,
-      limit: 1, // 只需要檢查是否有代碼，不需要獲取全部
-      coupon_id: editingCoupon.id,
-    } : undefined,
-    {
-      enabled: shouldCheckCodes, // 只有編輯時且 ID 有效時才查詢
-    }
-  );
-
-  // 只有在編輯模式且確實有代碼時才鎖定日期欄位
-  const hasCodes = shouldCheckCodes && codesData?.data?.data && codesData.data.data.length > 0;
+  // TODO: 檢查優惠券是否有代碼的功能暫時停用，因為對應的 API 尚未實現
+  // const shouldCheckCodes = editingCoupon?.id && editingCoupon.id > 0;
+  // const { data: codesData } = useCouponCodesList(...);
+  
+  // 暫時允許編輯所有欄位
+  const hasCodes = false;
 
   useEffect(() => {
     if (editingCoupon) {

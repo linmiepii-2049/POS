@@ -208,6 +208,7 @@ describe('Orders API Routes', () => {
         user_id: 1,
         subtotal_twd: 13000,
         discount_twd: 0,
+        points_discount_twd: 0,
         total_twd: 13000,
         status: 'confirmed',
         created_at: '2024-01-01T00:00:00Z',
@@ -381,6 +382,112 @@ describe('Orders API Routes', () => {
       const data = await response.json();
       expect(data.success).toBe(false);
       expect(data.error).toBe('同一訂單不能包含重複商品');
+    });
+
+    it('應該在使用點數折抵時正確計算金額', async () => {
+      const newOrder = {
+        user_id: 1,
+        items: [{ product_id: 1, quantity: 2 }],
+        points_to_redeem: 40, // 折抵 2 元
+      };
+
+      const mockUser = { line_id: 'test-line-id', points: 100 };
+      const mockProduct = { id: 1, name: '產品1', unit_price_twd: 100, is_active: 1 };
+      const mockOrder = {
+        id: 1,
+        order_number: 'ORD-TEST',
+        user_id: 1,
+        subtotal_twd: 200,
+        discount_twd: 0,
+        points_discount_twd: 2,
+        total_twd: 198,
+        status: 'paid',
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      };
+
+      const mockPrepare = mockEnv.DB.prepare as any;
+      const mockBind = vi.fn().mockReturnValue({
+        first: vi.fn()
+          .mockResolvedValueOnce({ count: 1 }) // checkUserExists
+          .mockResolvedValueOnce(mockUser) // getUserLineId
+          .mockResolvedValueOnce({ points: 100 }) // getUserPoints
+          .mockResolvedValueOnce(mockProduct) // checkProductExists
+          .mockResolvedValueOnce({ points: 60 }) // getUserPoints after deduct
+          .mockResolvedValueOnce({ points: 258 }) // getUserPoints after earn
+          .mockResolvedValueOnce(mockOrder), // getOrderById
+        all: vi.fn()
+          .mockResolvedValueOnce({ results: [] }) // order_items
+          .mockResolvedValueOnce({ results: [] }), // coupon_redemptions
+        run: vi.fn().mockResolvedValue({ success: true, meta: { last_row_id: 1 } }),
+      });
+      mockPrepare.mockReturnValue({ bind: mockBind });
+
+      const response = await app.request('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newOrder),
+      }, mockEnv);
+
+      expect(response.status).toBe(201);
+      
+      const data = await response.json();
+      expect(data.success).toBe(true);
+      expect(data.data.points_discount_twd).toBe(2);
+      expect(data.data.total_twd).toBe(198);
+    });
+
+    it('應該拒絕非會員使用點數折抵', async () => {
+      const newOrder = {
+        items: [{ product_id: 1, quantity: 1 }],
+        points_to_redeem: 20,
+      };
+
+      const response = await app.request('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newOrder),
+      }, mockEnv);
+
+      expect(response.status).toBe(409);
+      
+      const data = await response.json();
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('點數折抵僅限會員使用');
+    });
+
+    it('應該拒絕沒有 LINE ID 的會員使用點數折抵', async () => {
+      const newOrder = {
+        user_id: 1,
+        items: [{ product_id: 1, quantity: 1 }],
+        points_to_redeem: 20,
+      };
+
+      const mockPrepare = mockEnv.DB.prepare as any;
+      const mockBind = vi.fn().mockReturnValue({
+        first: vi.fn()
+          .mockResolvedValueOnce({ count: 1 }) // checkUserExists
+          .mockResolvedValueOnce({ line_id: null }), // 沒有 LINE ID
+      });
+      mockPrepare.mockReturnValue({ bind: mockBind });
+
+      const response = await app.request('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newOrder),
+      }, mockEnv);
+
+      expect(response.status).toBe(409);
+      
+      const data = await response.json();
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('點數折抵僅限 LINE ID 會員使用');
     });
   });
 });

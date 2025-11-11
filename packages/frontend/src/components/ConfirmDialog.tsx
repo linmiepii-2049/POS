@@ -8,7 +8,7 @@ import { useState, useEffect, useCallback, useRef, useImperativeHandle, forwardR
 import { useCart } from '../hooks/useCart';
 import { CartItem } from '../store/cart.tsx';
 import { formatMoney, calculateDiscountedAmount } from '../utils/money';
-import { useUsersGetByPhone } from '../api/posClient';
+import { useUsersGetByPhone, useUsersGetByLineId } from '../api/posClient';
 // Coupon feature hidden - 優惠券功能已隱藏 (2024-11-11)
 // import { useUsersGetAvailableCoupons } from '../api/posClient';
 
@@ -49,15 +49,24 @@ export interface ConfirmDialogProps {
  */
 export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onClose, onConfirm }, ref) => {
   const { state } = useCart();
+  const [searchType, setSearchType] = useState<'phone' | 'lineId'>('phone'); // 查詢類型
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [lineId, setLineId] = useState('');
+  const [redeemAmount, setRedeemAmount] = useState(0); // 要折抵的金額（元）
   // Coupon feature hidden - 優惠券功能已隱藏 (2024-11-11)
   // const [selectedCoupons, setSelectedCoupons] = useState<number[]>([]);
   // const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>([]);
   const [userData, setUserData] = useState<any>(null);
   
-  // 查詢會員
+  // 查詢會員（手機號碼）
   const { data: userQueryData, refetch: refetchUser } = useUsersGetByPhone(
     { phone: phoneNumber },
+    { query: { enabled: false } }
+  );
+
+  // 查詢會員（LINE ID）
+  const { data: lineIdQueryData, refetch: refetchLineIdUser } = useUsersGetByLineId(
+    lineId || 'dummy',
     { query: { enabled: false } }
   );
   
@@ -74,27 +83,62 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
    * 查詢會員
    */
   const handleSearchUser = useCallback(async () => {
-    if (!phoneNumber.trim()) return;
-    
-    try {
-      console.log('開始查詢會員:', phoneNumber);
-      const userResult = await refetchUser();
-      console.log('會員查詢結果:', userResult.data);
+    if (searchType === 'phone') {
+      if (!phoneNumber.trim()) return;
       
-      if (userResult.data?.data?.data) {
-        // 正確設置 userData，包含完整的 API 回應結構
-        setUserData(userResult.data);
-        console.log('設置 userData:', userResult.data);
-        console.log('userData.data.data.name:', userResult.data.data.data.name);
-      } else {
+      try {
+        console.log('開始查詢會員（手機）:', phoneNumber);
+        const userResult = await refetchUser();
+        console.log('會員查詢結果:', userResult.data);
+        
+        if (userResult.data?.data?.data) {
+          // 正確設置 userData，包含完整的 API 回應結構
+          setUserData(userResult.data);
+          setRedeemAmount(0); // 重置點數折抵
+          console.log('設置 userData:', userResult.data);
+        } else {
+          setUserData(null);
+          console.log('未找到會員資料');
+        }
+      } catch (error) {
+        console.error('查詢會員失敗:', error);
         setUserData(null);
-        console.log('未找到會員資料');
       }
-    } catch (error) {
-      console.error('查詢會員失敗:', error);
-      setUserData(null);
+    } else {
+      // LINE ID 查詢
+      if (!lineId.trim()) return;
+      
+      try {
+        console.log('開始查詢會員（LINE ID）:', lineId);
+        const userResult = await refetchLineIdUser();
+        console.log('LINE ID 查詢結果:', userResult.data);
+        
+        if (userResult.data?.data?.data) {
+          setUserData(userResult.data);
+          setRedeemAmount(0); // 重置點數折抵
+          console.log('設置 LINE ID userData:', userResult.data);
+        } else {
+          setUserData(null);
+          console.log('未找到 LINE ID 會員資料');
+        }
+      } catch (error) {
+        console.error('LINE ID 查詢會員失敗:', error);
+        setUserData(null);
+      }
     }
-  }, [phoneNumber, refetchUser]);
+  }, [searchType, phoneNumber, lineId, refetchUser, refetchLineIdUser]);
+
+  // 自動偵測 LINE ID 輸入（當有輸入時自動查詢）
+  useEffect(() => {
+    if (searchType === 'lineId' && lineId.trim().length > 0) {
+      console.log('LINE ID 輸入變化，自動查詢:', lineId);
+      const timer = setTimeout(() => {
+        handleSearchUser();
+      }, 500); // 延遲 500ms 以避免頻繁查詢
+      
+      return () => clearTimeout(timer);
+    }
+  }, [lineId, searchType, handleSearchUser]);
 
   /* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11)
   // 當 userData 變化時，自動查詢優惠券
@@ -108,11 +152,11 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
 
   // 自動偵測手機號碼輸入
   useEffect(() => {
-    if (phoneNumber.length === 10 && /^09\d{8}$/.test(phoneNumber)) {
+    if (searchType === 'phone' && phoneNumber.length === 10 && /^09\d{8}$/.test(phoneNumber)) {
       console.log('自動偵測到10位手機號碼，開始查詢:', phoneNumber);
       handleSearchUser();
     }
-  }, [phoneNumber, handleSearchUser]);
+  }, [phoneNumber, searchType, handleSearchUser]);
 
   // 暴露重置函數給父組件
   useImperativeHandle(ref, () => ({
@@ -154,6 +198,9 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
    */
   const resetForm = () => {
     setPhoneNumber('');
+    setLineId('');
+    setRedeemAmount(0);
+    setSearchType('phone');
     // setSelectedCoupons([]); // Coupon feature hidden
     // setAvailableCoupons([]); // Coupon feature hidden
     setUserData(null);
@@ -165,6 +212,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
   const handleClose = () => {
     // 只清空選中的優惠券，保留會員查詢結果
     // setSelectedCoupons([]); // Coupon feature hidden
+    setRedeemAmount(0); // 重置點數折抵
     onClose();
   };
 
@@ -198,10 +246,12 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
   */
 
   /**
-   * 計算最終金額 (No discount applied - coupon feature hidden)
+   * 計算最終金額（包含點數折抵）
    */
   // const discountAmount = calculateDiscount(); // Coupon feature hidden
-  const discountAmount = 0; // No discount when coupon feature is hidden
+  const pointsDiscount = redeemAmount; // 直接使用輸入的折抵金額
+  const pointsToRedeem = redeemAmount * 20; // 金額轉換為點數（1元 = 20點）
+  const discountAmount = pointsDiscount;
   const finalAmount = calculateDiscountedAmount(state.totalAmount, discountAmount);
 
   /**
@@ -212,6 +262,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
       items: state.items,
       userId: userData?.data?.data?.id,
       // couponCodeId: selectedCoupons.length > 0 ? selectedCoupons[0] : undefined, // Coupon feature hidden
+      pointsToRedeem: pointsToRedeem,
       totalAmount: finalAmount, // 使用折扣後的最終金額
       finalAmount,
     });
@@ -256,14 +307,57 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
           {/* 會員查詢 */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-3">會員查詢</h3>
+            
+            {/* 查詢類型切換 */}
+            <div className="flex space-x-2 mb-3">
+              <button
+                onClick={() => {
+                  setSearchType('phone');
+                  setUserData(null);
+                  setRedeemAmount(0);
+                }}
+                className={`px-4 py-2 rounded-md ${
+                  searchType === 'phone'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                手機號碼
+              </button>
+              <button
+                onClick={() => {
+                  setSearchType('lineId');
+                  setUserData(null);
+                  setRedeemAmount(0);
+                }}
+                className={`px-4 py-2 rounded-md ${
+                  searchType === 'lineId'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                LINE ID（可用點數）
+              </button>
+            </div>
+
             <div className="flex space-x-3">
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="請輸入手機號碼"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              {searchType === 'phone' ? (
+                <input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="請輸入手機號碼"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              ) : (
+                <input
+                  type="text"
+                  value={lineId}
+                  onChange={(e) => setLineId(e.target.value)}
+                  placeholder="請輸入 LINE ID"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              )}
               <button
                 onClick={handleSearchUser}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -272,7 +366,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
               </button>
             </div>
             
-            {userData?.data && (
+            {userData?.data?.data && (
               <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg shadow-sm">
                 <div className="flex items-center space-x-3">
                   <div className="flex-shrink-0">
@@ -286,29 +380,58 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
                     <h4 className="text-lg font-semibold text-green-800">
                       很高興看到你, {userData.data.data.name}
                     </h4>
-                    {/* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11)
-                    {availableCoupons.length > 0 && (
+                    {/* 顯示點數信息（僅 LINE ID 查詢時） */}
+                    {searchType === 'lineId' && userData.data.data.points !== undefined && (
                       <div className="mt-2 flex items-center space-x-2">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                           <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
                           </svg>
-                          {availableCoupons.length} 張優惠券
+                          {userData.data.data.points} 點數（可折抵 ${userData.data.data.points_yuan_equivalent}）
                         </span>
-                        {availableCoupons.filter(c => c.isAvailable).length > 0 && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {availableCoupons.filter(c => c.isAvailable).length} 張可用
-                          </span>
-                        )}
                       </div>
                     )}
-                    */}
                   </div>
                 </div>
               </div>
             )}
             
           </div>
+
+          {/* 點數折抵（僅 LINE ID 查詢且有點數時顯示） */}
+          {searchType === 'lineId' && userData?.data?.data && userData.data.data.points > 0 && (
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-3">點數折抵</h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <span className="text-gray-600">$</span>
+                  <input
+                    type="number"
+                    value={redeemAmount}
+                    onChange={(e) => {
+                      const value = Math.max(0, parseInt(e.target.value) || 0);
+                      const maxAmount = userData.data.data.points_yuan_equivalent; // 最大可折抵金額
+                      setRedeemAmount(Math.min(value, maxAmount));
+                    }}
+                    placeholder="輸入要折抵的金額"
+                    step="1"
+                    min="0"
+                    max={userData.data.data.points_yuan_equivalent}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                  <span className="text-gray-600">元</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">使用點數：</span>
+                  <span className="font-medium text-purple-600">{redeemAmount * 20} 點</span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  * 1元 = 20點，最多可折抵 ${userData.data.data.points_yuan_equivalent}（{userData.data.data.points} 點）
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11) - May be restored in the future
           {availableCoupons.length > 0 && (
@@ -377,6 +500,12 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
                 <span className="text-gray-600">訂單金額</span>
                 <span className="text-gray-900">{formatMoney(state.totalAmount)}</span>
               </div>
+              {redeemAmount > 0 && (
+                <div className="flex justify-between text-purple-600">
+                  <span>點數折抵（{redeemAmount * 20}點）</span>
+                  <span>-{formatMoney(redeemAmount)}</span>
+                </div>
+              )}
               {/* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11)
               {discountAmount > 0 && (
                 <div className="flex justify-between">

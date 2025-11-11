@@ -10,6 +10,8 @@ import type {
   Pagination, 
   CouponOwned 
 } from '../zod/users.js';
+import { PointsService } from './points.js';
+import type { PointsHistoryQuery } from '../zod/points.js';
 
 /**
  * 使用者服務類別
@@ -25,6 +27,18 @@ export class UserService {
     const date = new Date(taipeiTime);
     const utcDate = new Date(date.getTime() - 8 * 60 * 60 * 1000);
     return utcDate.toISOString();
+  }
+
+  /**
+   * 為使用者添加點數等值金額
+   */
+  private enrichUserWithPoints(user: any): User {
+    const points = user.points || 0;
+    return {
+      ...user,
+      points,
+      points_yuan_equivalent: Math.floor(points / 20),
+    };
   }
 
   /**
@@ -101,7 +115,8 @@ export class UserService {
     `;
     
     const listResult = await this.db.prepare(listQuery).bind(...params, limit, offset).all();
-    const users = listResult.results as User[];
+    const rawUsers = listResult.results as any[];
+    const users = rawUsers.map(user => this.enrichUserWithPoints(user));
 
     return {
       users,
@@ -126,7 +141,7 @@ export class UserService {
       return null;
     }
 
-    const user = userResult as User;
+    const user = this.enrichUserWithPoints(userResult);
 
     // 取得統計資訊
     const stats = await this.getUserStats(id);
@@ -135,6 +150,42 @@ export class UserService {
       ...user,
       stats,
     };
+  }
+
+  /**
+   * 根據 LINE ID 取得使用者資訊
+   */
+  async getUserByLineId(lineId: string): Promise<User | null> {
+    const query = `
+      SELECT 
+        u.*,
+        MAX(CASE WHEN o.status != 'cancelled' THEN o.created_at END) as last_purchase_at,
+        COALESCE(SUM(CASE 
+          WHEN o.created_at >= datetime('now', '-30 days') 
+          AND o.status != 'cancelled'
+          THEN o.total_twd 
+          ELSE 0 
+        END), 0) as current_month_spending,
+        COALESCE(SUM(CASE 
+          WHEN o.created_at >= datetime('now', '-60 days') 
+          AND o.created_at < datetime('now', '-30 days')
+          AND o.status != 'cancelled'
+          THEN o.total_twd 
+          ELSE 0 
+        END), 0) as last_month_spending
+      FROM users u
+      LEFT JOIN orders o ON u.id = o.user_id
+      WHERE u.line_id = ? AND u.is_active = 1
+      GROUP BY u.id
+    `;
+    
+    const result = await this.db.prepare(query).bind(lineId).first();
+    
+    if (!result) {
+      return null;
+    }
+
+    return this.enrichUserWithPoints(result);
   }
 
   /**
@@ -364,5 +415,21 @@ export class UserService {
 
     const result = await this.db.prepare(query).bind(...params).first();
     return (result?.count as number || 0) > 0;
+  }
+
+  /**
+   * 取得使用者點數
+   */
+  async getUserPoints(userId: number): Promise<number> {
+    const pointsService = new PointsService(this.db);
+    return await pointsService.getUserPoints(userId);
+  }
+
+  /**
+   * 取得使用者點數交易歷史
+   */
+  async getPointsHistory(userId: number, query: PointsHistoryQuery) {
+    const pointsService = new PointsService(this.db);
+    return await pointsService.getPointsHistory(userId, query);
   }
 }

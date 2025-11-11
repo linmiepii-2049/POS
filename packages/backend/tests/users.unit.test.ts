@@ -48,8 +48,8 @@ describe('UserService', () => {
 
       // 模擬使用者列表查詢
       const mockUsers = [
-        { id: 1, name: '使用者1', phone: '0912345678', role: 'CLIENT', is_active: 1, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
-        { id: 2, name: '使用者2', phone: '0987654321', role: 'ADMIN', is_active: 1, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+        { id: 1, name: '使用者1', phone: '0912345678', role: 'CLIENT', is_active: 1, points: 0, points_yuan_equivalent: 0, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+        { id: 2, name: '使用者2', phone: '0987654321', role: 'ADMIN', is_active: 1, points: 0, points_yuan_equivalent: 0, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
       ];
       mockD1.prepare().bind().all.mockResolvedValueOnce({ results: mockUsers });
 
@@ -70,7 +70,7 @@ describe('UserService', () => {
       mockD1.prepare().bind().first.mockResolvedValueOnce({ total: 1 });
 
       // 模擬使用者列表查詢
-      const mockUsers = [{ id: 1, name: '張小明', phone: '0912345678', role: 'CLIENT', is_active: 1, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' }];
+      const mockUsers = [{ id: 1, name: '張小明', phone: '0912345678', role: 'CLIENT', is_active: 1, points: 0, points_yuan_equivalent: 0, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' }];
       mockD1.prepare().bind().all.mockResolvedValueOnce({ results: mockUsers });
 
       const query = { 

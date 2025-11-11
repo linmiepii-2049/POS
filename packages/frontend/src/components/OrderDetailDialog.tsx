@@ -15,6 +15,7 @@ interface OrderItem {
   updated_at: string;
 }
 
+// TODO: 優惠券功能已停用
 interface CouponRedemption {
   id: number;
   order_id: number;
@@ -200,8 +201,8 @@ export function OrderDetailDialog({ isOpen, onClose, orderId }: OrderDetailDialo
               </div>
             </div>
 
-            {/* 優惠券使用 */}
-            {orderDetail.coupon_redemptions.length > 0 && (
+            {/* TODO: 優惠券功能已停用 - 不再顯示優惠券使用信息 */}
+            {false && orderDetail.coupon_redemptions && orderDetail.coupon_redemptions.length > 0 && (
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">使用優惠券</h3>
                 <div className="overflow-x-auto">
@@ -254,6 +255,12 @@ export function OrderDetailDialog({ isOpen, onClose, orderId }: OrderDetailDialo
                   <span className="text-gray-600">商品小計</span>
                   <span className="text-gray-900">NT$ {formatMoney(orderDetail.subtotal_twd)}</span>
                 </div>
+                {orderDetail.points_discount_twd > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-purple-600">點數折抵</span>
+                    <span className="text-purple-600">-NT$ {formatMoney(orderDetail.points_discount_twd)}</span>
+                  </div>
+                )}
                 {orderDetail.discount_twd > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">優惠折扣</span>

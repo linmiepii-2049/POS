@@ -4,12 +4,12 @@ import { Button, FormField, Input, Select } from './Form';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { 
-  useCouponCodesList, 
-  useCouponsCreateGrant,
+  // useCouponCodesList, // TODO: 優惠券功能暫時停用
+  // useCouponsCreateGrant, // TODO: 優惠券功能暫時停用
   useGetApiUsersIdCouponsOwned,
-  useCouponsList,
-  type CouponCodesList200DataItem,
-  type CouponsCreateGrantBody,
+  // useCouponsList, // TODO: 優惠券功能暫時停用
+  // type CouponCodesList200DataItem, // TODO: 優惠券功能暫時停用
+  // type CouponsCreateGrantBody, // TODO: 優惠券功能暫時停用
   type GetApiUsersIdCouponsOwned200DataItem
 } from '../api/posClient';
 
@@ -73,25 +73,17 @@ export const UserDialog: React.FC<UserDialogProps> = ({
     }
   );
 
-  const { data: couponsData } = useCouponsList({
-    page: 1,
-    limit: 100,
-    is_active: 1,
-  });
+  // TODO: 優惠券功能暫時停用
+  // const { data: couponsData } = useCouponsList({...});
+  const couponsData = undefined;
 
-  // 獲取選中優惠券的代碼列表
-  const { data: selectedCouponCodesData } = useCouponCodesList(
-    couponCodeForm.coupon_id ? {
-      page: 1,
-      limit: 100,
-      coupon_id: couponCodeForm.coupon_id,
-    } : undefined,
-    {
-      enabled: !!couponCodeForm.coupon_id,
-    }
-  );
+  // TODO: 優惠券代碼列表功能暫時停用
+  // const { data: selectedCouponCodesData } = useCouponCodesList(...);
+  const selectedCouponCodesData = undefined;
 
-  const createGrantMutation = useCouponsCreateGrant();
+  // TODO: 優惠券授權功能暫時停用
+  // const createGrantMutation = useCouponsCreateGrant();
+  const createGrantMutation = { mutateAsync: async () => { throw new Error('優惠券功能暫時停用'); } };
 
   // 當編輯用戶時，填充表單數據
   React.useEffect(() => {
@@ -130,7 +122,8 @@ export const UserDialog: React.FC<UserDialogProps> = ({
     }
 
     try {
-      const createData: CouponsCreateGrantBody = {
+      // TODO: 優惠券功能暫時停用，類型改為 any
+      const createData: any = {
         coupon_code_id: couponCodeForm.coupon_code_id,
         user_id: editingUser.id,
         allowed_uses: 1, // 統一一次使用
@@ -281,7 +274,8 @@ export const UserDialog: React.FC<UserDialogProps> = ({
                           disabled={!couponCodeForm.coupon_id}
                           options={[
                             { value: 0, label: couponCodeForm.coupon_id ? '請選擇代碼' : '請先選擇優惠券' },
-                            ...(selectedCouponCodesData?.data?.data?.map((code: CouponCodesList200DataItem) => ({
+                            // TODO: 暫時無法獲取優惠券代碼列表（API 尚未實現）
+                            ...(selectedCouponCodesData?.data?.data?.map((code: any) => ({
                               value: code.id,
                               label: `${code.code} (${code.max_redemptions ? `最多${code.max_redemptions}次` : '無限制'})`
                             })) || [])

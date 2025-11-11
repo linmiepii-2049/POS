@@ -56,6 +56,7 @@ export const OrderSchema = z.object({
   user_id: z.number().int().positive().describe('使用者 ID'),
   subtotal_twd: z.number().int().min(0).describe('小計 (元)'),
   discount_twd: z.number().int().min(0).describe('折扣金額 (元)'),
+  points_discount_twd: z.number().int().min(0).describe('點數折扣金額 (元)'),
   total_twd: z.number().int().min(0).describe('總金額 (元)'),
   status: z.enum(['created', 'confirmed', 'paid', 'cancelled']).describe('訂單狀態'),
   created_at: z.string().describe('建立時間 (UTC)'),
@@ -71,6 +72,8 @@ export const OrderSchema = z.object({
 export const OrderDetailSchema = OrderSchema.extend({
   order_items: z.array(OrderItemSchema).describe('訂單項目列表'),
   coupon_redemptions: z.array(CouponRedemptionSchema).describe('優惠券兌換紀錄列表'),
+  points_earned: z.number().int().min(0).optional().describe('獲得的點數（僅會員）'),
+  user_points_remaining: z.number().int().min(0).optional().describe('剩餘點數（僅會員）'),
 });
 
 /**
@@ -88,6 +91,7 @@ export const CreateOrderRequestSchema = z.object({
   user_id: z.number().int().positive().optional().describe('使用者 ID（可選）'),
   items: z.array(CreateOrderItemRequestSchema).min(1).describe('訂單項目列表'),
   coupon_code_id: z.number().int().positive().optional().describe('優惠券代碼 ID（可選）'),
+  points_to_redeem: z.number().int().min(0).optional().describe('欲折抵的點數（可選，僅限 LINE ID 會員）'),
 });
 
 /**

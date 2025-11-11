@@ -13,6 +13,11 @@ import {
   UserCouponsOwnedResponseSchema,
   ErrorResponseSchema,
 } from '../zod/users.js';
+import {
+  PointsHistoryQuerySchema,
+  PointsHistoryResponseSchema,
+  ErrorResponseSchema as PointsErrorResponseSchema,
+} from '../zod/points.js';
 
 /**
  * 使用者路由處理器
@@ -544,6 +549,171 @@ usersRouter.openapi(getUserCouponsOwnedRoute, async (c) => {
     return c.json({
       success: false,
       error: '取得使用者擁有的優惠券時發生錯誤',
+      timestamp: new Date().toISOString(),
+    }, 500);
+  }
+});
+
+/**
+ * GET /users/by-line-id/:lineId - 根據 LINE ID 取得使用者資訊
+ */
+const getUserByLineIdRoute = createRoute({
+  method: 'get',
+  path: '/users/by-line-id/{lineId}',
+  tags: ['Users'],
+  summary: '根據 LINE ID 查詢使用者',
+  description: '根據 LINE ID 查詢使用者資訊，用於點數折抵功能',
+  operationId: 'Users_GetByLineId',
+  request: {
+    params: z.object({
+      lineId: z.string().min(1).describe('LINE ID'),
+    }),
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            success: z.boolean(),
+            data: z.object({
+              id: z.number().int().positive(),
+              name: z.string(),
+              points: z.number().int().min(0),
+              points_yuan_equivalent: z.number().int().min(0),
+            }),
+            timestamp: z.string(),
+          }),
+        },
+      },
+      description: '成功取得使用者資訊',
+    },
+    404: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: '使用者不存在',
+    },
+    500: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: '伺服器錯誤',
+    },
+  },
+});
+
+usersRouter.openapi(getUserByLineIdRoute, async (c) => {
+  try {
+    const { lineId } = c.req.valid('param');
+    const userService = new UserService(c.env.DB);
+    
+    const user = await userService.getUserByLineId(lineId);
+    
+    if (!user) {
+      return c.json({
+        success: false,
+        error: '找不到此 LINE ID 對應的使用者',
+        timestamp: new Date().toISOString(),
+      }, 404);
+    }
+    
+    return c.json({
+      success: true,
+      data: {
+        id: user.id,
+        name: user.name,
+        points: user.points,
+        points_yuan_equivalent: user.points_yuan_equivalent,
+      },
+      timestamp: new Date().toISOString(),
+    }, 200);
+  } catch (error) {
+    console.error('根據 LINE ID 查詢使用者時發生錯誤:', error);
+    return c.json({
+      success: false,
+      error: '查詢使用者時發生錯誤',
+      timestamp: new Date().toISOString(),
+    }, 500);
+  }
+});
+
+/**
+ * GET /users/:id/points-history - 取得使用者點數交易歷史
+ */
+const getUserPointsHistoryRoute = createRoute({
+  method: 'get',
+  path: '/users/{id}/points-history',
+  tags: ['Users'],
+  summary: '取得使用者點數交易歷史',
+  description: '取得使用者的點數獲得與折抵記錄',
+  operationId: 'Users_GetPointsHistory',
+  request: {
+    params: z.object({
+      id: z.coerce.number().int().positive().describe('使用者 ID'),
+    }),
+    query: PointsHistoryQuerySchema,
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: PointsHistoryResponseSchema,
+        },
+      },
+      description: '成功取得點數交易歷史',
+    },
+    404: {
+      content: {
+        'application/json': {
+          schema: PointsErrorResponseSchema,
+        },
+      },
+      description: '使用者不存在',
+    },
+    500: {
+      content: {
+        'application/json': {
+          schema: PointsErrorResponseSchema,
+        },
+      },
+      description: '伺服器錯誤',
+    },
+  },
+});
+
+usersRouter.openapi(getUserPointsHistoryRoute, async (c) => {
+  try {
+    const { id } = c.req.valid('param');
+    const query = c.req.valid('query');
+    const userService = new UserService(c.env.DB);
+    
+    // 檢查使用者是否存在
+    const user = await userService.getUserById(id);
+    if (!user) {
+      return c.json({
+        success: false,
+        error: '使用者不存在',
+        timestamp: new Date().toISOString(),
+      }, 404);
+    }
+    
+    const result = await userService.getPointsHistory(id, query);
+    
+    return c.json({
+      success: true,
+      data: result.transactions,
+      pagination: result.pagination,
+      timestamp: new Date().toISOString(),
+    }, 200);
+  } catch (error) {
+    console.error('取得使用者點數交易歷史時發生錯誤:', error);
+    return c.json({
+      success: false,
+      error: '取得點數交易歷史時發生錯誤',
       timestamp: new Date().toISOString(),
     }, 500);
   }

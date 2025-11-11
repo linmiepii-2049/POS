@@ -79,7 +79,8 @@ export function POSPage() {
   const [orderNumber, setOrderNumber] = useState('');
   const [finalAmount, setFinalAmount] = useState(0); // 存儲折扣後的最終金額
   const [selectedUserId, setSelectedUserId] = useState<number | undefined>(undefined);
-  const [selectedCouponCodeId, setSelectedCouponCodeId] = useState<number | undefined>(undefined);
+  const [pointsToRedeem, setPointsToRedeem] = useState(0); // 要折抵的點數
+  // const [selectedCouponCodeId, setSelectedCouponCodeId] = useState<number | undefined>(undefined); // TODO: 優惠券功能已停用
   
   // QR Code 圖片 URL - 可以在這裡設定你的 QR Code 圖片
   // 方法一：使用外部圖片 URL
@@ -120,14 +121,16 @@ export function POSPage() {
   const handleConfirmOrder = (orderData: {
     items: Array<{ id: number; name: string; price: number; quantity: number }>;
     userId?: number;
-    couponCodeId?: number;
+    // couponCodeId?: number; // TODO: 優惠券功能已停用
+    pointsToRedeem?: number;
     totalAmount: number;
     finalAmount: number;
   }) => {
-    // 存儲折扣後的最終金額、用戶ID和優惠券代碼ID
+    // 存儲折扣後的最終金額、用戶ID和點數折抵
     setFinalAmount(orderData.finalAmount);
     setSelectedUserId(orderData.userId);
-    setSelectedCouponCodeId(orderData.couponCodeId);
+    setPointsToRedeem(orderData.pointsToRedeem || 0);
+    // setSelectedCouponCodeId(orderData.couponCodeId); // TODO: 優惠券功能已停用
     setIsConfirmDialogOpen(false);
     setCurrentStep('paying');
     setIsPaymentDialogOpen(true);
@@ -151,10 +154,16 @@ export function POSPage() {
         orderData.user_id = selectedUserId;
       }
 
-      // 添加優惠券代碼 ID（如果有的話）
-      if (selectedCouponCodeId) {
-        orderData.coupon_code_id = selectedCouponCodeId;
+      // 添加點數折抵（如果有的話）
+      if (pointsToRedeem > 0) {
+        orderData.points_to_redeem = pointsToRedeem;
       }
+
+      // TODO: 優惠券功能已停用
+      // 添加優惠券代碼 ID（如果有的話）
+      // if (selectedCouponCodeId) {
+      //   orderData.coupon_code_id = selectedCouponCodeId;
+      // }
 
       const orderResponse = await createOrderMutation.mutateAsync({
         data: orderData,
@@ -164,10 +173,11 @@ export function POSPage() {
       setOrderNumber(orderResponse.data.orderNumber || `ORD-${Date.now()}`);
       refetchTodayStats(); // 重新獲取今日訂單統計
       
-      // 清空購物車和用戶選擇
+      // 清空購物車、用戶選擇和點數折抵
       clearCart();
       setSelectedUserId(undefined);
-      setSelectedCouponCodeId(undefined);
+      setPointsToRedeem(0);
+      // setSelectedCouponCodeId(undefined); // TODO: 優惠券功能已停用
       
       // 關閉付款對話框
       setIsPaymentDialogOpen(false);
@@ -189,7 +199,8 @@ export function POSPage() {
     setOrderNumber('');
     clearCart();
     setSelectedUserId(undefined);
-    setSelectedCouponCodeId(undefined);
+    setPointsToRedeem(0);
+    // setSelectedCouponCodeId(undefined); // TODO: 優惠券功能已停用
     // 重置確認對話框
     if (confirmDialogRef.current) {
       confirmDialogRef.current.resetForm();

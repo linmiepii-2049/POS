@@ -7,6 +7,7 @@ import type {
   OrderQuery, 
   Pagination 
 } from '../zod/orders.js';
+import { PointsService } from './points.js';
 
 /**
  * 訂單服務類別
@@ -77,6 +78,7 @@ export class OrderService {
   private enrichOrder(order: any): Order {
     return {
       ...order,
+      points_discount_twd: order.points_discount_twd || 0,
       created_at_taipei: this.utcToTaipei(order.created_at),
       updated_at_taipei: this.utcToTaipei(order.updated_at),
     };
@@ -415,17 +417,47 @@ export class OrderService {
    * 建立訂單
    */
   async createOrder(data: CreateOrderRequest): Promise<OrderDetail> {
-    const { user_id, items, coupon_code_id } = data;
+    const { user_id, items, coupon_code_id, points_to_redeem } = data;
 
     // 如果沒有提供 user_id，使用特殊的非會員 ID (10)
     // 如果提供了 user_id，檢查使用者是否存在
     const finalUserId = user_id || 10;
+    let userLineId: string | null = null;
     
     if (user_id) {
       const userExists = await this.checkUserExists(user_id);
       if (!userExists) {
         throw new Error('使用者不存在或已停用');
       }
+
+      // 取得使用者的 LINE ID（用於驗證點數折抵）
+      const userQuery = 'SELECT line_id FROM users WHERE id = ?';
+      const userResult = await this.db.prepare(userQuery).bind(user_id).first();
+      userLineId = userResult?.line_id as string | null;
+    }
+
+    // 驗證點數折抵
+    const pointsService = new PointsService(this.db);
+    let pointsDiscount = 0;
+    
+    if (points_to_redeem && points_to_redeem > 0) {
+      // 檢查是否為非會員
+      if (!user_id || user_id === 10) {
+        throw new Error('點數折抵僅限會員使用');
+      }
+
+      // 檢查是否有 LINE ID
+      if (!userLineId) {
+        throw new Error('點數折抵僅限 LINE ID 會員使用');
+      }
+
+      // 驗證點數是否足夠
+      const validation = await pointsService.validatePointsRedemption(user_id, points_to_redeem);
+      if (!validation.valid) {
+        throw new Error(validation.error || '點數折抵驗證失敗');
+      }
+
+      pointsDiscount = pointsService.calculatePointsDiscount(points_to_redeem);
     }
 
     // 檢查產品並計算小計
@@ -474,22 +506,31 @@ export class OrderService {
       discountAmount = this.calculateDiscountAmount(couponData, subtotal);
     }
 
+    // 先扣除點數（如果使用點數折抵）
+    if (points_to_redeem && points_to_redeem > 0 && user_id) {
+      await pointsService.deductPoints(user_id, points_to_redeem, null);
+    }
+
     // 開始交易
     const orderNumber = this.generateOrderNumber();
     
     try {
+      // 計算最終金額：小計 - 優惠券折扣 - 點數折扣
+      const finalTotal = subtotal - discountAmount - pointsDiscount;
+
       // 建立訂單
       const orderQuery = `
-        INSERT INTO orders (order_number, user_id, subtotal_twd, discount_twd, total_twd, status, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, 'paid', datetime('now'), datetime('now'))
+        INSERT INTO orders (order_number, user_id, subtotal_twd, discount_twd, points_discount_twd, total_twd, status, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, 'paid', datetime('now'), datetime('now'))
       `;
       
       const orderResult = await this.db.prepare(orderQuery).bind(
         orderNumber,
-        finalUserId, // 使用 finalUserId (0 表示非會員)
+        finalUserId, // 使用 finalUserId (10 表示非會員)
         subtotal,
         discountAmount,
-        subtotal - discountAmount
+        pointsDiscount,
+        finalTotal
       ).run();
 
       if (!orderResult.success) {
@@ -538,16 +579,56 @@ export class OrderService {
         }
       }
 
+      // 更新點數交易記錄（將 order_id 關聯上）
+      if (points_to_redeem && points_to_redeem > 0 && user_id) {
+        const updatePointsTxQuery = `
+          UPDATE points_transactions 
+          SET order_id = ?
+          WHERE user_id = ? AND order_id IS NULL AND transaction_type = 'REDEEM'
+          ORDER BY created_at DESC
+          LIMIT 1
+        `;
+        await this.db.prepare(updatePointsTxQuery).bind(orderId, user_id).run();
+      }
+
+      // 會員獲得點數（根據訂單最終金額）
+      let pointsEarned = 0;
+      let userPointsRemaining = 0;
+
+      if (user_id && user_id !== 10) {
+        const finalTotal = subtotal - discountAmount - pointsDiscount;
+        pointsEarned = pointsService.calculatePointsEarned(finalTotal);
+        
+        if (pointsEarned > 0) {
+          await pointsService.addPoints(user_id, pointsEarned, orderId, 'EARN');
+        }
+
+        userPointsRemaining = await pointsService.getUserPoints(user_id);
+      }
+
       // 取得完整的訂單資訊
       const orderDetail = await this.getOrderById(orderId);
       if (!orderDetail) {
         throw new Error('無法取得建立的訂單資訊');
       }
 
-      return orderDetail;
+      // 添加點數資訊（僅會員）
+      return {
+        ...orderDetail,
+        points_earned: user_id && user_id !== 10 ? pointsEarned : undefined,
+        user_points_remaining: user_id && user_id !== 10 ? userPointsRemaining : undefined,
+      };
 
     } catch (error) {
-      // 如果發生錯誤，交易會自動回滾（因為沒有明確的 BEGIN/COMMIT）
+      // 如果發生錯誤，需要回滾點數
+      if (points_to_redeem && points_to_redeem > 0 && user_id) {
+        try {
+          await pointsService.addPoints(user_id, points_to_redeem, null, 'EARN');
+        } catch (rollbackError) {
+          console.error('回滾點數失敗:', rollbackError);
+        }
+      }
+      
       console.error('建立訂單失敗:', error);
       throw error;
     }

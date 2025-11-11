@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { zhTW } from 'date-fns/locale';
 import {
-  useGetApiUsersIdCouponsOwned,
+  // useGetApiUsersIdCouponsOwned, // TODO: 優惠券功能已停用
   type GetApiUsers200DataItem,
-  type GetApiUsersIdCouponsOwned200DataItem,
+  // type GetApiUsersIdCouponsOwned200DataItem, // TODO: 優惠券功能已停用
 } from '../api/posClient';
 import { Table, type TableColumn } from './Table';
 import { Button } from './Form';
@@ -18,28 +18,21 @@ interface UserViewDialogProps {
 }
 
 export function UserViewDialog({ isOpen, onClose, user }: UserViewDialogProps) {
+  // TODO: 優惠券功能已停用
   // 獲取用戶擁有的優惠券
-  const { data: couponsResponse, refetch: refetchCoupons } = useGetApiUsersIdCouponsOwned(
-    user?.id || 0,
-    {
-      query: {
-        enabled: !!user?.id,
-      },
-    }
-  );
+  // const { data: couponsResponse, refetch: refetchCoupons } = useGetApiUsersIdCouponsOwned(...);
+  const couponsData: any[] = [];
 
-  const couponsData = Array.isArray(couponsResponse?.data?.data) ? couponsResponse.data.data : [];
-
-  useEffect(() => {
-    if (isOpen && user) {
-      refetchCoupons();
-    }
-  }, [isOpen, user, refetchCoupons]);
+  // useEffect(() => {
+  //   if (isOpen && user) {
+  //     refetchCoupons();
+  //   }
+  // }, [isOpen, user, refetchCoupons]);
 
   if (!isOpen || !user) return null;
 
-  // 優惠券代碼表格欄位
-  const couponCodeColumns: TableColumn<GetApiUsersIdCouponsOwned200DataItem>[] = [
+  // TODO: 優惠券代碼表格欄位（暫時停用）
+  const couponCodeColumns: TableColumn<any>[] = [
     {
       key: 'coupon_name',
       label: '優惠券名稱',

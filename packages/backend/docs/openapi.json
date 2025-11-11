@@ -33,14 +33,6 @@
       "description": "產品管理端點"
     },
     {
-      "name": "Coupons",
-      "description": "優惠券管理端點"
-    },
-    {
-      "name": "CouponCodes",
-      "description": "優惠券代碼管理端點"
-    },
-    {
       "name": "Orders",
       "description": "訂單管理端點"
     },
@@ -428,6 +420,16 @@
                             "maximum": 1,
                             "description": "是否啟用 (0: 停用, 1: 啟用)"
                           },
+                          "points": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "目前點數"
+                          },
+                          "points_yuan_equivalent": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "點數折抵金額 (元，20點折1元)"
+                          },
                           "created_at": {
                             "type": "string",
                             "description": "建立時間 (UTC)"
@@ -459,6 +461,8 @@
                           "phone",
                           "role",
                           "is_active",
+                          "points",
+                          "points_yuan_equivalent",
                           "created_at",
                           "updated_at",
                           "last_purchase_at",
@@ -697,6 +701,16 @@
                           "maximum": 1,
                           "description": "是否啟用 (0: 停用, 1: 啟用)"
                         },
+                        "points": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "目前點數"
+                        },
+                        "points_yuan_equivalent": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "點數折抵金額 (元，20點折1元)"
+                        },
                         "created_at": {
                           "type": "string",
                           "description": "建立時間 (UTC)"
@@ -728,6 +742,8 @@
                         "phone",
                         "role",
                         "is_active",
+                        "points",
+                        "points_yuan_equivalent",
                         "created_at",
                         "updated_at",
                         "last_purchase_at",
@@ -923,6 +939,16 @@
                           "maximum": 1,
                           "description": "是否啟用 (0: 停用, 1: 啟用)"
                         },
+                        "points": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "目前點數"
+                        },
+                        "points_yuan_equivalent": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "點數折抵金額 (元，20點折1元)"
+                        },
                         "created_at": {
                           "type": "string",
                           "description": "建立時間 (UTC)"
@@ -980,6 +1006,8 @@
                         "phone",
                         "role",
                         "is_active",
+                        "points",
+                        "points_yuan_equivalent",
                         "created_at",
                         "updated_at",
                         "last_purchase_at",
@@ -1192,6 +1220,16 @@
                           "maximum": 1,
                           "description": "是否啟用 (0: 停用, 1: 啟用)"
                         },
+                        "points": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "目前點數"
+                        },
+                        "points_yuan_equivalent": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "點數折抵金額 (元，20點折1元)"
+                        },
                         "created_at": {
                           "type": "string",
                           "description": "建立時間 (UTC)"
@@ -1223,6 +1261,8 @@
                         "phone",
                         "role",
                         "is_active",
+                        "points",
+                        "points_yuan_equivalent",
                         "created_at",
                         "updated_at",
                         "last_purchase_at",
@@ -1759,6 +1799,427 @@
           }
         },
         "operationId": "get--api-users--id--coupons-owned"
+      }
+    },
+    "/api/users/by-line-id/{lineId}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "根據 LINE ID 查詢使用者",
+        "description": "根據 LINE ID 查詢使用者資訊，用於點數折抵功能",
+        "operationId": "Users_GetByLineId",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "LINE ID"
+            },
+            "required": true,
+            "description": "LINE ID",
+            "name": "lineId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功取得使用者資訊",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "points": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "points_yuan_equivalent": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "points",
+                        "points_yuan_equivalent"
+                      ]
+                    },
+                    "timestamp": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "使用者不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "操作失敗"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "錯誤時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "伺服器錯誤",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "操作失敗"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "錯誤時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}/points-history": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "取得使用者點數交易歷史",
+        "description": "取得使用者的點數獲得與折抵記錄",
+        "operationId": "Users_GetPointsHistory",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "description": "使用者 ID"
+            },
+            "required": true,
+            "description": "使用者 ID",
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "description": "頁碼 (從 1 開始)"
+            },
+            "required": false,
+            "description": "頁碼 (從 1 開始)",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "description": "每頁筆數 (1-100)"
+            },
+            "required": false,
+            "description": "每頁筆數 (1-100)",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc",
+              "description": "排序方向"
+            },
+            "required": false,
+            "description": "排序方向",
+            "name": "sortDir",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "EARN",
+                "REDEEM"
+              ],
+              "description": "交易類型篩選"
+            },
+            "required": false,
+            "description": "交易類型篩選",
+            "name": "transaction_type",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "開始時間 (台北時間)"
+            },
+            "required": false,
+            "description": "開始時間 (台北時間)",
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "結束時間 (台北時間)"
+            },
+            "required": false,
+            "description": "結束時間 (台北時間)",
+            "name": "to",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功取得點數交易歷史",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "操作是否成功"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "exclusiveMinimum": true,
+                            "description": "交易記錄 ID"
+                          },
+                          "user_id": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "exclusiveMinimum": true,
+                            "description": "使用者 ID"
+                          },
+                          "order_id": {
+                            "type": "integer",
+                            "nullable": true,
+                            "minimum": 0,
+                            "exclusiveMinimum": true,
+                            "description": "訂單 ID"
+                          },
+                          "points_change": {
+                            "type": "integer",
+                            "description": "點數變動（正數為獲得，負數為扣除）"
+                          },
+                          "transaction_type": {
+                            "type": "string",
+                            "enum": [
+                              "EARN",
+                              "REDEEM"
+                            ],
+                            "description": "交易類型"
+                          },
+                          "balance_after": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "交易後餘額"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "description": "建立時間 (UTC)"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "user_id",
+                          "order_id",
+                          "points_change",
+                          "transaction_type",
+                          "balance_after",
+                          "created_at"
+                        ]
+                      },
+                      "description": "點數交易記錄列表"
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "description": "當前頁碼"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "description": "每頁筆數"
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "總筆數"
+                        },
+                        "total_pages": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "總頁數"
+                        }
+                      },
+                      "required": [
+                        "page",
+                        "limit",
+                        "total",
+                        "total_pages"
+                      ],
+                      "description": "分頁資訊"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "回應時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "pagination",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "使用者不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "操作失敗"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "錯誤時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "伺服器錯誤",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "操作失敗"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "錯誤時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/user-by-phone": {
@@ -3637,3651 +4098,6 @@
         }
       }
     },
-    "/api/coupons": {
-      "get": {
-        "tags": [
-          "Coupons"
-        ],
-        "summary": "取得優惠券列表",
-        "description": "取得優惠券列表，支援分頁、排序、搜尋和篩選",
-        "operationId": "Coupons_List",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1,
-              "description": "頁碼 (從 1 開始)"
-            },
-            "required": false,
-            "description": "頁碼 (從 1 開始)",
-            "name": "page",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 20,
-              "description": "每頁筆數 (1-100)"
-            },
-            "required": false,
-            "description": "每頁筆數 (1-100)",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "id",
-                "name",
-                "discount_type",
-                "min_order_twd",
-                "max_uses_total",
-                "starts_at",
-                "ends_at",
-                "is_active",
-                "created_at",
-                "updated_at"
-              ],
-              "default": "id",
-              "description": "排序欄位"
-            },
-            "required": false,
-            "description": "排序欄位",
-            "name": "sortBy",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "asc",
-              "description": "排序方向"
-            },
-            "required": false,
-            "description": "排序方向",
-            "name": "sortDir",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "名稱搜尋"
-            },
-            "required": false,
-            "description": "名稱搜尋",
-            "name": "search",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "PERCENT",
-                "FIXED"
-              ],
-              "description": "折扣類型篩選"
-            },
-            "required": false,
-            "description": "折扣類型篩選",
-            "name": "discount_type",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "nullable": true,
-              "minimum": 0,
-              "maximum": 1,
-              "description": "啟用狀態篩選"
-            },
-            "required": false,
-            "description": "啟用狀態篩選",
-            "name": "is_active",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "boolean",
-              "nullable": true,
-              "description": "有效性篩選"
-            },
-            "required": false,
-            "description": "有效性篩選",
-            "name": "is_valid",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "建立時間起始 (台北時間)"
-            },
-            "required": false,
-            "description": "建立時間起始 (台北時間)",
-            "name": "from",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "建立時間結束 (台北時間)"
-            },
-            "required": false,
-            "description": "建立時間結束 (台北時間)",
-            "name": "to",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功取得優惠券列表",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "description": "操作是否成功"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "exclusiveMinimum": true,
-                            "description": "優惠券 ID"
-                          },
-                          "name": {
-                            "type": "string",
-                            "nullable": true,
-                            "maxLength": 200,
-                            "description": "優惠券名稱"
-                          },
-                          "description": {
-                            "type": "string",
-                            "nullable": true,
-                            "maxLength": 500,
-                            "description": "優惠券描述"
-                          },
-                          "discount_type": {
-                            "type": "string",
-                            "enum": [
-                              "PERCENT",
-                              "FIXED"
-                            ],
-                            "description": "折扣類型"
-                          },
-                          "percent_off_bps": {
-                            "type": "integer",
-                            "nullable": true,
-                            "minimum": 0,
-                            "maximum": 10000,
-                            "description": "折扣百分比 (基點，100 = 1%，最大值 10000 = 100%)"
-                          },
-                          "amount_off_twd": {
-                            "type": "integer",
-                            "nullable": true,
-                            "minimum": 0,
-                            "description": "固定折扣金額 (元)"
-                          },
-                          "min_order_twd": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "description": "最低消費金額 (元)"
-                          },
-                          "max_uses_total": {
-                            "type": "integer",
-                            "nullable": true,
-                            "minimum": 0,
-                            "exclusiveMinimum": true,
-                            "description": "全站總可用次數"
-                          },
-                          "max_redemptions": {
-                            "type": "integer",
-                            "nullable": true,
-                            "minimum": 0,
-                            "exclusiveMinimum": true,
-                            "description": "所有代碼的總量限制"
-                          },
-                          "starts_at": {
-                            "type": "string",
-                            "nullable": true,
-                            "description": "開始時間 (UTC)"
-                          },
-                          "ends_at": {
-                            "type": "string",
-                            "nullable": true,
-                            "description": "結束時間 (UTC)"
-                          },
-                          "is_active": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 1,
-                            "description": "是否啟用 (0: 停用, 1: 啟用)"
-                          },
-                          "created_at": {
-                            "type": "string",
-                            "description": "建立時間 (UTC)"
-                          },
-                          "updated_at": {
-                            "type": "string",
-                            "description": "更新時間 (UTC)"
-                          },
-                          "total_redemptions": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "description": "已兌換總次數"
-                          },
-                          "remaining_uses": {
-                            "type": "integer",
-                            "nullable": true,
-                            "minimum": 0,
-                            "description": "剩餘可用次數"
-                          },
-                          "starts_at_taipei": {
-                            "type": "string",
-                            "nullable": true,
-                            "description": "開始時間 (台北時間)"
-                          },
-                          "ends_at_taipei": {
-                            "type": "string",
-                            "nullable": true,
-                            "description": "結束時間 (台北時間)"
-                          },
-                          "created_at_taipei": {
-                            "type": "string",
-                            "description": "建立時間 (台北時間)"
-                          },
-                          "updated_at_taipei": {
-                            "type": "string",
-                            "description": "更新時間 (台北時間)"
-                          },
-                          "is_valid": {
-                            "type": "boolean",
-                            "description": "是否有效 (啟用且未過期)"
-                          },
-                          "is_expired": {
-                            "type": "boolean",
-                            "description": "是否已過期"
-                          },
-                          "is_not_started": {
-                            "type": "boolean",
-                            "description": "是否尚未開始"
-                          },
-                          "is_fully_redeemed": {
-                            "type": "boolean",
-                            "description": "是否已完全兌換"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "name",
-                          "description",
-                          "discount_type",
-                          "percent_off_bps",
-                          "amount_off_twd",
-                          "min_order_twd",
-                          "max_uses_total",
-                          "max_redemptions",
-                          "starts_at",
-                          "ends_at",
-                          "is_active",
-                          "created_at",
-                          "updated_at",
-                          "total_redemptions",
-                          "remaining_uses",
-                          "starts_at_taipei",
-                          "ends_at_taipei",
-                          "created_at_taipei",
-                          "updated_at_taipei",
-                          "is_valid",
-                          "is_expired",
-                          "is_not_started",
-                          "is_fully_redeemed"
-                        ]
-                      },
-                      "description": "優惠券列表"
-                    },
-                    "pagination": {
-                      "type": "object",
-                      "properties": {
-                        "page": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "當前頁碼"
-                        },
-                        "limit": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "每頁筆數"
-                        },
-                        "total": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "總筆數"
-                        },
-                        "total_pages": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "總頁數"
-                        }
-                      },
-                      "required": [
-                        "page",
-                        "limit",
-                        "total",
-                        "total_pages"
-                      ],
-                      "description": "分頁資訊"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "回應時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "data",
-                    "pagination",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "請求參數錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "伺服器錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Coupons"
-        ],
-        "summary": "建立優惠券",
-        "description": "建立新的優惠券",
-        "operationId": "Coupons_Create",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200,
-                    "description": "優惠券名稱"
-                  },
-                  "description": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "description": "優惠券描述"
-                  },
-                  "discount_type": {
-                    "type": "string",
-                    "enum": [
-                      "PERCENT",
-                      "FIXED"
-                    ],
-                    "description": "折扣類型"
-                  },
-                  "percent_off_bps": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 10000,
-                    "description": "折扣百分比 (基點，100 = 1%，最大值 10000 = 100%)"
-                  },
-                  "amount_off_twd": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "description": "固定折扣金額 (元)"
-                  },
-                  "min_order_twd": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "default": 0,
-                    "description": "最低消費金額 (元)"
-                  },
-                  "max_uses_total": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "exclusiveMinimum": true,
-                    "description": "全站總可用次數"
-                  },
-                  "starts_at": {
-                    "type": "string",
-                    "description": "開始時間 (台北時間)"
-                  },
-                  "ends_at": {
-                    "type": "string",
-                    "description": "結束時間 (台北時間)"
-                  },
-                  "is_active": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 1,
-                    "default": 1,
-                    "description": "是否啟用 (0: 停用, 1: 啟用)"
-                  }
-                },
-                "required": [
-                  "name",
-                  "discount_type"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "成功建立優惠券",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "description": "操作是否成功"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "優惠券 ID"
-                        },
-                        "name": {
-                          "type": "string",
-                          "nullable": true,
-                          "maxLength": 200,
-                          "description": "優惠券名稱"
-                        },
-                        "description": {
-                          "type": "string",
-                          "nullable": true,
-                          "maxLength": 500,
-                          "description": "優惠券描述"
-                        },
-                        "discount_type": {
-                          "type": "string",
-                          "enum": [
-                            "PERCENT",
-                            "FIXED"
-                          ],
-                          "description": "折扣類型"
-                        },
-                        "percent_off_bps": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "maximum": 10000,
-                          "description": "折扣百分比 (基點，100 = 1%，最大值 10000 = 100%)"
-                        },
-                        "amount_off_twd": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "description": "固定折扣金額 (元)"
-                        },
-                        "min_order_twd": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "最低消費金額 (元)"
-                        },
-                        "max_uses_total": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "全站總可用次數"
-                        },
-                        "max_redemptions": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "所有代碼的總量限制"
-                        },
-                        "starts_at": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "開始時間 (UTC)"
-                        },
-                        "ends_at": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "結束時間 (UTC)"
-                        },
-                        "is_active": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 1,
-                          "description": "是否啟用 (0: 停用, 1: 啟用)"
-                        },
-                        "created_at": {
-                          "type": "string",
-                          "description": "建立時間 (UTC)"
-                        },
-                        "updated_at": {
-                          "type": "string",
-                          "description": "更新時間 (UTC)"
-                        },
-                        "total_redemptions": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "已兌換總次數"
-                        },
-                        "remaining_uses": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "description": "剩餘可用次數"
-                        },
-                        "starts_at_taipei": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "開始時間 (台北時間)"
-                        },
-                        "ends_at_taipei": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "結束時間 (台北時間)"
-                        },
-                        "created_at_taipei": {
-                          "type": "string",
-                          "description": "建立時間 (台北時間)"
-                        },
-                        "updated_at_taipei": {
-                          "type": "string",
-                          "description": "更新時間 (台北時間)"
-                        },
-                        "is_valid": {
-                          "type": "boolean",
-                          "description": "是否有效 (啟用且未過期)"
-                        },
-                        "is_expired": {
-                          "type": "boolean",
-                          "description": "是否已過期"
-                        },
-                        "is_not_started": {
-                          "type": "boolean",
-                          "description": "是否尚未開始"
-                        },
-                        "is_fully_redeemed": {
-                          "type": "boolean",
-                          "description": "是否已完全兌換"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "name",
-                        "description",
-                        "discount_type",
-                        "percent_off_bps",
-                        "amount_off_twd",
-                        "min_order_twd",
-                        "max_uses_total",
-                        "max_redemptions",
-                        "starts_at",
-                        "ends_at",
-                        "is_active",
-                        "created_at",
-                        "updated_at",
-                        "total_redemptions",
-                        "remaining_uses",
-                        "starts_at_taipei",
-                        "ends_at_taipei",
-                        "created_at_taipei",
-                        "updated_at_taipei",
-                        "is_valid",
-                        "is_expired",
-                        "is_not_started",
-                        "is_fully_redeemed"
-                      ],
-                      "description": "建立的優惠券資訊"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "回應時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "data",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "請求參數錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "伺服器錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/coupons/codes": {
-      "get": {
-        "tags": [
-          "CouponCodes"
-        ],
-        "summary": "取得優惠券代碼列表",
-        "description": "取得優惠券代碼列表，支援分頁、排序、搜尋和篩選",
-        "operationId": "CouponCodes_List",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1,
-              "description": "頁碼 (從 1 開始)"
-            },
-            "required": false,
-            "description": "頁碼 (從 1 開始)",
-            "name": "page",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 20,
-              "description": "每頁筆數 (1-100)"
-            },
-            "required": false,
-            "description": "每頁筆數 (1-100)",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "id",
-                "code",
-                "max_redemptions",
-                "starts_at",
-                "ends_at",
-                "is_active",
-                "created_at",
-                "updated_at"
-              ],
-              "default": "id",
-              "description": "排序欄位"
-            },
-            "required": false,
-            "description": "排序欄位",
-            "name": "sortBy",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "asc",
-              "description": "排序方向"
-            },
-            "required": false,
-            "description": "排序方向",
-            "name": "sortDir",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "代碼搜尋"
-            },
-            "required": false,
-            "description": "代碼搜尋",
-            "name": "search",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true,
-              "description": "優惠券 ID 篩選"
-            },
-            "required": false,
-            "description": "優惠券 ID 篩選",
-            "name": "coupon_id",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true,
-              "description": "用戶 ID 篩選"
-            },
-            "required": false,
-            "description": "用戶 ID 篩選",
-            "name": "user_id",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "nullable": true,
-              "minimum": 0,
-              "maximum": 1,
-              "description": "啟用狀態篩選"
-            },
-            "required": false,
-            "description": "啟用狀態篩選",
-            "name": "is_active",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "boolean",
-              "nullable": true,
-              "description": "有效性篩選"
-            },
-            "required": false,
-            "description": "有效性篩選",
-            "name": "is_valid",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "建立時間起始 (台北時間)"
-            },
-            "required": false,
-            "description": "建立時間起始 (台北時間)",
-            "name": "from",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "建立時間結束 (台北時間)"
-            },
-            "required": false,
-            "description": "建立時間結束 (台北時間)",
-            "name": "to",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功取得優惠券代碼列表",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "description": "操作是否成功"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "exclusiveMinimum": true,
-                            "description": "優惠券代碼 ID"
-                          },
-                          "coupon_id": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "exclusiveMinimum": true,
-                            "description": "優惠券 ID"
-                          },
-                          "code": {
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 50,
-                            "description": "優惠券代碼"
-                          },
-                          "max_redemptions": {
-                            "type": "integer",
-                            "nullable": true,
-                            "minimum": 0,
-                            "exclusiveMinimum": true,
-                            "description": "單一代碼的可用總次數"
-                          },
-                          "starts_at": {
-                            "type": "string",
-                            "nullable": true,
-                            "description": "開始時間 (UTC)"
-                          },
-                          "ends_at": {
-                            "type": "string",
-                            "nullable": true,
-                            "description": "結束時間 (UTC)"
-                          },
-                          "expires_after_days": {
-                            "type": "integer",
-                            "nullable": true,
-                            "minimum": 0,
-                            "exclusiveMinimum": true,
-                            "description": "取得後有效天數"
-                          },
-                          "is_active": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 1,
-                            "description": "是否啟用 (0: 停用, 1: 啟用)"
-                          },
-                          "created_at": {
-                            "type": "string",
-                            "description": "建立時間 (UTC)"
-                          },
-                          "updated_at": {
-                            "type": "string",
-                            "description": "更新時間 (UTC)"
-                          },
-                          "total_redemptions": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "description": "已兌換次數"
-                          },
-                          "remaining_uses": {
-                            "type": "integer",
-                            "nullable": true,
-                            "minimum": 0,
-                            "description": "剩餘可用次數"
-                          },
-                          "starts_at_taipei": {
-                            "type": "string",
-                            "nullable": true,
-                            "description": "開始時間 (台北時間)"
-                          },
-                          "ends_at_taipei": {
-                            "type": "string",
-                            "nullable": true,
-                            "description": "結束時間 (台北時間)"
-                          },
-                          "created_at_taipei": {
-                            "type": "string",
-                            "description": "建立時間 (台北時間)"
-                          },
-                          "updated_at_taipei": {
-                            "type": "string",
-                            "description": "更新時間 (台北時間)"
-                          },
-                          "is_valid": {
-                            "type": "boolean",
-                            "description": "是否有效 (啟用且未過期)"
-                          },
-                          "is_expired": {
-                            "type": "boolean",
-                            "description": "是否已過期"
-                          },
-                          "is_not_started": {
-                            "type": "boolean",
-                            "description": "是否尚未開始"
-                          },
-                          "is_fully_redeemed": {
-                            "type": "boolean",
-                            "description": "是否已完全兌換"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "coupon_id",
-                          "code",
-                          "max_redemptions",
-                          "starts_at",
-                          "ends_at",
-                          "expires_after_days",
-                          "is_active",
-                          "created_at",
-                          "updated_at",
-                          "total_redemptions",
-                          "remaining_uses",
-                          "starts_at_taipei",
-                          "ends_at_taipei",
-                          "created_at_taipei",
-                          "updated_at_taipei",
-                          "is_valid",
-                          "is_expired",
-                          "is_not_started",
-                          "is_fully_redeemed"
-                        ]
-                      },
-                      "description": "優惠券代碼列表"
-                    },
-                    "pagination": {
-                      "type": "object",
-                      "properties": {
-                        "page": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "當前頁碼"
-                        },
-                        "limit": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "每頁筆數"
-                        },
-                        "total": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "總筆數"
-                        },
-                        "total_pages": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "總頁數"
-                        }
-                      },
-                      "required": [
-                        "page",
-                        "limit",
-                        "total",
-                        "total_pages"
-                      ],
-                      "description": "分頁資訊"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "回應時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "data",
-                    "pagination",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "請求參數錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "伺服器錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "CouponCodes"
-        ],
-        "summary": "建立優惠券代碼",
-        "description": "建立新的優惠券代碼",
-        "operationId": "CouponCodes_Create",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "coupon_id": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "exclusiveMinimum": true,
-                    "description": "優惠券 ID"
-                  },
-                  "code": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 50,
-                    "description": "優惠券代碼"
-                  },
-                  "max_redemptions": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "exclusiveMinimum": true,
-                    "description": "單一代碼的可用總次數"
-                  },
-                  "starts_at": {
-                    "type": "string",
-                    "nullable": true,
-                    "description": "開始時間 (台北時間)"
-                  },
-                  "ends_at": {
-                    "type": "string",
-                    "nullable": true,
-                    "description": "結束時間 (台北時間)"
-                  },
-                  "expires_after_days": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "exclusiveMinimum": true,
-                    "description": "取得後有效天數"
-                  },
-                  "is_active": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 1,
-                    "default": 1,
-                    "description": "是否啟用 (0: 停用, 1: 啟用)"
-                  }
-                },
-                "required": [
-                  "coupon_id",
-                  "code",
-                  "max_redemptions"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "成功建立優惠券代碼",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "description": "操作是否成功"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "優惠券代碼 ID"
-                        },
-                        "coupon_id": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "優惠券 ID"
-                        },
-                        "code": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 50,
-                          "description": "優惠券代碼"
-                        },
-                        "max_redemptions": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "單一代碼的可用總次數"
-                        },
-                        "starts_at": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "開始時間 (UTC)"
-                        },
-                        "ends_at": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "結束時間 (UTC)"
-                        },
-                        "expires_after_days": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "取得後有效天數"
-                        },
-                        "is_active": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 1,
-                          "description": "是否啟用 (0: 停用, 1: 啟用)"
-                        },
-                        "created_at": {
-                          "type": "string",
-                          "description": "建立時間 (UTC)"
-                        },
-                        "updated_at": {
-                          "type": "string",
-                          "description": "更新時間 (UTC)"
-                        },
-                        "total_redemptions": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "已兌換次數"
-                        },
-                        "remaining_uses": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "description": "剩餘可用次數"
-                        },
-                        "starts_at_taipei": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "開始時間 (台北時間)"
-                        },
-                        "ends_at_taipei": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "結束時間 (台北時間)"
-                        },
-                        "created_at_taipei": {
-                          "type": "string",
-                          "description": "建立時間 (台北時間)"
-                        },
-                        "updated_at_taipei": {
-                          "type": "string",
-                          "description": "更新時間 (台北時間)"
-                        },
-                        "is_valid": {
-                          "type": "boolean",
-                          "description": "是否有效 (啟用且未過期)"
-                        },
-                        "is_expired": {
-                          "type": "boolean",
-                          "description": "是否已過期"
-                        },
-                        "is_not_started": {
-                          "type": "boolean",
-                          "description": "是否尚未開始"
-                        },
-                        "is_fully_redeemed": {
-                          "type": "boolean",
-                          "description": "是否已完全兌換"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "coupon_id",
-                        "code",
-                        "max_redemptions",
-                        "starts_at",
-                        "ends_at",
-                        "expires_after_days",
-                        "is_active",
-                        "created_at",
-                        "updated_at",
-                        "total_redemptions",
-                        "remaining_uses",
-                        "starts_at_taipei",
-                        "ends_at_taipei",
-                        "created_at_taipei",
-                        "updated_at_taipei",
-                        "is_valid",
-                        "is_expired",
-                        "is_not_started",
-                        "is_fully_redeemed"
-                      ],
-                      "description": "建立的優惠券代碼資訊"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "回應時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "data",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "請求參數錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "優惠券不存在",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "優惠券代碼已存在",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "伺服器錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/coupons/{id}": {
-      "get": {
-        "tags": [
-          "Coupons"
-        ],
-        "summary": "取得優惠券詳細資訊",
-        "description": "根據優惠券 ID 取得詳細資訊",
-        "operationId": "Coupons_Get",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true,
-              "description": "優惠券 ID"
-            },
-            "required": true,
-            "description": "優惠券 ID",
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功取得優惠券詳細資訊",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "description": "操作是否成功"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "優惠券 ID"
-                        },
-                        "name": {
-                          "type": "string",
-                          "nullable": true,
-                          "maxLength": 200,
-                          "description": "優惠券名稱"
-                        },
-                        "description": {
-                          "type": "string",
-                          "nullable": true,
-                          "maxLength": 500,
-                          "description": "優惠券描述"
-                        },
-                        "discount_type": {
-                          "type": "string",
-                          "enum": [
-                            "PERCENT",
-                            "FIXED"
-                          ],
-                          "description": "折扣類型"
-                        },
-                        "percent_off_bps": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "maximum": 10000,
-                          "description": "折扣百分比 (基點，100 = 1%，最大值 10000 = 100%)"
-                        },
-                        "amount_off_twd": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "description": "固定折扣金額 (元)"
-                        },
-                        "min_order_twd": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "最低消費金額 (元)"
-                        },
-                        "max_uses_total": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "全站總可用次數"
-                        },
-                        "max_redemptions": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "所有代碼的總量限制"
-                        },
-                        "starts_at": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "開始時間 (UTC)"
-                        },
-                        "ends_at": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "結束時間 (UTC)"
-                        },
-                        "is_active": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 1,
-                          "description": "是否啟用 (0: 停用, 1: 啟用)"
-                        },
-                        "created_at": {
-                          "type": "string",
-                          "description": "建立時間 (UTC)"
-                        },
-                        "updated_at": {
-                          "type": "string",
-                          "description": "更新時間 (UTC)"
-                        },
-                        "total_redemptions": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "已兌換總次數"
-                        },
-                        "remaining_uses": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "description": "剩餘可用次數"
-                        },
-                        "starts_at_taipei": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "開始時間 (台北時間)"
-                        },
-                        "ends_at_taipei": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "結束時間 (台北時間)"
-                        },
-                        "created_at_taipei": {
-                          "type": "string",
-                          "description": "建立時間 (台北時間)"
-                        },
-                        "updated_at_taipei": {
-                          "type": "string",
-                          "description": "更新時間 (台北時間)"
-                        },
-                        "is_valid": {
-                          "type": "boolean",
-                          "description": "是否有效 (啟用且未過期)"
-                        },
-                        "is_expired": {
-                          "type": "boolean",
-                          "description": "是否已過期"
-                        },
-                        "is_not_started": {
-                          "type": "boolean",
-                          "description": "是否尚未開始"
-                        },
-                        "is_fully_redeemed": {
-                          "type": "boolean",
-                          "description": "是否已完全兌換"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "name",
-                        "description",
-                        "discount_type",
-                        "percent_off_bps",
-                        "amount_off_twd",
-                        "min_order_twd",
-                        "max_uses_total",
-                        "max_redemptions",
-                        "starts_at",
-                        "ends_at",
-                        "is_active",
-                        "created_at",
-                        "updated_at",
-                        "total_redemptions",
-                        "remaining_uses",
-                        "starts_at_taipei",
-                        "ends_at_taipei",
-                        "created_at_taipei",
-                        "updated_at_taipei",
-                        "is_valid",
-                        "is_expired",
-                        "is_not_started",
-                        "is_fully_redeemed"
-                      ],
-                      "description": "優惠券詳細資訊"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "回應時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "data",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "優惠券不存在",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "伺服器錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Coupons"
-        ],
-        "summary": "更新優惠券",
-        "description": "更新優惠券資訊",
-        "operationId": "Coupons_Update",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true,
-              "description": "優惠券 ID"
-            },
-            "required": true,
-            "description": "優惠券 ID",
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 200,
-                    "description": "優惠券名稱"
-                  },
-                  "description": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "description": "優惠券描述"
-                  },
-                  "discount_type": {
-                    "type": "string",
-                    "enum": [
-                      "PERCENT",
-                      "FIXED"
-                    ],
-                    "description": "折扣類型"
-                  },
-                  "percent_off_bps": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 10000,
-                    "description": "折扣百分比 (基點，100 = 1%，最大值 10000 = 100%)"
-                  },
-                  "amount_off_twd": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "description": "固定折扣金額 (元)"
-                  },
-                  "min_order_twd": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "description": "最低消費金額 (元)"
-                  },
-                  "max_uses_total": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "exclusiveMinimum": true,
-                    "description": "全站總可用次數"
-                  },
-                  "max_redemptions": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "exclusiveMinimum": true,
-                    "description": "代碼總量限制"
-                  },
-                  "starts_at": {
-                    "type": "string",
-                    "description": "開始時間 (台北時間)"
-                  },
-                  "ends_at": {
-                    "type": "string",
-                    "description": "結束時間 (台北時間)"
-                  },
-                  "is_active": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 1,
-                    "description": "是否啟用 (0: 停用, 1: 啟用)"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "成功更新優惠券",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "description": "操作是否成功"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "優惠券 ID"
-                        },
-                        "name": {
-                          "type": "string",
-                          "nullable": true,
-                          "maxLength": 200,
-                          "description": "優惠券名稱"
-                        },
-                        "description": {
-                          "type": "string",
-                          "nullable": true,
-                          "maxLength": 500,
-                          "description": "優惠券描述"
-                        },
-                        "discount_type": {
-                          "type": "string",
-                          "enum": [
-                            "PERCENT",
-                            "FIXED"
-                          ],
-                          "description": "折扣類型"
-                        },
-                        "percent_off_bps": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "maximum": 10000,
-                          "description": "折扣百分比 (基點，100 = 1%，最大值 10000 = 100%)"
-                        },
-                        "amount_off_twd": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "description": "固定折扣金額 (元)"
-                        },
-                        "min_order_twd": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "最低消費金額 (元)"
-                        },
-                        "max_uses_total": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "全站總可用次數"
-                        },
-                        "max_redemptions": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "所有代碼的總量限制"
-                        },
-                        "starts_at": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "開始時間 (UTC)"
-                        },
-                        "ends_at": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "結束時間 (UTC)"
-                        },
-                        "is_active": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 1,
-                          "description": "是否啟用 (0: 停用, 1: 啟用)"
-                        },
-                        "created_at": {
-                          "type": "string",
-                          "description": "建立時間 (UTC)"
-                        },
-                        "updated_at": {
-                          "type": "string",
-                          "description": "更新時間 (UTC)"
-                        },
-                        "total_redemptions": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "已兌換總次數"
-                        },
-                        "remaining_uses": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "description": "剩餘可用次數"
-                        },
-                        "starts_at_taipei": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "開始時間 (台北時間)"
-                        },
-                        "ends_at_taipei": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "結束時間 (台北時間)"
-                        },
-                        "created_at_taipei": {
-                          "type": "string",
-                          "description": "建立時間 (台北時間)"
-                        },
-                        "updated_at_taipei": {
-                          "type": "string",
-                          "description": "更新時間 (台北時間)"
-                        },
-                        "is_valid": {
-                          "type": "boolean",
-                          "description": "是否有效 (啟用且未過期)"
-                        },
-                        "is_expired": {
-                          "type": "boolean",
-                          "description": "是否已過期"
-                        },
-                        "is_not_started": {
-                          "type": "boolean",
-                          "description": "是否尚未開始"
-                        },
-                        "is_fully_redeemed": {
-                          "type": "boolean",
-                          "description": "是否已完全兌換"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "name",
-                        "description",
-                        "discount_type",
-                        "percent_off_bps",
-                        "amount_off_twd",
-                        "min_order_twd",
-                        "max_uses_total",
-                        "max_redemptions",
-                        "starts_at",
-                        "ends_at",
-                        "is_active",
-                        "created_at",
-                        "updated_at",
-                        "total_redemptions",
-                        "remaining_uses",
-                        "starts_at_taipei",
-                        "ends_at_taipei",
-                        "created_at_taipei",
-                        "updated_at_taipei",
-                        "is_valid",
-                        "is_expired",
-                        "is_not_started",
-                        "is_fully_redeemed"
-                      ],
-                      "description": "更新的優惠券資訊"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "回應時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "data",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "請求參數錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "優惠券不存在",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "伺服器錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Coupons"
-        ],
-        "summary": "刪除優惠券",
-        "description": "刪除優惠券（僅限無優惠券代碼和兌換記錄的優惠券）",
-        "operationId": "Coupons_Delete",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true,
-              "description": "優惠券 ID"
-            },
-            "required": true,
-            "description": "優惠券 ID",
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功刪除優惠券",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "description": "操作是否成功"
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "刪除成功訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "回應時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "message",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "優惠券不存在",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "無法刪除有優惠券代碼或兌換記錄的優惠券",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "伺服器錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/coupons/codes/{id}": {
-      "get": {
-        "tags": [
-          "CouponCodes"
-        ],
-        "summary": "取得優惠券代碼詳細資訊",
-        "description": "根據優惠券代碼 ID 取得詳細資訊",
-        "operationId": "CouponCodes_Get",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true,
-              "description": "優惠券代碼 ID"
-            },
-            "required": true,
-            "description": "優惠券代碼 ID",
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功取得優惠券代碼詳細資訊",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "description": "操作是否成功"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "優惠券代碼 ID"
-                        },
-                        "coupon_id": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "優惠券 ID"
-                        },
-                        "code": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 50,
-                          "description": "優惠券代碼"
-                        },
-                        "max_redemptions": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "單一代碼的可用總次數"
-                        },
-                        "starts_at": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "開始時間 (UTC)"
-                        },
-                        "ends_at": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "結束時間 (UTC)"
-                        },
-                        "expires_after_days": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "取得後有效天數"
-                        },
-                        "is_active": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 1,
-                          "description": "是否啟用 (0: 停用, 1: 啟用)"
-                        },
-                        "created_at": {
-                          "type": "string",
-                          "description": "建立時間 (UTC)"
-                        },
-                        "updated_at": {
-                          "type": "string",
-                          "description": "更新時間 (UTC)"
-                        },
-                        "total_redemptions": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "已兌換次數"
-                        },
-                        "remaining_uses": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "description": "剩餘可用次數"
-                        },
-                        "starts_at_taipei": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "開始時間 (台北時間)"
-                        },
-                        "ends_at_taipei": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "結束時間 (台北時間)"
-                        },
-                        "created_at_taipei": {
-                          "type": "string",
-                          "description": "建立時間 (台北時間)"
-                        },
-                        "updated_at_taipei": {
-                          "type": "string",
-                          "description": "更新時間 (台北時間)"
-                        },
-                        "is_valid": {
-                          "type": "boolean",
-                          "description": "是否有效 (啟用且未過期)"
-                        },
-                        "is_expired": {
-                          "type": "boolean",
-                          "description": "是否已過期"
-                        },
-                        "is_not_started": {
-                          "type": "boolean",
-                          "description": "是否尚未開始"
-                        },
-                        "is_fully_redeemed": {
-                          "type": "boolean",
-                          "description": "是否已完全兌換"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "coupon_id",
-                        "code",
-                        "max_redemptions",
-                        "starts_at",
-                        "ends_at",
-                        "expires_after_days",
-                        "is_active",
-                        "created_at",
-                        "updated_at",
-                        "total_redemptions",
-                        "remaining_uses",
-                        "starts_at_taipei",
-                        "ends_at_taipei",
-                        "created_at_taipei",
-                        "updated_at_taipei",
-                        "is_valid",
-                        "is_expired",
-                        "is_not_started",
-                        "is_fully_redeemed"
-                      ],
-                      "description": "優惠券代碼詳細資訊"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "回應時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "data",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "優惠券代碼不存在",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "伺服器錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "CouponCodes"
-        ],
-        "summary": "更新優惠券代碼",
-        "description": "更新優惠券代碼資訊",
-        "operationId": "CouponCodes_Update",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true,
-              "description": "優惠券代碼 ID"
-            },
-            "required": true,
-            "description": "優惠券代碼 ID",
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 50,
-                    "description": "優惠券代碼"
-                  },
-                  "max_redemptions": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "exclusiveMinimum": true,
-                    "description": "單一代碼的可用總次數"
-                  },
-                  "starts_at": {
-                    "type": "string",
-                    "nullable": true,
-                    "description": "開始時間 (台北時間)"
-                  },
-                  "ends_at": {
-                    "type": "string",
-                    "nullable": true,
-                    "description": "結束時間 (台北時間)"
-                  },
-                  "is_active": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 1,
-                    "description": "是否啟用 (0: 停用, 1: 啟用)"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "成功更新優惠券代碼",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "description": "操作是否成功"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "優惠券代碼 ID"
-                        },
-                        "coupon_id": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "優惠券 ID"
-                        },
-                        "code": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 50,
-                          "description": "優惠券代碼"
-                        },
-                        "max_redemptions": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "單一代碼的可用總次數"
-                        },
-                        "starts_at": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "開始時間 (UTC)"
-                        },
-                        "ends_at": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "結束時間 (UTC)"
-                        },
-                        "expires_after_days": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "取得後有效天數"
-                        },
-                        "is_active": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 1,
-                          "description": "是否啟用 (0: 停用, 1: 啟用)"
-                        },
-                        "created_at": {
-                          "type": "string",
-                          "description": "建立時間 (UTC)"
-                        },
-                        "updated_at": {
-                          "type": "string",
-                          "description": "更新時間 (UTC)"
-                        },
-                        "total_redemptions": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "已兌換次數"
-                        },
-                        "remaining_uses": {
-                          "type": "integer",
-                          "nullable": true,
-                          "minimum": 0,
-                          "description": "剩餘可用次數"
-                        },
-                        "starts_at_taipei": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "開始時間 (台北時間)"
-                        },
-                        "ends_at_taipei": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "結束時間 (台北時間)"
-                        },
-                        "created_at_taipei": {
-                          "type": "string",
-                          "description": "建立時間 (台北時間)"
-                        },
-                        "updated_at_taipei": {
-                          "type": "string",
-                          "description": "更新時間 (台北時間)"
-                        },
-                        "is_valid": {
-                          "type": "boolean",
-                          "description": "是否有效 (啟用且未過期)"
-                        },
-                        "is_expired": {
-                          "type": "boolean",
-                          "description": "是否已過期"
-                        },
-                        "is_not_started": {
-                          "type": "boolean",
-                          "description": "是否尚未開始"
-                        },
-                        "is_fully_redeemed": {
-                          "type": "boolean",
-                          "description": "是否已完全兌換"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "coupon_id",
-                        "code",
-                        "max_redemptions",
-                        "starts_at",
-                        "ends_at",
-                        "expires_after_days",
-                        "is_active",
-                        "created_at",
-                        "updated_at",
-                        "total_redemptions",
-                        "remaining_uses",
-                        "starts_at_taipei",
-                        "ends_at_taipei",
-                        "created_at_taipei",
-                        "updated_at_taipei",
-                        "is_valid",
-                        "is_expired",
-                        "is_not_started",
-                        "is_fully_redeemed"
-                      ],
-                      "description": "更新的優惠券代碼資訊"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "回應時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "data",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "請求參數錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "優惠券代碼不存在",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "優惠券代碼已存在",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "伺服器錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "CouponCodes"
-        ],
-        "summary": "刪除優惠券代碼",
-        "description": "刪除優惠券代碼（僅限無兌換記錄和授權記錄的優惠券代碼）",
-        "operationId": "CouponCodes_Delete",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true,
-              "description": "優惠券代碼 ID"
-            },
-            "required": true,
-            "description": "優惠券代碼 ID",
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功刪除優惠券代碼",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "description": "操作是否成功"
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "刪除成功訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "回應時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "message",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "優惠券代碼不存在",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "無法刪除有兌換記錄或授權記錄的優惠券代碼",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "伺服器錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/coupons/grants": {
-      "post": {
-        "tags": [
-          "Coupons"
-        ],
-        "summary": "建立優惠券授權",
-        "description": "為指定用戶建立優惠券代碼的授權記錄",
-        "operationId": "Coupons_CreateGrant",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "coupon_code_id": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "exclusiveMinimum": true,
-                    "description": "優惠券代碼 ID"
-                  },
-                  "user_id": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "exclusiveMinimum": true,
-                    "description": "用戶 ID"
-                  },
-                  "allowed_uses": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "default": 1,
-                    "description": "允許使用次數"
-                  },
-                  "expires_at": {
-                    "type": "string",
-                    "description": "授權過期時間 (台北時間)"
-                  }
-                },
-                "required": [
-                  "coupon_code_id",
-                  "user_id"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "成功建立優惠券授權",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "description": "操作是否成功"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "授權 ID"
-                        },
-                        "coupon_code_id": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "優惠券代碼 ID"
-                        },
-                        "user_id": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "用戶 ID"
-                        },
-                        "allowed_uses": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "允許使用次數"
-                        },
-                        "used_count": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "已使用次數"
-                        },
-                        "granted_at": {
-                          "type": "string",
-                          "description": "授權時間 (UTC)"
-                        },
-                        "expires_at": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "授權過期時間 (UTC)"
-                        },
-                        "created_at": {
-                          "type": "string",
-                          "description": "建立時間 (UTC)"
-                        },
-                        "updated_at": {
-                          "type": "string",
-                          "description": "更新時間 (UTC)"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "coupon_code_id",
-                        "user_id",
-                        "allowed_uses",
-                        "used_count",
-                        "granted_at",
-                        "expires_at",
-                        "created_at",
-                        "updated_at"
-                      ],
-                      "description": "建立的優惠券授權資訊"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "回應時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "data",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "請求參數錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "授權已存在或相關資源不存在",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "伺服器錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/coupons/grants/list": {
-      "get": {
-        "tags": [
-          "Coupons"
-        ],
-        "summary": "取得優惠券授權列表",
-        "description": "取得優惠券授權列表，支援分頁和篩選",
-        "operationId": "Coupons_ListGrants",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1,
-              "description": "頁碼 (從 1 開始)"
-            },
-            "required": false,
-            "description": "頁碼 (從 1 開始)",
-            "name": "page",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 20,
-              "description": "每頁筆數 (1-100)"
-            },
-            "required": false,
-            "description": "每頁筆數 (1-100)",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true,
-              "description": "用戶 ID"
-            },
-            "required": false,
-            "description": "用戶 ID",
-            "name": "user_id",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true,
-              "description": "優惠券代碼 ID"
-            },
-            "required": false,
-            "description": "優惠券代碼 ID",
-            "name": "coupon_code_id",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功取得優惠券授權列表",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "description": "操作是否成功"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "exclusiveMinimum": true,
-                            "description": "授權 ID"
-                          },
-                          "coupon_code_id": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "exclusiveMinimum": true,
-                            "description": "優惠券代碼 ID"
-                          },
-                          "user_id": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "exclusiveMinimum": true,
-                            "description": "用戶 ID"
-                          },
-                          "allowed_uses": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "description": "允許使用次數"
-                          },
-                          "used_count": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "description": "已使用次數"
-                          },
-                          "granted_at": {
-                            "type": "string",
-                            "description": "授權時間 (UTC)"
-                          },
-                          "expires_at": {
-                            "type": "string",
-                            "nullable": true,
-                            "description": "授權過期時間 (UTC)"
-                          },
-                          "created_at": {
-                            "type": "string",
-                            "description": "建立時間 (UTC)"
-                          },
-                          "updated_at": {
-                            "type": "string",
-                            "description": "更新時間 (UTC)"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "coupon_code_id",
-                          "user_id",
-                          "allowed_uses",
-                          "used_count",
-                          "granted_at",
-                          "expires_at",
-                          "created_at",
-                          "updated_at"
-                        ]
-                      },
-                      "description": "優惠券授權列表"
-                    },
-                    "pagination": {
-                      "type": "object",
-                      "properties": {
-                        "page": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "當前頁碼"
-                        },
-                        "limit": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "exclusiveMinimum": true,
-                          "description": "每頁筆數"
-                        },
-                        "total": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "總筆數"
-                        },
-                        "total_pages": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "description": "總頁數"
-                        }
-                      },
-                      "required": [
-                        "page",
-                        "limit",
-                        "total",
-                        "total_pages"
-                      ],
-                      "description": "分頁資訊"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "回應時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "data",
-                    "pagination",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "伺服器錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/coupons/grants/{id}": {
-      "put": {
-        "tags": [
-          "Coupons"
-        ],
-        "summary": "更新優惠券授權",
-        "description": "更新優惠券授權資訊",
-        "operationId": "Coupons_UpdateGrant",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "exclusiveMinimum": true,
-              "description": "授權 ID"
-            },
-            "required": true,
-            "description": "授權 ID",
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "granted_at": {
-                    "type": "string",
-                    "description": "授權時間 (UTC)"
-                  },
-                  "expires_at": {
-                    "type": "string",
-                    "description": "過期時間 (UTC)"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "更新成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "description": "是否成功"
-                    },
-                    "data": {
-                      "nullable": true,
-                      "description": "更新後的授權資訊"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "回應時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "授權不存在",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "伺服器錯誤",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        false
-                      ],
-                      "description": "操作失敗"
-                    },
-                    "error": {
-                      "type": "string",
-                      "description": "錯誤訊息"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "description": "錯誤時間戳"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/orders": {
       "get": {
         "tags": [
@@ -7447,6 +4263,11 @@
                             "minimum": 0,
                             "description": "折扣金額 (元)"
                           },
+                          "points_discount_twd": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "點數折扣金額 (元)"
+                          },
                           "total_twd": {
                             "type": "integer",
                             "minimum": 0,
@@ -7485,6 +4306,7 @@
                           "user_id",
                           "subtotal_twd",
                           "discount_twd",
+                          "points_discount_twd",
                           "total_twd",
                           "status",
                           "created_at",
@@ -7660,6 +4482,11 @@
                     "minimum": 0,
                     "exclusiveMinimum": true,
                     "description": "優惠券代碼 ID（可選）"
+                  },
+                  "points_to_redeem": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "欲折抵的點數（可選，僅限 LINE ID 會員）"
                   }
                 },
                 "required": [
@@ -7711,6 +4538,11 @@
                           "type": "integer",
                           "minimum": 0,
                           "description": "折扣金額 (元)"
+                        },
+                        "points_discount_twd": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "點數折扣金額 (元)"
                         },
                         "total_twd": {
                           "type": "integer",
@@ -7888,6 +4720,16 @@
                             ]
                           },
                           "description": "優惠券兌換紀錄列表"
+                        },
+                        "points_earned": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "獲得的點數（僅會員）"
+                        },
+                        "user_points_remaining": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "剩餘點數（僅會員）"
                         }
                       },
                       "required": [
@@ -7896,6 +4738,7 @@
                         "user_id",
                         "subtotal_twd",
                         "discount_twd",
+                        "points_discount_twd",
                         "total_twd",
                         "status",
                         "created_at",
@@ -8117,6 +4960,11 @@
                           "minimum": 0,
                           "description": "折扣金額 (元)"
                         },
+                        "points_discount_twd": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "點數折扣金額 (元)"
+                        },
                         "total_twd": {
                           "type": "integer",
                           "minimum": 0,
@@ -8293,6 +5141,16 @@
                             ]
                           },
                           "description": "優惠券兌換紀錄列表"
+                        },
+                        "points_earned": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "獲得的點數（僅會員）"
+                        },
+                        "user_points_remaining": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "剩餘點數（僅會員）"
                         }
                       },
                       "required": [
@@ -8301,6 +5159,7 @@
                         "user_id",
                         "subtotal_twd",
                         "discount_twd",
+                        "points_discount_twd",
                         "total_twd",
                         "status",
                         "created_at",
@@ -8482,6 +5341,11 @@
                           "minimum": 0,
                           "description": "折扣金額 (元)"
                         },
+                        "points_discount_twd": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "點數折扣金額 (元)"
+                        },
                         "total_twd": {
                           "type": "integer",
                           "minimum": 0,
@@ -8658,6 +5522,16 @@
                             ]
                           },
                           "description": "優惠券兌換紀錄列表"
+                        },
+                        "points_earned": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "獲得的點數（僅會員）"
+                        },
+                        "user_points_remaining": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "剩餘點數（僅會員）"
                         }
                       },
                       "required": [
@@ -8666,6 +5540,7 @@
                         "user_id",
                         "subtotal_twd",
                         "discount_twd",
+                        "points_discount_twd",
                         "total_twd",
                         "status",
                         "created_at",
@@ -8855,6 +5730,11 @@
                           "minimum": 0,
                           "description": "折扣金額 (元)"
                         },
+                        "points_discount_twd": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "點數折扣金額 (元)"
+                        },
                         "total_twd": {
                           "type": "integer",
                           "minimum": 0,
@@ -9031,6 +5911,16 @@
                             ]
                           },
                           "description": "優惠券兌換紀錄列表"
+                        },
+                        "points_earned": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "獲得的點數（僅會員）"
+                        },
+                        "user_points_remaining": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "剩餘點數（僅會員）"
                         }
                       },
                       "required": [
@@ -9039,6 +5929,7 @@
                         "user_id",
                         "subtotal_twd",
                         "discount_twd",
+                        "points_discount_twd",
                         "total_twd",
                         "status",
                         "created_at",
@@ -9196,6 +6087,11 @@
                           "minimum": 0,
                           "description": "折扣金額 (元)"
                         },
+                        "points_discount_twd": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "點數折扣金額 (元)"
+                        },
                         "total_twd": {
                           "type": "integer",
                           "minimum": 0,
@@ -9372,6 +6268,16 @@
                             ]
                           },
                           "description": "優惠券兌換紀錄列表"
+                        },
+                        "points_earned": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "獲得的點數（僅會員）"
+                        },
+                        "user_points_remaining": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "剩餘點數（僅會員）"
                         }
                       },
                       "required": [
@@ -9380,6 +6286,7 @@
                         "user_id",
                         "subtotal_twd",
                         "discount_twd",
+                        "points_discount_twd",
                         "total_twd",
                         "status",
                         "created_at",
@@ -9637,6 +6544,11 @@
                             "minimum": 0,
                             "description": "折扣金額 (元)"
                           },
+                          "points_discount_twd": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "點數折扣金額 (元)"
+                          },
                           "total_twd": {
                             "type": "integer",
                             "minimum": 0,
@@ -9675,6 +6587,7 @@
                           "user_id",
                           "subtotal_twd",
                           "discount_twd",
+                          "points_discount_twd",
                           "total_twd",
                           "status",
                           "created_at",

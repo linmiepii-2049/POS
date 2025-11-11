@@ -25,6 +25,8 @@ export const UserSchema = z.object({
   phone: z.string().regex(/^09\d{8}$/, '請輸入有效的台灣手機號碼').nullable().describe('手機號碼'),
   role: UserRoleSchema.describe('使用者角色'),
   is_active: z.number().int().min(0).max(1).describe('是否啟用 (0: 停用, 1: 啟用)'),
+  points: z.number().int().min(0).describe('目前點數'),
+  points_yuan_equivalent: z.number().int().min(0).describe('點數折抵金額 (元，20點折1元)'),
   created_at: z.string().describe('建立時間 (UTC)'),
   updated_at: z.string().describe('更新時間 (UTC)'),
   last_purchase_at: z.string().nullable().describe('最後消費時間 (UTC)'),

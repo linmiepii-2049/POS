@@ -48,8 +48,8 @@ describe('Users Routes', () => {
     it('應該成功取得使用者列表', async () => {
       // 模擬資料庫查詢
       const mockUsers = [
-        { id: 1, name: '使用者1', phone: '0912345678', role: 'CLIENT', is_active: 1, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
-        { id: 2, name: '使用者2', phone: '0987654321', role: 'ADMIN', is_active: 1, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+        { id: 1, name: '使用者1', phone: '0912345678', role: 'CLIENT', is_active: 1, points: 0, points_yuan_equivalent: 0, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+        { id: 2, name: '使用者2', phone: '0987654321', role: 'ADMIN', is_active: 1, points: 0, points_yuan_equivalent: 0, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
       ];
 
       // 模擬總筆數查詢
@@ -364,6 +364,133 @@ describe('Users Routes', () => {
       mockEnv.DB.prepare().bind().first.mockResolvedValueOnce(null);
 
       const response = await app.request('/api/users/999/coupons/owned', {
+        method: 'GET',
+      }, mockEnv);
+
+      expect(response.status).toBe(404);
+
+      const data = await response.json();
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('使用者不存在');
+    });
+  });
+
+  describe('GET /api/users/by-line-id/:lineId', () => {
+    it('應該成功根據 LINE ID 取得使用者資訊', async () => {
+      const mockUser = {
+        id: 1,
+        line_id: 'test-line-id',
+        name: '測試使用者',
+        phone: '0912345678',
+        role: 'CLIENT',
+        is_active: 1,
+        points: 100,
+        created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T00:00:00Z',
+        last_purchase_at: null,
+        current_month_spending: 0,
+        last_month_spending: 0,
+      };
+
+      mockEnv.DB.prepare().bind().first.mockResolvedValueOnce(mockUser);
+
+      const response = await app.request('/api/users/by-line-id/test-line-id', {
+        method: 'GET',
+      }, mockEnv);
+
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data.success).toBe(true);
+      expect(data.data).toMatchObject({
+        id: 1,
+        name: '測試使用者',
+        points: 100,
+        points_yuan_equivalent: 5,
+      });
+    });
+
+    it('應該回傳 404 當 LINE ID 不存在', async () => {
+      mockEnv.DB.prepare().bind().first.mockResolvedValueOnce(null);
+
+      const response = await app.request('/api/users/by-line-id/nonexistent', {
+        method: 'GET',
+      }, mockEnv);
+
+      expect(response.status).toBe(404);
+
+      const data = await response.json();
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('找不到此 LINE ID 對應的使用者');
+    });
+  });
+
+  describe('GET /api/users/:id/points-history', () => {
+    it('應該成功取得使用者點數交易歷史', async () => {
+      const mockUser = {
+        id: 1,
+        name: '使用者1',
+        phone: '0912345678',
+        role: 'CLIENT',
+        is_active: 1,
+        points: 100,
+        created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T00:00:00Z',
+      };
+
+      const mockTransactions = [
+        {
+          id: 1,
+          user_id: 1,
+          order_id: 100,
+          points_change: 50,
+          transaction_type: 'EARN',
+          balance_after: 150,
+          created_at: '2025-01-02T00:00:00Z',
+        },
+        {
+          id: 2,
+          user_id: 1,
+          order_id: 101,
+          points_change: -20,
+          transaction_type: 'REDEEM',
+          balance_after: 100,
+          created_at: '2025-01-01T00:00:00Z',
+        },
+      ];
+
+      // 模擬檢查使用者存在
+      mockEnv.DB.prepare().bind().first
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce({ total_spent: 0 })
+        .mockResolvedValueOnce({ last_purchase_at: null })
+        .mockResolvedValueOnce({ total_orders: 0 })
+        .mockResolvedValueOnce({ total: 2 }); // count query
+
+      // 模擬取得交易記錄
+      mockEnv.DB.prepare().bind().all.mockResolvedValueOnce({ results: mockTransactions });
+
+      const response = await app.request('/api/users/1/points-history', {
+        method: 'GET',
+      }, mockEnv);
+
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data.success).toBe(true);
+      expect(data.data).toHaveLength(2);
+      expect(data.pagination).toMatchObject({
+        page: 1,
+        limit: 20,
+        total: 2,
+        total_pages: 1,
+      });
+    });
+
+    it('應該回傳 404 當使用者不存在', async () => {
+      mockEnv.DB.prepare().bind().first.mockResolvedValueOnce(null);
+
+      const response = await app.request('/api/users/999/points-history', {
         method: 'GET',
       }, mockEnv);
 
