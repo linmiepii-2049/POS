@@ -174,10 +174,25 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
           // 不顯示錯誤，因為會頻繁觸發
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('無法啟動相機:', error);
-      toast.error('無法啟動相機，請檢查權限設定');
       setIsScanning(false);
+      
+      // 提供更詳細的錯誤訊息
+      const errorMsg = error?.message || error?.toString() || '';
+      
+      if (errorMsg.includes('Permission') || errorMsg.includes('NotAllowedError')) {
+        toast.error(
+          '相機權限被拒絕\n\n請至手機設定 → Safari → 相機，允許存取相機',
+          { duration: 6000 }
+        );
+      } else if (errorMsg.includes('NotFoundError')) {
+        toast.error('找不到相機設備');
+      } else if (errorMsg.includes('NotReadableError')) {
+        toast.error('相機正在被其他應用程式使用');
+      } else {
+        toast.error('無法啟動相機，請檢查權限設定或稍後再試');
+      }
     }
   };
 
