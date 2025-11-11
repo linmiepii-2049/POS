@@ -485,8 +485,8 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
                     <h4 className="text-lg font-semibold text-green-800">
                       很高興看到你, {userData.data.data.name}
                     </h4>
-                    {/* 顯示點數信息（僅 LINE ID 查詢時） */}
-                    {searchType === 'lineId' && userData.data.data.points !== undefined && (
+                    {/* 顯示點數信息（所有會員都顯示） */}
+                    {userData.data.data.points !== undefined && (
                       <div className="mt-2 flex items-center space-x-2">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                           <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -495,6 +495,12 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
                           </svg>
                           {userData.data.data.points} 點數（可折抵 ${userData.data.data.points_yuan_equivalent}）
                         </span>
+                        {/* 電話查詢時提示 */}
+                        {searchType === 'phone' && (
+                          <span className="text-xs text-gray-500">
+                            （使用 LINE ID 查詢可折抵點數）
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>

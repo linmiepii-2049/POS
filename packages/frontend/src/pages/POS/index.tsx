@@ -3,7 +3,7 @@
  * 整合商品展示、購物車、確認訂單、付款流程
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useProductsList, useOrdersCreate, useOrdersGetTodayStats } from '../../api/posClient';
 import { useCart } from '../../hooks/useCart';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
@@ -139,7 +139,7 @@ export function POSPage() {
   /**
    * 完成付款
    */
-  const handlePaymentComplete = async (paymentData: Record<string, unknown>) => {
+  const handlePaymentComplete = async () => {
     try {
       // 建立訂單
       const orderData: any = {

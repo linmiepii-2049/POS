@@ -240,7 +240,13 @@ ordersRouter.openapi(createOrderRoute, async (c) => {
         }, 404);
       }
       
-      if (error.message.includes('不可用') || error.message.includes('重複') || error.message.includes('未達最低消費')) {
+      if (
+        error.message.includes('不可用') || 
+        error.message.includes('重複') || 
+        error.message.includes('未達最低消費') ||
+        error.message.includes('點數折抵') ||
+        error.message.includes('點數不足')
+      ) {
         return c.json({
           success: false,
           error: error.message,

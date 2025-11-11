@@ -244,15 +244,21 @@ describe('Orders API Routes', () => {
       const mockBind = vi.fn().mockReturnValue({
         first: vi.fn()
           .mockResolvedValueOnce({ count: 1 }) // 檢查使用者
+          .mockResolvedValueOnce({ line_id: 'U1234567890' }) // 取得 LINE ID
           .mockResolvedValueOnce(mockProducts[0]) // 檢查產品1
           .mockResolvedValueOnce(mockProducts[1]) // 檢查產品2
-          .mockResolvedValueOnce(mockOrder) // 取得訂單
-          .mockResolvedValueOnce(mockOrderItems[0]) // 取得訂單項目1
-          .mockResolvedValueOnce(mockOrderItems[1]), // 取得訂單項目2
+          .mockResolvedValueOnce({ points: 13000 }) // getUserPoints after earn (in addPoints)
+          .mockResolvedValueOnce({ points: 13000 }) // getUserPoints (line 606 in createOrder)
+          .mockResolvedValueOnce(mockOrder), // getOrderById: SELECT * FROM orders
         all: vi.fn()
-          .mockResolvedValueOnce({ results: mockOrderItems }) // 取得訂單項目列表
-          .mockResolvedValueOnce({ results: [] }), // 取得優惠券兌換紀錄（空）
-        run: vi.fn().mockResolvedValue({ success: true, meta: { last_row_id: 1 } }),
+          .mockResolvedValueOnce({ results: mockOrderItems }) // getOrderById: SELECT order_items
+          .mockResolvedValueOnce({ results: [] }), // getOrderById: SELECT coupon_redemptions
+        run: vi.fn()
+          .mockResolvedValueOnce({ success: true, meta: { last_row_id: 1 } }) // INSERT orders
+          .mockResolvedValueOnce({ success: true }) // INSERT order_items (item 1)
+          .mockResolvedValueOnce({ success: true }) // INSERT order_items (item 2)
+          .mockResolvedValueOnce({ success: true }) // addPoints: UPDATE users
+          .mockResolvedValueOnce({ success: true }), // addPoints: INSERT points_transactions
       });
       mockPrepare.mockReturnValue({ bind: mockBind });
 
@@ -365,6 +371,7 @@ describe('Orders API Routes', () => {
       const mockBind = vi.fn().mockReturnValue({
         first: vi.fn()
           .mockResolvedValueOnce({ count: 1 }) // 檢查使用者
+          .mockResolvedValueOnce({ line_id: 'U1234567890' }) // 取得 LINE ID
           .mockResolvedValueOnce(mockProduct), // 檢查產品
       });
       mockPrepare.mockReturnValue({ bind: mockBind });
@@ -411,15 +418,23 @@ describe('Orders API Routes', () => {
         first: vi.fn()
           .mockResolvedValueOnce({ count: 1 }) // checkUserExists
           .mockResolvedValueOnce(mockUser) // getUserLineId
-          .mockResolvedValueOnce({ points: 100 }) // getUserPoints
+          .mockResolvedValueOnce({ points: 100 }) // getUserPoints (validate)
           .mockResolvedValueOnce(mockProduct) // checkProductExists
-          .mockResolvedValueOnce({ points: 60 }) // getUserPoints after deduct
-          .mockResolvedValueOnce({ points: 258 }) // getUserPoints after earn
-          .mockResolvedValueOnce(mockOrder), // getOrderById
+          .mockResolvedValueOnce({ points: 60 }) // getUserPoints after deduct (in deductPoints)
+          .mockResolvedValueOnce({ points: 258 }) // getUserPoints after earn (in addPoints)
+          .mockResolvedValueOnce({ points: 258 }) // getUserPoints (line 606 in createOrder)
+          .mockResolvedValueOnce(mockOrder), // getOrderById: SELECT * FROM orders
         all: vi.fn()
           .mockResolvedValueOnce({ results: [] }) // order_items
           .mockResolvedValueOnce({ results: [] }), // coupon_redemptions
-        run: vi.fn().mockResolvedValue({ success: true, meta: { last_row_id: 1 } }),
+        run: vi.fn()
+          .mockResolvedValueOnce({ success: true }) // deductPoints: UPDATE users
+          .mockResolvedValueOnce({ success: true }) // deductPoints: INSERT points_transactions
+          .mockResolvedValueOnce({ success: true, meta: { last_row_id: 1 } }) // INSERT orders
+          .mockResolvedValueOnce({ success: true }) // INSERT order_items
+          .mockResolvedValueOnce({ success: true }) // UPDATE points_transactions SET order_id
+          .mockResolvedValueOnce({ success: true }) // addPoints: UPDATE users
+          .mockResolvedValueOnce({ success: true }), // addPoints: INSERT points_transactions
       });
       mockPrepare.mockReturnValue({ bind: mockBind });
 

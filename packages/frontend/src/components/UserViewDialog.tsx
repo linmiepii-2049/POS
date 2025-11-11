@@ -1,12 +1,4 @@
-import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
-import { zhTW } from 'date-fns/locale';
-import {
-  // useGetApiUsersIdCouponsOwned, // TODO: 優惠券功能已停用
-  type GetApiUsers200DataItem,
-  // type GetApiUsersIdCouponsOwned200DataItem, // TODO: 優惠券功能已停用
-} from '../api/posClient';
-import { Table, type TableColumn } from './Table';
+import { type GetApiUsers200DataItem } from '../api/posClient';
 import { Button } from './Form';
 import { clsx } from 'clsx';
 import { formatDateOnly } from '../utils/time';
@@ -18,65 +10,7 @@ interface UserViewDialogProps {
 }
 
 export function UserViewDialog({ isOpen, onClose, user }: UserViewDialogProps) {
-  // TODO: 優惠券功能已停用
-  // 獲取用戶擁有的優惠券
-  // const { data: couponsResponse, refetch: refetchCoupons } = useGetApiUsersIdCouponsOwned(...);
-  const couponsData: any[] = [];
-
-  // useEffect(() => {
-  //   if (isOpen && user) {
-  //     refetchCoupons();
-  //   }
-  // }, [isOpen, user, refetchCoupons]);
-
   if (!isOpen || !user) return null;
-
-  // TODO: 優惠券代碼表格欄位（暫時停用）
-  const couponCodeColumns: TableColumn<any>[] = [
-    {
-      key: 'coupon_name',
-      label: '優惠券名稱',
-      render: (_, record) => (
-        <span className="font-medium text-gray-900">{record.coupon_name || '未知優惠券'}</span>
-      ),
-    },
-    {
-      key: 'coupon_code',
-      label: '代碼',
-      render: (value) => (
-        <span className="font-mono font-medium text-blue-600">{value}</span>
-      ),
-    },
-    {
-      key: 'usage_stats',
-      label: '使用統計',
-      render: (_, record) => (
-        <div className="text-sm">
-          <div className="text-gray-600">
-            獲得: {record.allowed_uses || 0} 次
-          </div>
-          <div className="text-gray-600">
-            已用: {record.used_count || 0} 次
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'valid_period',
-      label: '有效時間',
-      render: (_, record) => {
-        const grantedTime = record.granted_at ? formatDateOnly(record.granted_at) : '未知';
-        // 使用優惠券的結束時間，而不是授權的過期時間
-        const expiresTime = record.ends_at ? formatDateOnly(record.ends_at) : '無限制';
-        return (
-          <div className="text-sm">
-            <div className="text-gray-600">獲得: {grantedTime}</div>
-            <div className="text-gray-600">到期: {expiresTime}</div>
-          </div>
-        );
-      },
-    },
-  ];
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -134,26 +68,38 @@ export function UserViewDialog({ isOpen, onClose, user }: UserViewDialogProps) {
           </div>
         </div>
 
-        {/* 優惠券代碼區域 */}
+        {/* 點數資訊區域 */}
         <div className="mb-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">優惠券代碼</h3>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            {couponsData.length > 0 ? (
-              <Table
-                columns={couponCodeColumns}
-                data={couponsData}
-                loading={false}
-                emptyText="暫無優惠券代碼"
-                rowKey="grant_id"
-              />
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <p className="mt-2">此用戶暫無優惠券代碼</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">點數資訊</h3>
+          <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-lg border border-purple-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="bg-purple-100 p-3 rounded-full">
+                  <svg className="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">目前點數</p>
+                  <p className="text-3xl font-bold text-purple-900">{user.points || 0}</p>
+                  <p className="text-sm text-purple-600 mt-1">
+                    可折抵金額：${user.points_yuan_equivalent || 0} 元
+                  </p>
+                </div>
               </div>
-            )}
+              <div className="text-right">
+                <p className="text-xs text-gray-500 mb-1">換算比例</p>
+                <div className="bg-white px-3 py-2 rounded-lg shadow-sm">
+                  <p className="text-sm font-medium text-gray-700">20 點 = 1 元</p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 pt-4 border-t border-purple-200">
+              <p className="text-xs text-gray-600">
+                💡 消費金額 1:1 獲得點數，使用 LINE ID 查詢即可在結帳時折抵
+              </p>
+            </div>
           </div>
         </div>
 
