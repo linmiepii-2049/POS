@@ -563,18 +563,18 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
                 <div className="flex items-center space-x-3">
                   <span className="text-gray-600">$</span>
                   <input
-                    type="number"
-                    value={redeemAmount}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={redeemAmount || ''}
                     onChange={(e) => {
-                      const value = Math.max(0, parseInt(e.target.value) || 0);
+                      const value = e.target.value.replace(/[^0-9]/g, ''); // 只允許數字
+                      const numValue = value ? parseInt(value) : 0;
                       const maxAmount = userData.data.data.points_yuan_equivalent; // 最大可折抵金額
-                      setRedeemAmount(Math.min(value, maxAmount));
+                      setRedeemAmount(Math.min(numValue, maxAmount));
                     }}
                     placeholder="輸入要折抵的金額"
-                    step="1"
-                    min="0"
-                    max={userData.data.data.points_yuan_equivalent}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-center text-lg font-semibold"
                   />
                   <span className="text-gray-600">元</span>
                 </div>
