@@ -54,20 +54,26 @@ jobs:
           VITE_API_BASE: ${{ secrets.VITE_API_BASE_PROD }}
           VITE_LIFF_ID: ${{ secrets.VITE_LIFF_ID }}
         run: |
-          # 顯示環境變數（遮蔽值）
+          # Debug: 顯示環境變數是否存在
+          echo "Environment variables check:"
           echo "VITE_API_BASE is set: ${VITE_API_BASE:+yes}"
           echo "VITE_LIFF_ID is set: ${VITE_LIFF_ID:+yes}"
+          echo "VITE_API_BASE length: ${#VITE_API_BASE}"
+          echo "VITE_LIFF_ID length: ${#VITE_LIFF_ID}"
           
-          # 建立 .env.production 檔案
-          echo "VITE_API_BASE=$VITE_API_BASE" > .env.production
-          echo "VITE_LIFF_ID=$VITE_LIFF_ID" >> .env.production
+          # 顯示當前目錄
+          echo "Current directory: $(pwd)"
           
-          # 驗證檔案內容（不顯示實際值）
-          echo "Checking .env.production file..."
-          wc -l .env.production
-          
-          # 執行建置
+          # 執行建置（環境變數直接從 env 傳遞，不需要 .env 檔案）
           pnpm run build:gh-pages
+          
+          # 驗證建置產物
+          echo "Build output:"
+          ls -lh dist/
+          
+          # 檢查 index.html 是否包含正確的 base path
+          echo "Checking base path in index.html:"
+          grep -o 'src="[^"]*"' dist/index.html | head -3
 
       - name: 📤 上傳建置產物
         uses: actions/upload-pages-artifact@v3
