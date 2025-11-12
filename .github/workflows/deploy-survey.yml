@@ -50,30 +50,28 @@ jobs:
 
       - name: 🏗️ 建置 Survey 前端
         working-directory: packages/survey-frontend
-        env:
-          VITE_API_BASE: ${{ secrets.VITE_API_BASE_PROD }}
-          VITE_LIFF_ID: ${{ secrets.VITE_LIFF_ID }}
         run: |
-          # Debug: 顯示環境變數是否存在
+          # Debug: 顯示環境變數
           echo "Environment variables check:"
-          echo "VITE_API_BASE is set: ${VITE_API_BASE:+yes}"
-          echo "VITE_LIFF_ID is set: ${VITE_LIFF_ID:+yes}"
-          echo "VITE_API_BASE length: ${#VITE_API_BASE}"
-          echo "VITE_LIFF_ID length: ${#VITE_LIFF_ID}"
+          echo "VITE_API_BASE: ${VITE_API_BASE:0:20}..."
+          echo "VITE_LIFF_ID: ${VITE_LIFF_ID:0:15}..."
           
-          # 顯示當前目錄
-          echo "Current directory: $(pwd)"
+          # 建立 .env.production 檔案（確保換行和格式正確）
+          cat > .env.production << EOF
+VITE_API_BASE=${{ secrets.VITE_API_BASE_PROD }}
+VITE_LIFF_ID=${{ secrets.VITE_LIFF_ID }}
+EOF
           
-          # 執行建置（環境變數直接從 env 傳遞，不需要 .env 檔案）
+          # 驗證檔案內容
+          echo "Checking .env.production:"
+          cat .env.production
+          
+          # 執行建置
           pnpm run build:gh-pages
           
-          # 驗證建置產物
-          echo "Build output:"
-          ls -lh dist/
-          
-          # 檢查 index.html 是否包含正確的 base path
-          echo "Checking base path in index.html:"
-          grep -o 'src="[^"]*"' dist/index.html | head -3
+          # 驗證建置產物中是否包含 LIFF ID
+          echo "Checking if LIFF ID is in bundle:"
+          grep -r "${{ secrets.VITE_LIFF_ID }}" dist/assets/*.js && echo "✅ LIFF ID found in bundle" || echo "❌ LIFF ID NOT in bundle"
 
       - name: 📤 上傳建置產物
         uses: actions/upload-pages-artifact@v3
