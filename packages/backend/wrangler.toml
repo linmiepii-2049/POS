@@ -9,7 +9,7 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 ENV_NAME = "development"
 API_BASE = "http://localhost:8787"
-CORS_ORIGINS = "http://localhost:3000"
+CORS_ORIGINS = "http://localhost:3000,http://localhost:3001"
 
 # D1 資料庫綁定（本地）
 [[d1_databases]]
@@ -33,7 +33,7 @@ local_protocol = "http"
 # ================================
 [env.staging]
 name = "pos-backend-staging"
-vars = { ENV_NAME = "staging", API_BASE = "https://pos-backend-staging.survey-api.workers.dev", CORS_ORIGINS = "http://localhost:3000,https://pos-frontend-staging.pages.dev" }
+vars = { ENV_NAME = "staging", API_BASE = "https://pos-backend-staging.survey-api.workers.dev", CORS_ORIGINS = "http://localhost:3000,http://localhost:3001,https://pos-frontend-staging.pages.dev" }
 
 # D1 資料庫綁定（Staging）
 [[env.staging.d1_databases]]
@@ -58,7 +58,7 @@ bucket_name = "pos-assets-staging"
 # ================================
 [env.production]
 name = "pos-backend-prod"
-vars = { ENV_NAME = "production", API_BASE = "https://pos-backend-prod.survey-api.workers.dev", CORS_ORIGINS = "https://pos-frontend-prod.pages.dev" }
+vars = { ENV_NAME = "production", API_BASE = "https://pos-backend-prod.survey-api.workers.dev", CORS_ORIGINS = "https://pos-frontend-prod.pages.dev,https://YOUR_USERNAME.github.io" }
 
 # D1 資料庫綁定（Production）
 [[env.production.d1_databases]]

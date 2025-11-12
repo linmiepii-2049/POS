@@ -6,10 +6,11 @@
 
 ```
 packages/
-├── backend/     # 後端服務 (Cloudflare Workers + Hono)
-├── frontend/    # 前端應用 (Vite + React + TypeScript)
-├── sdk/         # 共用 SDK (自動產生)
-└── shared/      # 共用模組與工具
+├── backend/          # 後端服務 (Cloudflare Workers + Hono)
+├── frontend/         # POS 前端應用 (Vite + React + TypeScript)
+├── survey-frontend/  # 🆕 Survey 問卷前端 (GitHub Pages)
+├── sdk/              # 共用 SDK (自動產生)
+└── shared/           # 共用模組與工具
 ```
 
 ## 技術棧
@@ -17,15 +18,35 @@ packages/
 - **包管理**: pnpm workspaces
 - **後端**: Cloudflare Workers + Hono + D1 (SQLite)
 - **前端**: Vite + React + TypeScript
+- **Survey 前端**: Vite + React + LINE LIFF SDK (GitHub Pages)
 - **SDK**: 自動產生 (OpenAPI → Spectral → Orval)
 - **測試**: Vitest
 - **代碼品質**: ESLint + Prettier
 - **建構工具**: Turbo (可選)
 
+## 📋 專案特色
+
+- **統一 API 後端**: 使用 Cloudflare Workers 提供高效能、低延遲的 API
+- **多前端架構**: POS 前端（Cloudflare Pages）+ Survey 前端（GitHub Pages）
+- **LIFF 整合**: 完整的 LINE Front-end Framework 問卷調查系統
+- **自動化 SDK**: 從 OpenAPI 自動產生型別安全的 SDK
+- **完整測試**: 單元測試、整合測試、E2E 測試
+
+## 🆕 Survey 問卷調查系統
+
+本專案已整合 LIFF 問卷調查系統，採用獨立前端部署架構：
+
+- **快速開始**: 參考 [SURVEY_QUICKSTART.md](./SURVEY_QUICKSTART.md)
+- **完整文件**: 參考 [SURVEY_INTEGRATION.md](./SURVEY_INTEGRATION.md)
+- **Survey 前端**: `packages/survey-frontend/`
+- **部署方式**: GitHub Pages（自動部署）
+
 ## 開發環境需求
 
 - Node.js >= 18.0.0
 - pnpm >= 8.0.0
+- Cloudflare 帳戶（用於部署後端）
+- GitHub 帳戶（用於部署 Survey 前端）
 
 ## 安裝依賴
 

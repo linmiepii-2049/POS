@@ -69,6 +69,16 @@ jobs:
           cd packages/frontend
           pnpm run test:run || true
 
+      - name: 🔍 Survey 前端 - ESLint 檢查
+        run: |
+          cd packages/survey-frontend
+          pnpm run lint || true
+
+      - name: 🔍 Survey 前端 - TypeScript 型別檢查
+        run: |
+          cd packages/survey-frontend
+          pnpm run typecheck || true
+
       - name: ✅ 品質檢查通過
         run: echo "🎉 所有品質檢查已通過！"
 
@@ -103,6 +113,11 @@ jobs:
       - name: 🏗️ 前端 - 建置檢查
         run: |
           cd packages/frontend
+          pnpm run build
+
+      - name: 🏗️ Survey 前端 - 建置檢查
+        run: |
+          cd packages/survey-frontend
           pnpm run build
 
       - name: ✅ 建置檢查通過

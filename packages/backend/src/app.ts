@@ -10,6 +10,7 @@ import { productsRouter } from './routes/products.js';
 // COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11) - May be restored in the future
 // import { couponsRouter } from './routes/coupons.js';
 import { ordersRouter } from './routes/orders.js';
+import { surveysRouter } from './routes/surveys.js';
 import { r2UploadRouter } from './routes/r2-upload.js';
 import localUploadRouter from './routes/local-upload.js';
 
@@ -215,6 +216,10 @@ export const createApp = () => {
         description: '訂單管理端點',
       },
       {
+        name: 'Surveys',
+        description: '問卷調查端點',
+      },
+      {
         name: 'Uploads',
         description: '檔案上傳端點',
       },
@@ -245,6 +250,9 @@ export const createApp = () => {
 
   // 掛載訂單路由
   app.route('/api', ordersRouter);
+
+  // 掛載問卷調查路由
+  app.route('/api', surveysRouter);
 
   // 掛載 R2 上傳路由（生產環境用）
   app.route('/', r2UploadRouter);
