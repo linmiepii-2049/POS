@@ -29,6 +29,11 @@ jobs:
       - name: 📚 安裝依賴
         run: pnpm install --frozen-lockfile
 
+      - name: 🔨 建置 SDK（前端依賴）
+        run: |
+          cd packages/sdk
+          pnpm run build
+
       - name: 🔍 後端 - ESLint 檢查
         run: |
           cd packages/backend

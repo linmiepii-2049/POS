@@ -13,7 +13,7 @@ function App() {
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = async (formData: Record<string, unknown>) => {
+  const handleSubmit = async (formData: any) => {
     setSubmitStatus('loading');
     
     try {
@@ -21,7 +21,7 @@ function App() {
         ...formData,
         lineUserId: profile?.userId,
         displayName: profile?.displayName,
-      });
+      } as any);
       
       setSubmitStatus('success');
       
