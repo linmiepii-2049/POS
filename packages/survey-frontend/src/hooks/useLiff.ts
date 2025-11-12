@@ -15,6 +15,7 @@ export function useLiff() {
   const [isReady, setIsReady] = useState(false);
   const [profile, setProfile] = useState<LiffProfile | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const liffId = import.meta.env.VITE_LIFF_ID;
@@ -32,7 +33,10 @@ export function useLiff() {
         console.log('✅ LIFF 初始化成功');
         setIsReady(true);
         
-        if (liff.isLoggedIn()) {
+        const loggedIn = liff.isLoggedIn();
+        setIsLoggedIn(loggedIn);
+        
+        if (loggedIn) {
           console.log('✅ 使用者已登入，取得個人資料...');
           return liff.getProfile();
         }
@@ -59,7 +63,7 @@ export function useLiff() {
     isReady,
     profile,
     error,
-    isLoggedIn: liff.isLoggedIn(),
+    isLoggedIn,
     liff,
   };
 }
