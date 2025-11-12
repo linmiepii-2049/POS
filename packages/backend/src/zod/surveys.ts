@@ -182,15 +182,15 @@ export const SurveyStatsSchema = z.object({
     example: 150,
     description: '總問卷數',
   }),
-  ageDistribution: z.record(z.number()).openapi({
+  ageDistribution: z.record(z.string(), z.number()).openapi({
     example: { '25歲以下': 30, '26-45歲': 80, '46歲以上': 40 },
     description: '年齡分佈',
   }),
-  genderDistribution: z.record(z.number()).openapi({
+  genderDistribution: z.record(z.string(), z.number()).openapi({
     example: { '男': 70, '女': 80 },
     description: '性別分佈',
   }),
-  purchaseFrequencyDistribution: z.record(z.number()).optional().openapi({
+  purchaseFrequencyDistribution: z.record(z.string(), z.number()).optional().openapi({
     example: { '每週3次以上': 40, '每週1~3次': 60, '偶爾': 50 },
     description: '購買頻率分佈',
   }),

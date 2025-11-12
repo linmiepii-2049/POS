@@ -92,8 +92,9 @@ surveysRouter.openapi(createSurveyRoute, async (c) => {
     if (error.message.includes('已經填寫過問卷')) {
       return c.json(
         {
-          code: 'DUPLICATE_SURVEY',
-          message: error.message,
+          success: false,
+          error: error.message,
+          timestamp: new Date().toISOString(),
         },
         409
       );
@@ -101,9 +102,9 @@ surveysRouter.openapi(createSurveyRoute, async (c) => {
     
     return c.json(
       {
-        code: 'INTERNAL_ERROR',
-        message: '問卷提交失敗',
-        details: error.message,
+        success: false,
+        error: '問卷提交失敗',
+        timestamp: new Date().toISOString(),
       },
       500
     );
@@ -165,8 +166,9 @@ surveysRouter.openapi(getSurveyByMemberIdRoute, async (c) => {
     if (!result) {
       return c.json(
         {
-          code: 'NOT_FOUND',
-          message: '找不到該會員的問卷資料',
+          success: false,
+          error: '找不到該會員的問卷資料',
+          timestamp: new Date().toISOString(),
         },
         404
       );
@@ -177,9 +179,9 @@ surveysRouter.openapi(getSurveyByMemberIdRoute, async (c) => {
     console.error('查詢問卷錯誤:', error);
     return c.json(
       {
-        code: 'INTERNAL_ERROR',
-        message: '查詢失敗',
-        details: error.message,
+        success: false,
+        error: '查詢失敗',
+        timestamp: new Date().toISOString(),
       },
       500
     );
@@ -229,9 +231,9 @@ surveysRouter.openapi(listSurveysRoute, async (c) => {
     console.error('查詢問卷列表錯誤:', error);
     return c.json(
       {
-        code: 'INTERNAL_ERROR',
-        message: '查詢失敗',
-        details: error.message,
+        success: false,
+        error: '查詢失敗',
+        timestamp: new Date().toISOString(),
       },
       500
     );
@@ -277,9 +279,9 @@ surveysRouter.openapi(getSurveyStatsRoute, async (c) => {
     console.error('取得統計資料錯誤:', error);
     return c.json(
       {
-        code: 'INTERNAL_ERROR',
-        message: '查詢失敗',
-        details: error.message,
+        success: false,
+        error: '查詢失敗',
+        timestamp: new Date().toISOString(),
       },
       500
     );
@@ -346,8 +348,9 @@ surveysRouter.openapi(deleteSurveyRoute, async (c) => {
     if (!existing) {
       return c.json(
         {
-          code: 'NOT_FOUND',
-          message: '找不到該問卷',
+          success: false,
+          error: '找不到該問卷',
+          timestamp: new Date().toISOString(),
         },
         404
       );
@@ -371,9 +374,9 @@ surveysRouter.openapi(deleteSurveyRoute, async (c) => {
     console.error('刪除問卷錯誤:', error);
     return c.json(
       {
-        code: 'INTERNAL_ERROR',
-        message: '刪除失敗',
-        details: error.message,
+        success: false,
+        error: '刪除失敗',
+        timestamp: new Date().toISOString(),
       },
       500
     );
