@@ -114,7 +114,7 @@ export function AdminUsers() {
         console.log('創建請求參數:', { data: userData });
         
         await createUserMutation.mutateAsync({
-          data: userData,
+          data: userData as PostApiUsersBody,
         });
         console.log('用戶創建成功');
         toast.success('用戶建立成功');

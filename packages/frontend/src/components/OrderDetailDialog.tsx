@@ -38,6 +38,7 @@ interface OrderDetail {
   user_phone?: string;
   subtotal_twd: number;
   discount_twd: number;
+  points_discount_twd: number; // 點數折抵金額
   total_twd: number;
   status: string;
   created_at: string;
@@ -201,8 +202,8 @@ export function OrderDetailDialog({ isOpen, onClose, orderId }: OrderDetailDialo
               </div>
             </div>
 
-            {/* TODO: 優惠券功能已停用 - 不再顯示優惠券使用信息 */}
-            {false && orderDetail.coupon_redemptions && orderDetail.coupon_redemptions.length > 0 && (
+            {/* TODO: 優惠券功能已停用 - 不再顯示優惠券使用信息 
+            {false && orderDetail && orderDetail.coupon_redemptions && orderDetail.coupon_redemptions.length > 0 && (
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">使用優惠券</h3>
                 <div className="overflow-x-auto">
@@ -221,7 +222,7 @@ export function OrderDetailDialog({ isOpen, onClose, orderId }: OrderDetailDialo
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {orderDetail.coupon_redemptions.map((redemption) => (
+                      {orderDetail?.coupon_redemptions.map((redemption) => (
                         <tr key={redemption.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             <div>

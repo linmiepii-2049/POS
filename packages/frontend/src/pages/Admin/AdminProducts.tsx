@@ -180,7 +180,7 @@ export function AdminProducts() {
         console.log('=== 創建產品 ===');
         
         await createProductMutation.mutateAsync({
-          data: productData,
+          data: productData as ProductsCreateBody,
         });
         
         console.log('產品創建成功');

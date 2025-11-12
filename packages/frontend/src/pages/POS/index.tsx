@@ -170,7 +170,10 @@ export function POSPage() {
       });
 
       // 設定訂單編號和重新獲取統計
-      setOrderNumber(orderResponse.data.order_number || `ORD-${Date.now()}`);
+      const newOrderNumber = (orderResponse.data && 'order_number' in orderResponse.data) 
+        ? String(orderResponse.data.order_number)
+        : `ORD-${Date.now()}`;
+      setOrderNumber(newOrderNumber);
       refetchTodayStats(); // 重新獲取今日訂單統計
       
       // 清空購物車、用戶選擇和點數折抵
@@ -220,7 +223,7 @@ export function POSPage() {
         <OrderComplete
           orderNumber={orderNumber}
           onNewOrder={handleNewOrder}
-          dailyOrderCount={(todayStatsResponse && 'data' in todayStatsResponse && todayStatsResponse.data) ? (todayStatsResponse.data.data?.todayOrderCount || 0) : 0}
+          dailyOrderCount={(todayStatsResponse && 'data' in todayStatsResponse && todayStatsResponse.data && 'data' in todayStatsResponse.data) ? (todayStatsResponse.data.data?.todayOrderCount || 0) : 0}
         />
     );
   }
@@ -244,7 +247,7 @@ export function POSPage() {
                 重新結帳
               </button>
               <div className="text-sm text-gray-600">
-                今日訂單：<span className="font-semibold">{(todayStatsResponse && 'data' in todayStatsResponse && todayStatsResponse.data) ? (todayStatsResponse.data.data?.todayOrderCount || 0) : 0}</span>
+                今日訂單：<span className="font-semibold">{(todayStatsResponse && 'data' in todayStatsResponse && todayStatsResponse.data && 'data' in todayStatsResponse.data) ? (todayStatsResponse.data.data?.todayOrderCount || 0) : 0}</span>
               </div>
               <div className="text-sm text-gray-600">
                 購物車：<span className="font-semibold">{state.itemCount} 項</span>
