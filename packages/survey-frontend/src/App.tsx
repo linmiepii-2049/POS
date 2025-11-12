@@ -13,7 +13,25 @@ function App() {
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: {
+    memberId: string;
+    phone: string;
+    age: string;
+    gender: string;
+    location?: string;
+    purchaseFrequency?: string;
+    purchaseLocation?: string[];
+    purchaseTime?: string;
+    mealType?: string;
+    purchaseFactors?: string[];
+    healthPrice?: string;
+    naturalPreference?: string;
+    tastePreference?: string[];
+    breadTypes?: string[];
+    breadTypesOther?: string;
+    favoriteBread?: string;
+    desiredBread?: string;
+  }) => {
     setSubmitStatus('loading');
     
     try {
@@ -21,7 +39,7 @@ function App() {
         ...formData,
         lineUserId: profile?.userId,
         displayName: profile?.displayName,
-      } as any);
+      });
       
       setSubmitStatus('success');
       
