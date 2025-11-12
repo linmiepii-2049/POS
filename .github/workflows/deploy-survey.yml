@@ -49,14 +49,24 @@ jobs:
           pnpm run build
 
       - name: 🏗️ 建置 Survey 前端
+        working-directory: packages/survey-frontend
         env:
           VITE_API_BASE: ${{ secrets.VITE_API_BASE_PROD }}
           VITE_LIFF_ID: ${{ secrets.VITE_LIFF_ID }}
         run: |
-          cd packages/survey-frontend
+          # 顯示環境變數（遮蔽值）
+          echo "VITE_API_BASE is set: ${VITE_API_BASE:+yes}"
+          echo "VITE_LIFF_ID is set: ${VITE_LIFF_ID:+yes}"
+          
           # 建立 .env.production 檔案
           echo "VITE_API_BASE=$VITE_API_BASE" > .env.production
           echo "VITE_LIFF_ID=$VITE_LIFF_ID" >> .env.production
+          
+          # 驗證檔案內容（不顯示實際值）
+          echo "Checking .env.production file..."
+          wc -l .env.production
+          
+          # 執行建置
           pnpm run build:gh-pages
 
       - name: 📤 上傳建置產物
