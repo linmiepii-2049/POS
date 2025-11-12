@@ -52,22 +52,23 @@ jobs:
       - name: 📋 後端 - OpenAPI Spectral 驗證
         run: |
           cd packages/backend
-          npx @stoplight/spectral-cli lint docs/openapi.json --ruleset docs/.spectral.yaml || true
+          npx @stoplight/spectral-cli lint docs/openapi.json --ruleset docs/.spectral.yaml
 
       - name: 🧪 後端 - 執行測試
+        continue-on-error: true
         run: |
           cd packages/backend
-          pnpm run test || true
+          pnpm run test
 
       - name: 🔍 前端 - ESLint 檢查
         run: |
           cd packages/frontend
-          pnpm run lint || true
+          pnpm run lint
 
       - name: 🔍 前端 - TypeScript 型別檢查
         run: |
           cd packages/frontend
-          pnpm run typecheck || true
+          pnpm run typecheck
 
       - name: 🧪 前端 - 執行測試
         continue-on-error: true
