@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIFF 問題診斷工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .url-info {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 LIFF 問題診斷工具</h1>
+        
+        <div class="section">
+            <h2>📱 環境檢測</h2>
+            <div id="environmentInfo"></div>
+        </div>
+
+        <div class="section">
+            <h2>🔧 操作按鈕</h2>
+            <button onclick="checkEnvironment()">檢查環境</button>
+            <button onclick="getConfig()">獲取配置</button>
+            <button onclick="initLiff()">初始化 LIFF</button>
+            <button onclick="checkLoginStatus()">檢查登入狀態</button>
+            <button onclick="clearLog()">清除日誌</button>
+        </div>
+
+        <div class="section">
+            <h2>📊 狀態顯示</h2>
+            <div id="statusDisplay"></div>
+        </div>
+
+        <div class="section">
+            <h2>📝 詳細日誌</h2>
+            <div id="logDisplay" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let liffInitialized = false;
+        let configData = null;
+
+        // 日誌函數
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('logDisplay');
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logEntry.className = type;
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // 更新狀態顯示
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('statusDisplay');
+            const statusElement = document.createElement('div');
+            statusElement.className = `status ${type}`;
+            statusElement.textContent = message;
+            statusDiv.appendChild(statusElement);
+        }
+
+        // 清除日誌
+        function clearLog() {
+            document.getElementById('logDisplay').innerHTML = '';
+            document.getElementById('statusDisplay').innerHTML = '';
+        }
+
+        // 檢查環境
+        function checkEnvironment() {
+            log('開始檢查環境...', 'info');
+            
+            const userAgent = navigator.userAgent;
+            const isInLineApp = userAgent.includes('Line');
+            const isInClient = typeof liff !== 'undefined' && liff.isInClient();
+            
+            let environmentInfo = `
+                <div class="url-info">
+                    <strong>當前 URL:</strong> ${window.location.href}<br>
+                    <strong>User Agent:</strong> ${userAgent}<br>
+                    <strong>在 LINE App 內:</strong> ${isInLineApp ? '是' : '否'}<br>
+                    <strong>LIFF isInClient:</strong> ${isInClient ? '是' : '否'}<br>
+                    <strong>LIFF 已初始化:</strong> ${liffInitialized ? '是' : '否'}<br>
+                    <strong>頁面載入時間:</strong> ${new Date().toLocaleString()}
+                </div>
+            `;
+            
+            document.getElementById('environmentInfo').innerHTML = environmentInfo;
+            
+            log(`環境檢查完成 - 在LINE App內: ${isInLineApp}, LIFF已初始化: ${liffInitialized}`, 'info');
+            
+            if (isInLineApp) {
+                updateStatus('✅ 檢測到在 LINE App 內', 'success');
+            } else {
+                updateStatus('⚠️ 不在 LINE App 內，可能會有重定向問題', 'warning');
+            }
+        }
+
+        // 獲取配置
+        async function getConfig() {
+            log('開始獲取 LIFF 配置...', 'info');
+            
+            try {
+                const API_BASE_URL = 'https://liff-survey-worker.survey-api.workers.dev';
+                const response = await fetch(`${API_BASE_URL}/api/config`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const config = await response.json();
+                configData = config;
+                
+                if (config.success && config.data.liffId) {
+                    log(`配置獲取成功: LIFF ID = ${config.data.liffId}`, 'success');
+                    updateStatus(`✅ 配置獲取成功: ${config.data.liffId}`, 'success');
+                } else {
+                    log('配置獲取失敗: 響應格式錯誤', 'error');
+                    updateStatus('❌ 配置格式錯誤', 'error');
+                }
+                
+                log(`完整配置響應: ${JSON.stringify(config, null, 2)}`, 'info');
+                
+            } catch (error) {
+                log(`配置獲取失敗: ${error.message}`, 'error');
+                updateStatus(`❌ 配置獲取失敗: ${error.message}`, 'error');
+            }
+        }
+
+        // 初始化 LIFF
+        async function initLiff() {
+            if (!configData || !configData.success) {
+                log('無法初始化 LIFF: 配置未獲取', 'error');
+                updateStatus('❌ 請先獲取配置', 'error');
+                return;
+            }
+            
+            if (liffInitialized) {
+                log('LIFF 已經初始化過', 'warning');
+                updateStatus('⚠️ LIFF 已經初始化過', 'warning');
+                return;
+            }
+            
+            log('開始初始化 LIFF...', 'info');
+            updateStatus('🔄 正在初始化 LIFF...', 'info');
+            
+            try {
+                await liff.init({
+                    liffId: configData.data.liffId,
+                    scope: 'profile openid'
+                });
+                
+                liffInitialized = true;
+                log('LIFF 初始化成功', 'success');
+                updateStatus('✅ LIFF 初始化成功', 'success');
+                
+                // 檢查初始化後的狀態
+                const isLoggedIn = liff.isLoggedIn();
+                const isInClient = liff.isInClient();
+                
+                log(`初始化後狀態 - 已登入: ${isLoggedIn}, 在客戶端: ${isInClient}`, 'info');
+                
+            } catch (error) {
+                log(`LIFF 初始化失敗: ${error.message}`, 'error');
+                updateStatus(`❌ LIFF 初始化失敗: ${error.message}`, 'error');
+                
+                // 檢查是否是重定向相關錯誤
+                if (error.message.includes('redirect') || error.message.includes('redirect_uri')) {
+                    log('檢測到重定向相關錯誤，這可能是導致循環跳轉的原因', 'error');
+                    updateStatus('🚨 檢測到重定向錯誤！', 'error');
+                }
+            }
+        }
+
+        // 檢查登入狀態
+        function checkLoginStatus() {
+            if (!liffInitialized) {
+                log('無法檢查登入狀態: LIFF 未初始化', 'error');
+                updateStatus('❌ 請先初始化 LIFF', 'error');
+                return;
+            }
+            
+            try {
+                const isLoggedIn = liff.isLoggedIn();
+                const isInClient = liff.isInClient();
+                const language = liff.getLanguage();
+                const version = liff.getVersion();
+                const os = liff.getOS();
+                
+                log(`登入狀態檢查 - 已登入: ${isLoggedIn}, 在客戶端: ${isInClient}`, 'info');
+                log(`LIFF 資訊 - 語言: ${language}, 版本: ${version}, 作業系統: ${os}`, 'info');
+                
+                if (isLoggedIn) {
+                    updateStatus('✅ 用戶已登入', 'success');
+                    
+                    // 嘗試獲取用戶資料
+                    liff.getProfile().then(profile => {
+                        log(`用戶資料: ${JSON.stringify(profile, null, 2)}`, 'success');
+                        updateStatus(`✅ 用戶: ${profile.displayName}`, 'success');
+                    }).catch(err => {
+                        log(`獲取用戶資料失敗: ${err.message}`, 'error');
+                    });
+                } else {
+                    updateStatus('⚠️ 用戶未登入', 'warning');
+                }
+                
+            } catch (error) {
+                log(`檢查登入狀態失敗: ${error.message}`, 'error');
+                updateStatus(`❌ 狀態檢查失敗: ${error.message}`, 'error');
+            }
+        }
+
+        // 頁面載入時自動檢查環境
+        window.onload = function() {
+            log('診斷工具頁面載入完成', 'info');
+            checkEnvironment();
+            
+            // 檢查是否有 LIFF 相關的 URL 參數
+            const urlParams = new URLSearchParams(window.location.search);
+            const liffId = urlParams.get('liff.state');
+            const code = urlParams.get('code');
+            
+            if (liffId || code) {
+                log(`檢測到 LIFF 相關參數: liff.state=${liffId}, code=${code}`, 'warning');
+                updateStatus('⚠️ 檢測到 LIFF 參數，可能正在進行授權流程', 'warning');
+            }
+        };
+
+        // 監聽頁面可見性變化
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                log('頁面變為可見狀態', 'info');
+            } else {
+                log('頁面變為隱藏狀態', 'info');
+            }
+        });
+
+        // 監聽頁面焦點變化
+        window.addEventListener('focus', function() {
+            log('頁面獲得焦點', 'info');
+        });
+
+        window.addEventListener('blur', function() {
+            log('頁面失去焦點', 'info');
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>問卷調查 - LIFF</title>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #00B900, #00C300);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .form-container {
+            padding: 30px 20px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 2px solid #f0f0f0;
+            border-radius: 15px;
+            background: #fafafa;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #00B900;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        input[type="text"], input[type="tel"], textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus, input[type="tel"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #00B900;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-option, .checkbox-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            position: relative;
+        }
+
+        .radio-option:hover, .checkbox-option:hover {
+            border-color: #00B900;
+            background: #f8fff8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 185, 0, 0.1);
+        }
+
+        .radio-option.selected, .checkbox-option.selected {
+            border-color: #00B900;
+            background: #e8f5e8;
+            box-shadow: 0 2px 4px rgba(0, 185, 0, 0.2);
+        }
+
+        .radio-option input[type="radio"], .checkbox-option input[type="checkbox"] {
+            margin-right: 10px;
+            width: auto;
+            pointer-events: none;
+        }
+
+        .radio-option label, .checkbox-option label {
+            cursor: pointer;
+            flex: 1;
+            margin: 0;
+            user-select: none;
+        }
+
+        /* 添加点击反馈效果 */
+        .radio-option:active, .checkbox-option:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 185, 0, 0.1);
+        }
+
+        /* 添加触摸设备的优化 */
+        @media (hover: none) and (pointer: coarse) {
+            .radio-option, .checkbox-option {
+                min-height: 44px; /* 确保触摸目标足够大 */
+            }
+        }
+
+        /* 添加选中状态的视觉提示 */
+        .radio-option.selected::before, .checkbox-option.selected::before {
+            content: '✓';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #00B900;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #00B900, #00C300);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin-top: 30px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .success-message, .error-message {
+            display: none;
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .other-input {
+            margin-top: 10px;
+            display: none;
+        }
+
+        .other-input.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .radio-group, .checkbox-group {
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍞 麵包店顧客問卷調查</h1>
+            <p>感謝您抽空填寫問卷，協助我們提供更好的服務</p>
+        </div>
+
+        <div class="form-container">
+            <form id="surveyForm">
+                <!-- Part 1: 基本背景 -->
+                <div class="section">
+                    <div class="section-title">✅ Part 1：基本背景（方便區分不同顧客輪廓）</div>
+                    
+                    <!-- 手機號碼 -->
+                    <div class="form-group">
+                        <label for="phone">手機號碼（作為會員ID使用） <span class="required">*</span></label>
+                        <input type="tel" id="phone" name="phone" placeholder="請輸入手機號碼" maxlength="10" required>
+                        <div id="phoneError" class="error-message"></div>
+                    </div>
+
+                    <!-- 年齡 -->
+                    <div class="form-group">
+                        <label>年齡 <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="age1" name="age" value="25歲以下" required>
+                                <label for="age1">25歲以下</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="age2" name="age" value="26-45歲" required>
+                                <label for="age2">26-45歲</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="age3" name="age" value="46歲以上" required>
+                                <label for="age3">46歲以上</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 性別 -->
+                    <div class="form-group">
+                        <label>性別 <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="male" name="gender" value="男" required>
+                                <label for="male">👨 男</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="female" name="gender" value="女" required>
+                                <label for="female">👩 女</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 居住地 -->
+                    <div class="form-group">
+                        <label>居住地 <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="location1" name="location" value="附近" required>
+                                <label for="location1">附近</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="location2" name="location" value="外地" required>
+                                <label for="location2">外地</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Part 2: 購買習慣調查 -->
+                <div class="section">
+                    <div class="section-title">✅ Part 2：購買習慣調查（了解顧客行為模式）</div>
+                    
+                    <!-- 購買頻率 -->
+                    <div class="form-group">
+                        <label>你平均多久買一次麵包？ <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="freq1" name="purchase_frequency" value="每週3次以上" required>
+                                <label for="freq1">每週3次以上</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="freq2" name="purchase_frequency" value="每週1~3次" required>
+                                <label for="freq2">每週1~3次</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="freq3" name="purchase_frequency" value="偶爾" required>
+                                <label for="freq3">偶爾</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 購買地點 -->
+                    <div class="form-group">
+                        <label>你通常在哪裡購買麵包？（可複選） <span class="required">*</span></label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="place1" name="purchase_location" value="麵包店">
+                                <label for="place1">麵包店</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="place2" name="purchase_location" value="便利商店">
+                                <label for="place2">便利商店</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="place3" name="purchase_location" value="量販超市">
+                                <label for="place3">量販超市</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="place4" name="purchase_location" value="網購">
+                                <label for="place4">網購</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 購買時間 -->
+                    <div class="form-group">
+                        <label>購買麵包的時間通常是？ <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="time1" name="purchase_time" value="早上(6:00~12:00)" required>
+                                <label for="time1">早上(6:00~12:00)</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="time2" name="purchase_time" value="下午(12:00~17:00)" required>
+                                <label for="time2">下午(12:00~17:00)</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="time3" name="purchase_time" value="晚上(17:00後)" required>
+                                <label for="time3">晚上(17:00後)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 用餐時機 -->
+                    <div class="form-group">
+                        <label>麵包通常是你的哪一餐？ <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="meal1" name="meal_type" value="早餐" required>
+                                <label for="meal1">早餐</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="meal2" name="meal_type" value="點心" required>
+                                <label for="meal2">點心</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="meal3" name="meal_type" value="其他" required>
+                                <label for="meal3">其他</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Part 3: 選擇考量 -->
+                <div class="section">
+                    <div class="section-title">✅ Part 3：選擇考量（了解真正需求）</div>
+                    
+                    <!-- 選購考量 -->
+                    <div class="form-group">
+                        <label>你在選購麵包時最重視什麼？（可複選） <span class="required">*</span></label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="factor1" name="purchase_factors" value="價格">
+                                <label for="factor1">價格</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="factor2" name="purchase_factors" value="健康">
+                                <label for="factor2">健康</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="factor3" name="purchase_factors" value="好吃">
+                                <label for="factor3">好吃</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="factor4" name="purchase_factors" value="口味嚐鮮">
+                                <label for="factor4">口味嚐鮮</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="factor5" name="purchase_factors" value="美觀">
+                                <label for="factor5">美觀</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="factor6" name="purchase_factors" value="衛生">
+                                <label for="factor6">衛生</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 健康考量 -->
+                    <div class="form-group">
+                        <label>為了健康，你會為了「較好食材」多花一點錢嗎？ <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="health1" name="health_price" value="會" required>
+                                <label for="health1">會</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="health2" name="health_price" value="不會" required>
+                                <label for="health2">不會</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 天然食材 -->
+                    <div class="form-group">
+                        <label>你希望麵包食材天然無添加，即使比較不香？ <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="natural1" name="natural_preference" value="在意" required>
+                                <label for="natural1">在意</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="natural2" name="natural_preference" value="不在意" required>
+                                <label for="natural2">不在意</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 口味偏好 -->
+                    <div class="form-group">
+                        <label>你偏好麵包口味？（可複選） <span class="required">*</span></label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="taste1" name="taste_preference" value="原味">
+                                <label for="taste1">原味</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="taste2" name="taste_preference" value="鹹">
+                                <label for="taste2">鹹</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="taste3" name="taste_preference" value="甜">
+                                <label for="taste3">甜</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Part 4: 意見與建議 -->
+                <div class="section">
+                    <div class="section-title">✅ Part 4：意見與建議（蒐集靈感與需求）</div>
+                    
+                    <!-- 常吃麵包種類 -->
+                    <div class="form-group">
+                        <label>你常吃的麵包種類？（可複選） <span class="required">*</span></label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="type1" name="bread_types" value="吐司">
+                                <label for="type1">吐司</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="type2" name="bread_types" value="台式、日式麵包">
+                                <label for="type2">台式、日式麵包</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="type3" name="bread_types" value="歐式麵包">
+                                <label for="type3">歐式麵包</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="type4" name="bread_types" value="法國麵包">
+                                <label for="type4">法國麵包</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="type5" name="bread_types" value="丹麥可頌">
+                                <label for="type5">丹麥可頌</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="type6" name="bread_types" value="貝果系列">
+                                <label for="type6">貝果系列</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="type7" name="bread_types" value="無麩質麵包">
+                                <label for="type7">無麩質麵包</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="type8" name="bread_types" value="其他">
+                                <label for="type8">其他</label>
+                            </div>
+                        </div>
+                        <div class="other-input" id="breadTypeOther">
+                            <input type="text" name="bread_types_other" placeholder="請填寫其他麵包種類">
+                        </div>
+                    </div>
+
+                    <!-- 最喜歡的麵包 -->
+                    <div class="form-group">
+                        <label>你最喜歡的麵包/蛋糕是什麼？（不限幾種）</label>
+                        <textarea name="favorite_bread" placeholder="請分享您最喜歡的麵包或蛋糕..."></textarea>
+                    </div>
+
+                    <!-- 想吃但找不到的麵包 -->
+                    <div class="form-group">
+                        <label>你想吃但市面上很難找的麵包/蛋糕？（不限幾種）</label>
+                        <textarea name="desired_bread" placeholder="請分享您想吃但市面上很難找到的麵包或蛋糕..."></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    提交問卷
+                </button>
+
+                <div class="loading" id="loading">
+                    <p>📤 正在提交問卷...</p>
+                </div>
+
+                <div class="success-message" id="successMessage">
+                    ✅ 問卷提交成功！感謝您的參與
+                </div>
+
+                <div class="error-message" id="errorMessage">
+                    ❌ 提交失敗，請稍後再試
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // LIFF 狀態管理
+        let liffInitialized = false;
+        let liffLoginAttempted = false;
+        
+        window.onload = function() {
+            // 生產環境的後端 API URL
+            const API_BASE_URL = 'https://liff-survey-worker.survey-api.workers.dev';
+            
+            // 檢查是否在 LINE App 內
+            const isInLineApp = window.navigator.userAgent.includes('Line');
+            
+            // 如果不在 LINE App 內，直接初始化表單，跳過 LIFF
+            if (!isInLineApp) {
+                console.log('不在 LINE App 內，跳過 LIFF 初始化');
+                initializeForm();
+                return;
+            }
+            
+            // 在 LINE App 內，嘗試初始化 LIFF
+            console.log('在 LINE App 內，開始初始化 LIFF');
+            
+            // 先取得 LIFF 配置
+            fetch(`${API_BASE_URL}/api/config`)
+                .then(response => response.json())
+                .then(config => {
+                    if (config.success && config.data.liffId) {
+                        console.log('LIFF 配置載入成功');
+                        
+                        // 檢查是否已經初始化過
+                        if (liffInitialized) {
+                            console.log('⚠️ LIFF 已經初始化過，跳過重複初始化');
+                            initializeForm();
+                            return;
+                        }
+                        
+                        // 使用取得的 LIFF ID 進行初始化
+                        liff.init({
+                            liffId: config.data.liffId,
+                            scope: 'profile openid'
+                        }).then(() => {
+                            liffInitialized = true; // 標記已初始化
+                            console.log('LIFF 初始化成功');
+                            console.log('LIFF 登入狀態：', liff.isLoggedIn());
+                            console.log('LIFF 環境：', liff.isInClient() ? 'LINE App內' : '外部瀏覽器');
+                            
+                            // 檢查用戶是否已授權
+                            if (liff.isLoggedIn()) {
+                                console.log('用戶已登入，可以獲取profile');
+                            } else {
+                                console.log('用戶未登入，需要手動授權');
+                                // 不自動登入，讓用戶手動操作
+                            }
+                            
+                            initializeForm();
+                        }).catch((err) => {
+                            console.error('LIFF 初始化失敗', err);
+                            // LIFF 失敗時也要初始化表單
+                            initializeForm();
+                        });
+                    } else {
+                        console.error('無法取得 LIFF 配置');
+                        initializeForm(); // 沒有 LIFF 配置也要初始化表單
+                    }
+                })
+                .catch((err) => {
+                    console.error('取得配置失敗:', err);
+                    initializeForm(); // 取得配置失敗也要初始化表單
+                });
+        };
+
+        function initializeForm() {
+            
+            const phoneInput = document.getElementById('phone');
+            phoneInput.addEventListener('input', function(e) {
+                // 只允許數字
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                // 限制長度
+                if (e.target.value.length > 10) {
+                    e.target.value = e.target.value.slice(0, 10);
+                }
+                
+                // 即時驗證手機號碼格式
+                validatePhoneFormat(e.target);
+            });
+            
+            // 手機號碼格式驗證函數
+            function validatePhoneFormat(input) {
+                const phone = input.value;
+                const phoneError = document.getElementById('phoneError');
+                
+                if (phone.length === 0) {
+                    phoneError.textContent = '';
+                    input.style.borderColor = '#ddd';
+                    return true;
+                }
+                
+                if (phone.length !== 10) {
+                    phoneError.textContent = '手機號碼必須是10位數字';
+                    input.style.borderColor = '#e74c3c';
+                    return false;
+                }
+                
+                if (!/^09\d{8}$/.test(phone)) {
+                    phoneError.textContent = '手機號碼格式錯誤，請以09開頭';
+                    input.style.borderColor = '#e74c3c';
+                    return false;
+                }
+                
+                phoneError.textContent = '';
+                input.style.borderColor = '#00B900';
+                return true;
+            }
+
+            // 單選按鈕樣式處理 - 整個區域都可點擊
+            const radioOptions = document.querySelectorAll('.radio-option');
+            radioOptions.forEach(option => {
+                const radio = option.querySelector('input[type="radio"]');
+                
+                // 點擊整個區域時觸發單選按鈕
+                option.addEventListener('click', function(e) {
+                    // 如果點擊的是 input 或 label，不重複處理
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') {
+                        return;
+                    }
+                    
+                    // 觸發單選按鈕的點擊
+                    radio.click();
+                });
+                
+                radio.addEventListener('change', function() {
+                    // 移除同組的選中樣式
+                    const name = this.name;
+                    document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+                        r.closest('.radio-option').classList.remove('selected');
+                    });
+                    // 添加選中樣式
+                    this.closest('.radio-option').classList.add('selected');
+                });
+            });
+
+            // 複選框樣式處理 - 整個區域都可點擊
+            const checkboxOptions = document.querySelectorAll('.checkbox-option');
+            checkboxOptions.forEach(option => {
+                const checkbox = option.querySelector('input[type="checkbox"]');
+                
+                // 點擊整個區域時觸發複選框
+                option.addEventListener('click', function(e) {
+                    // 如果點擊的是 input 或 label，不重複處理
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') {
+                        return;
+                    }
+                    
+                    // 觸發複選框的點擊
+                    checkbox.click();
+                });
+                
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        this.closest('.checkbox-option').classList.add('selected');
+                    } else {
+                        this.closest('.checkbox-option').classList.remove('selected');
+                    }
+                });
+            });
+
+            // "其他" 選項顯示/隱藏文字輸入框
+            document.getElementById('type8').addEventListener('change', function() {
+                const otherInput = document.getElementById('breadTypeOther');
+                if (this.checked) {
+                    otherInput.classList.add('show');
+                } else {
+                    otherInput.classList.remove('show');
+                    otherInput.querySelector('input').value = '';
+                }
+            });
+
+            // 表單提交處理
+            const form = document.getElementById('surveyForm');
+            form.addEventListener('submit', handleSubmit);
+        }
+
+        function getCheckboxValues(name) {
+            const checkboxes = document.querySelectorAll(`input[name="${name}"]:checked`);
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // 隱藏之前的訊息
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+            // 驗證複選框必填項目
+            const requiredCheckboxGroups = [
+                'purchase_location', 'purchase_factors', 'taste_preference', 'bread_types'
+            ];
+            
+            for (const groupName of requiredCheckboxGroups) {
+                const checked = document.querySelectorAll(`input[name="${groupName}"]:checked`);
+                if (checked.length === 0) {
+                    alert(`請至少選擇一項：${getFieldDisplayName(groupName)}`);
+                    return;
+                }
+            }
+
+            // 顯示載入狀態
+            submitBtn.disabled = true;
+            loading.classList.add('show');
+
+            try {
+                // 生產環境的後端 API URL
+                const API_BASE_URL = 'https://liff-survey-worker.survey-api.workers.dev';
+                
+                // 收集表單資料
+                const formData = new FormData(e.target);
+                const surveyData = {
+                    memberId: formData.get('phone'), // 使用手機號碼作為會員ID
+                    phone: formData.get('phone'),
+                    age: formData.get('age'),
+                    gender: formData.get('gender'),
+                    location: formData.get('location'),
+                    purchase_frequency: formData.get('purchase_frequency'),
+                    purchase_location: getCheckboxValues('purchase_location'),
+                    purchase_time: formData.get('purchase_time'),
+                    meal_type: formData.get('meal_type'),
+                    purchase_factors: getCheckboxValues('purchase_factors'),
+                    health_price: formData.get('health_price'),
+                    natural_preference: formData.get('natural_preference'),
+                    taste_preference: getCheckboxValues('taste_preference'),
+                    bread_types: getCheckboxValues('bread_types'),
+                    bread_types_other: formData.get('bread_types_other') || '',
+                    favorite_bread: formData.get('favorite_bread') || '',
+                    desired_bread: formData.get('desired_bread') || '',
+                    timestamp: new Date().toISOString()
+                };
+
+                // 獲取 LIFF 用戶資訊（如果可用）
+                if (typeof liff !== 'undefined' && liff.isLoggedIn()) {
+                    try {
+                        console.log('LIFF 登入狀態：', liff.isLoggedIn());
+                        console.log('LIFF 環境：', liff.isInClient() ? 'LINE App內' : '外部瀏覽器');
+                        
+                        const profile = await liff.getProfile();
+                        console.log('獲取到用戶資料：', profile);
+                        
+                        surveyData.lineUserId = profile.userId;
+                        surveyData.displayName = profile.displayName;
+                        
+                        console.log('已設定 LINE 用戶資料：', {
+                            lineUserId: surveyData.lineUserId,
+                            displayName: surveyData.displayName
+                        });
+                    } catch (err) {
+                        console.error('獲取 LIFF 用戶資料失敗：', err);
+                        // 在開發環境顯示錯誤，生產環境靜默處理
+                        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                            console.error('LIFF 錯誤詳情：', err);
+                        }
+                    }
+                } else {
+                    console.log('LIFF 未登入或不可用');
+                    if (typeof liff !== 'undefined') {
+                        console.log('LIFF 登入狀態：', liff.isLoggedIn());
+                        console.log('LIFF 環境：', liff.isInClient() ? 'LINE App內' : '外部瀏覽器');
+                    }
+                }
+
+                // 發送到後端 API
+                const response = await fetch(`${API_BASE_URL}/api/survey`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer d92ebeb6b6e1b6790d02879d7c2c04d0fae71f4a9b608523cc07a3add72a808d'
+                    },
+                    body: JSON.stringify(surveyData)
+                });
+
+                if (response.ok) {
+                    // 成功
+                    successMessage.style.display = 'block';
+                    e.target.reset();
+                    
+                    // 移除選中樣式
+                    document.querySelectorAll('.radio-option.selected, .checkbox-option.selected').forEach(option => {
+                        option.classList.remove('selected');
+                    });
+
+                    // 隱藏其他輸入框
+                    document.getElementById('breadTypeOther').classList.remove('show');
+
+                    // 清除 URL 中的參數（如果有的話）
+                    if (window.history.replaceState) {
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+
+                    // 3秒後關閉 LIFF 視窗
+                    setTimeout(() => {
+                        if (typeof liff !== 'undefined' && liff.isInClient()) {
+                            liff.closeWindow();
+                        }
+                    }, 3000);
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || '提交失敗');
+                }
+            } catch (error) {
+                // 只在開發環境顯示詳細錯誤
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    console.error('提交錯誤:', error);
+                }
+                errorMessage.textContent = '❌ ' + (error.message || '提交失敗，請稍後再試');
+                errorMessage.style.display = 'block';
+            } finally {
+                // 隱藏載入狀態
+                loading.classList.remove('show');
+                submitBtn.disabled = false;
+            }
+        }
+
+        function getFieldDisplayName(fieldName) {
+            const fieldNames = {
+                'purchase_location': '購買地點',
+                'purchase_factors': '選購考量',
+                'taste_preference': '口味偏好',
+                'bread_types': '常吃的麵包種類'
+            };
+            return fieldNames[fieldName] || fieldName;
+        }
+    </script>
+</body>
+</html> 

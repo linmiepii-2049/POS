@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIFF 測試頁面</title>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LIFF 測試頁面</h1>
+        <p>此頁面用於測試 LIFF 功能，幫助診斷登入問題。</p>
+        
+        <div id="status" class="status info">正在初始化...</div>
+        
+        <div>
+            <button id="initBtn" onclick="initLIFF()">初始化 LIFF</button>
+            <button id="loginBtn" onclick="loginLIFF()" disabled>登入</button>
+            <button id="logoutBtn" onclick="logoutLIFF()" disabled>登出</button>
+            <button id="profileBtn" onclick="getProfile()" disabled>獲取資料</button>
+            <button id="closeBtn" onclick="closeWindow()" disabled>關閉視窗</button>
+        </div>
+        
+        <div>
+            <h3>狀態資訊</h3>
+            <div id="info"></div>
+        </div>
+        
+        <div>
+            <h3>操作日誌</h3>
+            <div id="log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let liffInitialized = false;
+        const API_BASE_URL = 'https://liff-survey-worker.survey-api.workers.dev';
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+        }
+        
+        function updateInfo() {
+            const infoDiv = document.getElementById('info');
+            if (typeof liff === 'undefined') {
+                infoDiv.innerHTML = '<p>LIFF SDK 未載入</p>';
+                return;
+            }
+            
+            infoDiv.innerHTML = `
+                <p><strong>LIFF 初始化狀態：</strong> ${liffInitialized ? '已初始化' : '未初始化'}</p>
+                <p><strong>登入狀態：</strong> ${liff.isLoggedIn() ? '已登入' : '未登入'}</p>
+                <p><strong>環境：</strong> ${liff.isInClient() ? 'LINE App內' : '外部瀏覽器'}</p>
+                <p><strong>語言：</strong> ${liff.getLanguage()}</p>
+                <p><strong>版本：</strong> ${liff.getVersion()}</p>
+                <p><strong>OS：</strong> ${liff.getOS()}</p>
+            `;
+        }
+        
+        async function initLIFF() {
+            try {
+                log('開始初始化 LIFF...');
+                updateStatus('正在初始化 LIFF...', 'info');
+                
+                // 獲取配置
+                const response = await fetch(`${API_BASE_URL}/api/config`);
+                const config = await response.json();
+                
+                if (!config.success || !config.data.liffId) {
+                    throw new Error('無法獲取 LIFF 配置');
+                }
+                
+                log(`獲取到 LIFF ID: ${config.data.liffId}`);
+                log(`環境: ${config.data.environment}`);
+                
+                // 初始化 LIFF
+                await liff.init({
+                    liffId: config.data.liffId,
+                    scope: 'profile openid'
+                });
+                
+                liffInitialized = true;
+                log('LIFF 初始化成功！');
+                updateStatus('LIFF 初始化成功', 'success');
+                
+                // 更新按鈕狀態
+                document.getElementById('loginBtn').disabled = false;
+                document.getElementById('profileBtn').disabled = false;
+                document.getElementById('closeBtn').disabled = false;
+                
+                // 更新資訊顯示
+                updateInfo();
+                
+                // 檢查登入狀態
+                if (liff.isLoggedIn()) {
+                    log('用戶已登入');
+                    document.getElementById('loginBtn').disabled = true;
+                    document.getElementById('logoutBtn').disabled = false;
+                } else {
+                    log('用戶未登入');
+                }
+                
+            } catch (error) {
+                log(`LIFF 初始化失敗: ${error.message}`, 'error');
+                updateStatus(`初始化失敗: ${error.message}`, 'error');
+            }
+        }
+        
+        function loginLIFF() {
+            try {
+                log('開始登入...');
+                updateStatus('正在登入...', 'info');
+                
+                if (!liffInitialized) {
+                    throw new Error('LIFF 尚未初始化');
+                }
+                
+                liff.login();
+                
+            } catch (error) {
+                log(`登入失敗: ${error.message}`, 'error');
+                updateStatus(`登入失敗: ${error.message}`, 'error');
+            }
+        }
+        
+        function logoutLIFF() {
+            try {
+                log('開始登出...');
+                updateStatus('正在登出...', 'info');
+                
+                if (!liffInitialized) {
+                    throw new Error('LIFF 尚未初始化');
+                }
+                
+                liff.logout();
+                
+            } catch (error) {
+                log(`登出失敗: ${error.message}`, 'error');
+                updateStatus(`登出失敗: ${error.message}`, 'error');
+            }
+        }
+        
+        async function getProfile() {
+            try {
+                log('獲取用戶資料...');
+                updateStatus('正在獲取用戶資料...', 'info');
+                
+                if (!liffInitialized) {
+                    throw new Error('LIFF 尚未初始化');
+                }
+                
+                if (!liff.isLoggedIn()) {
+                    throw new Error('用戶未登入');
+                }
+                
+                const profile = await liff.getProfile();
+                log(`用戶資料: ${JSON.stringify(profile, null, 2)}`);
+                updateStatus('用戶資料獲取成功', 'success');
+                
+            } catch (error) {
+                log(`獲取用戶資料失敗: ${error.message}`, 'error');
+                updateStatus(`獲取用戶資料失敗: ${error.message}`, 'error');
+            }
+        }
+        
+        function closeWindow() {
+            try {
+                log('關閉視窗...');
+                updateStatus('正在關閉視窗...', 'info');
+                
+                if (!liffInitialized) {
+                    throw new Error('LIFF 尚未初始化');
+                }
+                
+                if (liff.isInClient()) {
+                    liff.closeWindow();
+                } else {
+                    log('不在 LINE App 內，無法關閉視窗');
+                    updateStatus('不在 LINE App 內，無法關閉視窗', 'warning');
+                }
+                
+            } catch (error) {
+                log(`關閉視窗失敗: ${error.message}`, 'error');
+                updateStatus(`關閉視窗失敗: ${error.message}`, 'error');
+            }
+        }
+        
+        // 頁面載入時自動初始化
+        window.onload = function() {
+            log('頁面載入完成');
+            updateStatus('頁面載入完成，請點擊初始化按鈕', 'info');
+            updateInfo();
+        };
+        
+        // 監聽 LIFF 狀態變化
+        if (typeof liff !== 'undefined') {
+            liff.on('statechange', function() {
+                log('LIFF 狀態變化');
+                updateInfo();
+            });
+        }
+    </script>
+</body>
+</html> 

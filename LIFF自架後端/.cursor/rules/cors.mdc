@@ -1,0 +1,43 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+{
+  "name": "cors-policy-best-practices",
+  "description": "防止跨來源請求錯誤與安全漏洞，確保後端 API 正確設定 CORS 標頭，並協助前端依照規範攜帶憑證請求。",
+  "rules": [
+    {
+      "if": "使用 Access-Control-Allow-Origin: * 且同時設定 Access-Control-Allow-Credentials: true",
+      "then": "回報錯誤，提醒不可同時使用通配符與憑證"
+    },
+    {
+      "if": "Access-Control-Allow-Origin 為動態反射 req.headers.origin",
+      "then": "檢查是否有白名單驗證，否則回報風險"
+    },
+    {
+      "if": "Access-Control-Allow-Headers 設為 *",
+      "then": "回報無效，並建議列出具體允許的標頭"
+    },
+    {
+      "if": "Access-Control-Allow-Methods 設為 *",
+      "then": "回報錯誤，建議列出明確方法如 GET, POST, DELETE"
+    },
+    {
+      "if": "前端使用 fetch 發送跨域請求",
+      "then": "建議設定 credentials: 'include' 以攜帶憑證"
+    },
+    {
+      "if": "後端回應中未設定 Access-Control-Allow-Credentials 且前端要求包含 Cookie",
+      "then": "回報缺少憑證允許設定"
+    },
+    {
+      "if": "Origin 白名單中包含 null",
+      "then": "回報安全風險，建議移除 null"
+    },
+    {
+      "if": "允許跨域來源包含 http 網址但主網站為 https",
+      "then": "提醒不應允許非 TLS 來源，可能導致降級攻擊"
+    }
+  ]
+}
