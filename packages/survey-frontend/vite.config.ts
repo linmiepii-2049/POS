@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
   
   // GitHub Pages 的 base 路徑（僅在 production 時使用）
   const base = mode === 'production' 
-    ? '/POS_0922/'  // GitHub repo 名稱
+    ? '/POS/'  // GitHub repo 名稱
     : '/';
 
   return {
