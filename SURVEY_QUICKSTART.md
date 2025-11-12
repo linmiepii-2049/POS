@@ -117,7 +117,7 @@ git push origin main
 
 1. 更新 LIFF Endpoint URL:
    ```
-   https://YOUR_USERNAME.github.io/POS_0922/
+   https://YOUR_USERNAME.github.io/POS/
    ```
 
 2. 確認 Scope: `profile`, `openid`
@@ -143,7 +143,7 @@ curl https://pos-backend-prod.survey-api.workers.dev/health
 
 ### 2. 檢查 Survey 前端
 
-訪問: `https://YOUR_USERNAME.github.io/POS_0922/`
+訪問: `https://YOUR_USERNAME.github.io/POS/`
 
 應該看到問卷表單頁面。
 

@@ -108,7 +108,7 @@ pnpm build:gh-pages
 在 LINE Developers Console 中設定 LIFF Endpoint URL：
 
 ```
-https://YOUR_USERNAME.github.io/POS_0922/
+https://YOUR_USERNAME.github.io/POS/
 ```
 
 ## 🔧 程式碼結構

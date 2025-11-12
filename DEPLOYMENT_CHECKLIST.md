@@ -141,7 +141,7 @@
 
 - [ ] 更新 LIFF Endpoint URL
   ```
-  https://YOUR_USERNAME.github.io/POS_0922/
+  https://YOUR_USERNAME.github.io/POS/
   ```
 
 - [ ] 確認 Scope 設定
@@ -160,7 +160,7 @@
   ```
 
 - [ ] 訪問 Survey 前端
-  - URL: `https://YOUR_USERNAME.github.io/POS_0922/`
+  - URL: `https://YOUR_USERNAME.github.io/POS/`
   - 應該顯示問卷表單
 
 - [ ] 測試 LIFF 整合

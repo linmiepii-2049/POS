@@ -19,7 +19,7 @@
 ┌─────────────────────────────────────────┐
 │  Survey Frontend                        │
 │  (GitHub Pages)                         │
-│  https://username.github.io/POS_0922/   │
+│  https://username.github.io/POS/   │
 └────────────────┬────────────────────────┘
                  │
                  │ POST /api/surveys
@@ -167,7 +167,7 @@ pnpm build:gh-pages
 1. 前往你的 LIFF 應用
 2. 更新 Endpoint URL:
    ```
-   https://YOUR_USERNAME.github.io/POS_0922/
+   https://YOUR_USERNAME.github.io/POS/
    ```
 3. 確認 Scope 包含: `profile`, `openid`
 
@@ -340,7 +340,7 @@ curl http://localhost:8787/api/surveys/stats/summary
 ## 🔗 相關連結
 
 - **POS Backend API**: https://pos-backend-prod.survey-api.workers.dev
-- **Survey Frontend**: https://YOUR_USERNAME.github.io/POS_0922/
+- **Survey Frontend**: https://YOUR_USERNAME.github.io/POS/
 - **LINE Developers Console**: https://developers.line.biz/
 - **LIFF Documentation**: https://developers.line.biz/en/docs/liff/
 
