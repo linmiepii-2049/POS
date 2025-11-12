@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { format } from 'date-fns';
-import { zhTW } from 'date-fns/locale';
 import {
   useProductsList,
   useProductsCreate,
@@ -14,8 +12,7 @@ import {
   type ProductsUpdateBody,
 } from '../../api/posClient';
 import { Table, type TableColumn } from '../../components/Table';
-import { FormField, Input, Select, Button, Textarea } from '../../components/Form';
-import { ImageUploader } from '../../components/Uploader';
+import { FormField, Input, Select, Button } from '../../components/Form';
 import { ProductDialog } from '../../components/ProductDialog';
 import { clsx } from 'clsx';
 
@@ -84,7 +81,7 @@ export function AdminProducts() {
   // React Query 會將 API 回應包裝在 data 屬性中
   // API 回應結構: { success: true, data: [...], timestamp: ... }
   // React Query 包裝後: { data: { success: true, data: [...], timestamp: ... } }
-  const categoriesData = categoriesResponse?.data?.data;
+  const categoriesData = (categoriesResponse && 'data' in categoriesResponse && categoriesResponse.data && 'data' in categoriesResponse.data) ? categoriesResponse.data.data : undefined;
   const createProductMutation = useProductsCreate({
     mutation: {
       onSuccess: () => {
@@ -567,7 +564,7 @@ export function AdminProducts() {
       {/* 商品列表 */}
       <Table
         columns={columns}
-        data={productsData?.data || []}
+        data={(productsData && 'data' in productsData) ? (productsData.data || []) : []}
         loading={isLoading}
         emptyText="暫無商品資料"
         sortBy={sortBy}

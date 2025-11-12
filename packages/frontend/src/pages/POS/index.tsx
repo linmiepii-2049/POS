@@ -170,7 +170,7 @@ export function POSPage() {
       });
 
       // 設定訂單編號和重新獲取統計
-      setOrderNumber(orderResponse.data.orderNumber || `ORD-${Date.now()}`);
+      setOrderNumber(orderResponse.data.order_number || `ORD-${Date.now()}`);
       refetchTodayStats(); // 重新獲取今日訂單統計
       
       // 清空購物車、用戶選擇和點數折抵
@@ -220,7 +220,7 @@ export function POSPage() {
         <OrderComplete
           orderNumber={orderNumber}
           onNewOrder={handleNewOrder}
-          dailyOrderCount={todayStatsResponse?.data?.data?.todayOrderCount || 0}
+          dailyOrderCount={(todayStatsResponse && 'data' in todayStatsResponse && todayStatsResponse.data) ? (todayStatsResponse.data.data?.todayOrderCount || 0) : 0}
         />
     );
   }
@@ -244,7 +244,7 @@ export function POSPage() {
                 重新結帳
               </button>
               <div className="text-sm text-gray-600">
-                今日訂單：<span className="font-semibold">{todayStatsResponse?.data?.data?.todayOrderCount || 0}</span>
+                今日訂單：<span className="font-semibold">{(todayStatsResponse && 'data' in todayStatsResponse && todayStatsResponse.data) ? (todayStatsResponse.data.data?.todayOrderCount || 0) : 0}</span>
               </div>
               <div className="text-sm text-gray-600">
                 購物車：<span className="font-semibold">{state.itemCount} 項</span>
@@ -276,7 +276,7 @@ export function POSPage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {productsData?.data?.map((product: Record<string, unknown>) => (
+                  {(productsData && 'data' in productsData && productsData.data) && productsData.data.map((product: Record<string, unknown>) => (
                     <ProductCard
                       key={typeof product.id === 'number' ? product.id : 0}
                       product={{

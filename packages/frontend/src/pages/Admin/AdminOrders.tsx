@@ -3,7 +3,6 @@ import toast from 'react-hot-toast';
 import {
   useOrdersList,
   useOrdersUpdateStatus,
-  useOrdersCancel,
   type OrdersList200DataItem,
 } from '../../api/posClient';
 import { formatMoney } from '../../utils/money';
@@ -49,7 +48,6 @@ export function AdminOrders() {
   const ordersData = ordersResponse?.data;
 
   const updateStatusMutation = useOrdersUpdateStatus();
-  const cancelOrderMutation = useOrdersCancel();
 
   /**
    * 更新訂單狀態

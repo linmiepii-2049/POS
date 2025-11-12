@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { format } from 'date-fns';
-import { zhTW } from 'date-fns/locale';
 import {
   useGetApiUsers,
   usePostApiUsers,
@@ -359,7 +357,7 @@ export function AdminUsers() {
       {/* 用戶列表 */}
       <Table
         columns={columns}
-        data={usersData?.data || []}
+        data={(usersData && 'data' in usersData) ? (usersData.data || []) : []}
         loading={isLoading}
         emptyText="暫無用戶資料"
         sortBy={sortBy}

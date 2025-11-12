@@ -139,7 +139,7 @@ export function Data() {
             </div>
 
             {/* 資料表摘要 */}
-            {data?.data?.map((summary: any) => (
+            {(data && 'data' in data && data.data) && data.data.map((summary: any) => (
               <div key={summary.table_name} className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-gray-900 capitalize">
