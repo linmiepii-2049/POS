@@ -38,6 +38,8 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       'process.env': {},
+      'import.meta.env.VITE_API_BASE': JSON.stringify(env.VITE_API_BASE),
+      'import.meta.env.VITE_LIFF_ID': JSON.stringify(env.VITE_LIFF_ID),
     },
     envPrefix: 'VITE_',
   };
