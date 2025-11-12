@@ -72,12 +72,12 @@ jobs:
       - name: 🔍 Survey 前端 - ESLint 檢查
         run: |
           cd packages/survey-frontend
-          pnpm run lint || true
+          pnpm run lint
 
       - name: 🔍 Survey 前端 - TypeScript 型別檢查
         run: |
           cd packages/survey-frontend
-          pnpm run typecheck || true
+          pnpm run typecheck
 
       - name: ✅ 品質檢查通過
         run: echo "🎉 所有品質檢查已通過！"
