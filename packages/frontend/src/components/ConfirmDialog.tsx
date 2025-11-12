@@ -40,6 +40,7 @@ export interface ConfirmDialogProps {
     items: CartItem[];
     userId?: number;
     // couponIds: number[]; // Coupon feature hidden
+    points_to_redeem?: number; // 點數折抵
     totalAmount: number;
     finalAmount: number;
   }) => void;
@@ -64,15 +65,25 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
   const [userData, setUserData] = useState<any>(null);
   
   // 查詢會員（手機號碼）
-  const { data: userQueryData, refetch: refetchUser } = useUsersGetByPhone(
+  const { refetch: refetchUser } = useUsersGetByPhone(
     { phone: phoneNumber },
-    { query: { enabled: false } }
+    { 
+      query: { 
+        enabled: false,
+        queryKey: ['users', 'by-phone', phoneNumber] as const
+      } 
+    }
   );
 
   // 查詢會員（LINE ID）
-  const { data: lineIdQueryData, refetch: refetchLineIdUser } = useUsersGetByLineId(
+  const { refetch: refetchLineIdUser } = useUsersGetByLineId(
     lineId || 'dummy',
-    { query: { enabled: false } }
+    { 
+      query: { 
+        enabled: false,
+        queryKey: ['users', 'by-line-id', lineId] as const
+      } 
+    }
   );
   
   /* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11)
@@ -96,7 +107,8 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
         const userResult = await refetchUser();
         console.log('會員查詢結果:', userResult.data);
         
-        if (userResult.data?.data?.data) {
+        // 類型守衛：檢查是否為成功回應
+        if (userResult.data && 'data' in userResult.data && userResult.data.data) {
           // 正確設置 userData，包含完整的 API 回應結構
           setUserData(userResult.data);
           setRedeemAmount(0); // 重置點數折抵
@@ -118,7 +130,8 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
         const userResult = await refetchLineIdUser();
         console.log('LINE ID 查詢結果:', userResult.data);
         
-        if (userResult.data?.data?.data) {
+        // 類型守衛：檢查是否為成功回應
+        if (userResult.data && 'data' in userResult.data && userResult.data.data) {
           setUserData(userResult.data);
           setRedeemAmount(0); // 重置點數折抵
           console.log('設置 LINE ID userData:', userResult.data);
@@ -368,7 +381,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
       items: state.items,
       userId: userData?.data?.data?.id,
       // couponCodeId: selectedCoupons.length > 0 ? selectedCoupons[0] : undefined, // Coupon feature hidden
-      pointsToRedeem: pointsToRedeem,
+      points_to_redeem: pointsToRedeem, // 使用 snake_case 符合後端 schema
       totalAmount: finalAmount, // 使用折扣後的最終金額
       finalAmount,
     });

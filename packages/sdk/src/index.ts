@@ -21,6 +21,488 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
+/**
+ * 年齡範圍
+ */
+export type CreateSurveyRequestAge = typeof CreateSurveyRequestAge[keyof typeof CreateSurveyRequestAge];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateSurveyRequestAge = {
+  '25歲以下': '25歲以下',
+  '26-45歲': '26-45歲',
+  '46歲以上': '46歲以上',
+} as const;
+
+/**
+ * 性別
+ */
+export type CreateSurveyRequestGender = typeof CreateSurveyRequestGender[keyof typeof CreateSurveyRequestGender];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateSurveyRequestGender = {
+  男: '男',
+  女: '女',
+} as const;
+
+/**
+ * 居住地
+ */
+export type CreateSurveyRequestLocation = typeof CreateSurveyRequestLocation[keyof typeof CreateSurveyRequestLocation];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateSurveyRequestLocation = {
+  附近: '附近',
+  外地: '外地',
+} as const;
+
+/**
+ * 購買頻率
+ */
+export type CreateSurveyRequestPurchaseFrequency = typeof CreateSurveyRequestPurchaseFrequency[keyof typeof CreateSurveyRequestPurchaseFrequency];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateSurveyRequestPurchaseFrequency = {
+  每週3次以上: '每週3次以上',
+  '每週1~3次': '每週1~3次',
+  偶爾: '偶爾',
+} as const;
+
+export type CreateSurveyRequestPurchaseLocationItem = typeof CreateSurveyRequestPurchaseLocationItem[keyof typeof CreateSurveyRequestPurchaseLocationItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateSurveyRequestPurchaseLocationItem = {
+  麵包店: '麵包店',
+  便利商店: '便利商店',
+  量販超市: '量販超市',
+  網購: '網購',
+} as const;
+
+/**
+ * 購買時間
+ */
+export type CreateSurveyRequestPurchaseTime = typeof CreateSurveyRequestPurchaseTime[keyof typeof CreateSurveyRequestPurchaseTime];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateSurveyRequestPurchaseTime = {
+  '早上(6:00~12:00)': '早上(6:00~12:00)',
+  '下午(12:00~17:00)': '下午(12:00~17:00)',
+  '晚上(17:00後)': '晚上(17:00後)',
+} as const;
+
+/**
+ * 用餐時機
+ */
+export type CreateSurveyRequestMealType = typeof CreateSurveyRequestMealType[keyof typeof CreateSurveyRequestMealType];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateSurveyRequestMealType = {
+  早餐: '早餐',
+  點心: '點心',
+  其他: '其他',
+} as const;
+
+export type CreateSurveyRequestPurchaseFactorsItem = typeof CreateSurveyRequestPurchaseFactorsItem[keyof typeof CreateSurveyRequestPurchaseFactorsItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateSurveyRequestPurchaseFactorsItem = {
+  價格: '價格',
+  健康: '健康',
+  好吃: '好吃',
+  口味嚐鮮: '口味嚐鮮',
+  美觀: '美觀',
+  衛生: '衛生',
+} as const;
+
+/**
+ * 會因健康考量而選擇較貴的麵包嗎
+ */
+export type CreateSurveyRequestHealthPrice = typeof CreateSurveyRequestHealthPrice[keyof typeof CreateSurveyRequestHealthPrice];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateSurveyRequestHealthPrice = {
+  會: '會',
+  不會: '不會',
+} as const;
+
+/**
+ * 在意天然食材嗎
+ */
+export type CreateSurveyRequestNaturalPreference = typeof CreateSurveyRequestNaturalPreference[keyof typeof CreateSurveyRequestNaturalPreference];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateSurveyRequestNaturalPreference = {
+  在意: '在意',
+  不在意: '不在意',
+} as const;
+
+export type CreateSurveyRequestTastePreferenceItem = typeof CreateSurveyRequestTastePreferenceItem[keyof typeof CreateSurveyRequestTastePreferenceItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateSurveyRequestTastePreferenceItem = {
+  原味: '原味',
+  鹹: '鹹',
+  甜: '甜',
+} as const;
+
+export type CreateSurveyRequestBreadTypesItem = typeof CreateSurveyRequestBreadTypesItem[keyof typeof CreateSurveyRequestBreadTypesItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateSurveyRequestBreadTypesItem = {
+  吐司: '吐司',
+  '台式、日式麵包': '台式、日式麵包',
+  歐式麵包: '歐式麵包',
+  法國麵包: '法國麵包',
+  丹麥可頌: '丹麥可頌',
+  貝果系列: '貝果系列',
+  無麩質麵包: '無麩質麵包',
+  其他: '其他',
+} as const;
+
+export interface CreateSurveyRequest {
+  /**
+   * 會員 ID（手機號碼）
+   * @pattern ^09\d{8}$
+   */
+  memberId: string;
+  /**
+   * 手機號碼
+   * @pattern ^09\d{8}$
+   */
+  phone: string;
+  /** 年齡範圍 */
+  age: CreateSurveyRequestAge;
+  /** 性別 */
+  gender: CreateSurveyRequestGender;
+  /** 居住地 */
+  location?: CreateSurveyRequestLocation;
+  /** 購買頻率 */
+  purchaseFrequency?: CreateSurveyRequestPurchaseFrequency;
+  /** 購買地點（可複選） */
+  purchaseLocation?: CreateSurveyRequestPurchaseLocationItem[];
+  /** 購買時間 */
+  purchaseTime?: CreateSurveyRequestPurchaseTime;
+  /** 用餐時機 */
+  mealType?: CreateSurveyRequestMealType;
+  /** 選購考量因素（可複選） */
+  purchaseFactors?: CreateSurveyRequestPurchaseFactorsItem[];
+  /** 會因健康考量而選擇較貴的麵包嗎 */
+  healthPrice?: CreateSurveyRequestHealthPrice;
+  /** 在意天然食材嗎 */
+  naturalPreference?: CreateSurveyRequestNaturalPreference;
+  /** 口味偏好（可複選） */
+  tastePreference?: CreateSurveyRequestTastePreferenceItem[];
+  /** 喜歡的麵包種類（可複選） */
+  breadTypes?: CreateSurveyRequestBreadTypesItem[];
+  /**
+   * 其他麵包種類（自行填寫）
+   * @maxLength 100
+   */
+  breadTypesOther?: string;
+  /**
+   * 最喜歡的麵包
+   * @maxLength 500
+   */
+  favoriteBread?: string;
+  /**
+   * 想吃的麵包
+   * @maxLength 500
+   */
+  desiredBread?: string;
+  /** LINE 用戶 ID */
+  lineUserId?: string;
+  /** LINE 顯示名稱 */
+  displayName?: string;
+}
+
+/**
+ * 年齡範圍
+ */
+export type SurveyListResponseSurveysItemAge = typeof SurveyListResponseSurveysItemAge[keyof typeof SurveyListResponseSurveysItemAge];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SurveyListResponseSurveysItemAge = {
+  '25歲以下': '25歲以下',
+  '26-45歲': '26-45歲',
+  '46歲以上': '46歲以上',
+} as const;
+
+/**
+ * 性別
+ */
+export type SurveyListResponseSurveysItemGender = typeof SurveyListResponseSurveysItemGender[keyof typeof SurveyListResponseSurveysItemGender];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SurveyListResponseSurveysItemGender = {
+  男: '男',
+  女: '女',
+} as const;
+
+/**
+ * 居住地
+ */
+export type SurveyListResponseSurveysItemLocation = typeof SurveyListResponseSurveysItemLocation[keyof typeof SurveyListResponseSurveysItemLocation];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SurveyListResponseSurveysItemLocation = {
+  附近: '附近',
+  外地: '外地',
+} as const;
+
+/**
+ * 購買頻率
+ */
+export type SurveyListResponseSurveysItemPurchaseFrequency = typeof SurveyListResponseSurveysItemPurchaseFrequency[keyof typeof SurveyListResponseSurveysItemPurchaseFrequency];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SurveyListResponseSurveysItemPurchaseFrequency = {
+  每週3次以上: '每週3次以上',
+  '每週1~3次': '每週1~3次',
+  偶爾: '偶爾',
+} as const;
+
+export type SurveyListResponseSurveysItemPurchaseLocationItem = typeof SurveyListResponseSurveysItemPurchaseLocationItem[keyof typeof SurveyListResponseSurveysItemPurchaseLocationItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SurveyListResponseSurveysItemPurchaseLocationItem = {
+  麵包店: '麵包店',
+  便利商店: '便利商店',
+  量販超市: '量販超市',
+  網購: '網購',
+} as const;
+
+/**
+ * 購買時間
+ */
+export type SurveyListResponseSurveysItemPurchaseTime = typeof SurveyListResponseSurveysItemPurchaseTime[keyof typeof SurveyListResponseSurveysItemPurchaseTime];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SurveyListResponseSurveysItemPurchaseTime = {
+  '早上(6:00~12:00)': '早上(6:00~12:00)',
+  '下午(12:00~17:00)': '下午(12:00~17:00)',
+  '晚上(17:00後)': '晚上(17:00後)',
+} as const;
+
+/**
+ * 用餐時機
+ */
+export type SurveyListResponseSurveysItemMealType = typeof SurveyListResponseSurveysItemMealType[keyof typeof SurveyListResponseSurveysItemMealType];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SurveyListResponseSurveysItemMealType = {
+  早餐: '早餐',
+  點心: '點心',
+  其他: '其他',
+} as const;
+
+export type SurveyListResponseSurveysItemPurchaseFactorsItem = typeof SurveyListResponseSurveysItemPurchaseFactorsItem[keyof typeof SurveyListResponseSurveysItemPurchaseFactorsItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SurveyListResponseSurveysItemPurchaseFactorsItem = {
+  價格: '價格',
+  健康: '健康',
+  好吃: '好吃',
+  口味嚐鮮: '口味嚐鮮',
+  美觀: '美觀',
+  衛生: '衛生',
+} as const;
+
+/**
+ * 會因健康考量而選擇較貴的麵包嗎
+ */
+export type SurveyListResponseSurveysItemHealthPrice = typeof SurveyListResponseSurveysItemHealthPrice[keyof typeof SurveyListResponseSurveysItemHealthPrice];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SurveyListResponseSurveysItemHealthPrice = {
+  會: '會',
+  不會: '不會',
+} as const;
+
+/**
+ * 在意天然食材嗎
+ */
+export type SurveyListResponseSurveysItemNaturalPreference = typeof SurveyListResponseSurveysItemNaturalPreference[keyof typeof SurveyListResponseSurveysItemNaturalPreference];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SurveyListResponseSurveysItemNaturalPreference = {
+  在意: '在意',
+  不在意: '不在意',
+} as const;
+
+export type SurveyListResponseSurveysItemTastePreferenceItem = typeof SurveyListResponseSurveysItemTastePreferenceItem[keyof typeof SurveyListResponseSurveysItemTastePreferenceItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SurveyListResponseSurveysItemTastePreferenceItem = {
+  原味: '原味',
+  鹹: '鹹',
+  甜: '甜',
+} as const;
+
+export type SurveyListResponseSurveysItemBreadTypesItem = typeof SurveyListResponseSurveysItemBreadTypesItem[keyof typeof SurveyListResponseSurveysItemBreadTypesItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SurveyListResponseSurveysItemBreadTypesItem = {
+  吐司: '吐司',
+  '台式、日式麵包': '台式、日式麵包',
+  歐式麵包: '歐式麵包',
+  法國麵包: '法國麵包',
+  丹麥可頌: '丹麥可頌',
+  貝果系列: '貝果系列',
+  無麩質麵包: '無麩質麵包',
+  其他: '其他',
+} as const;
+
+export type SurveyListResponseSurveysItem = {
+  /**
+   * 問卷 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  id?: number;
+  /**
+   * 會員 ID（手機號碼）
+   * @pattern ^09\d{8}$
+   */
+  memberId: string;
+  /**
+   * 手機號碼
+   * @pattern ^09\d{8}$
+   */
+  phone: string;
+  /** 年齡範圍 */
+  age: SurveyListResponseSurveysItemAge;
+  /** 性別 */
+  gender: SurveyListResponseSurveysItemGender;
+  /** 居住地 */
+  location?: SurveyListResponseSurveysItemLocation;
+  /** 購買頻率 */
+  purchaseFrequency?: SurveyListResponseSurveysItemPurchaseFrequency;
+  /** 購買地點（可複選） */
+  purchaseLocation?: SurveyListResponseSurveysItemPurchaseLocationItem[];
+  /** 購買時間 */
+  purchaseTime?: SurveyListResponseSurveysItemPurchaseTime;
+  /** 用餐時機 */
+  mealType?: SurveyListResponseSurveysItemMealType;
+  /** 選購考量因素（可複選） */
+  purchaseFactors?: SurveyListResponseSurveysItemPurchaseFactorsItem[];
+  /** 會因健康考量而選擇較貴的麵包嗎 */
+  healthPrice?: SurveyListResponseSurveysItemHealthPrice;
+  /** 在意天然食材嗎 */
+  naturalPreference?: SurveyListResponseSurveysItemNaturalPreference;
+  /** 口味偏好（可複選） */
+  tastePreference?: SurveyListResponseSurveysItemTastePreferenceItem[];
+  /** 喜歡的麵包種類（可複選） */
+  breadTypes?: SurveyListResponseSurveysItemBreadTypesItem[];
+  /**
+   * 其他麵包種類（自行填寫）
+   * @maxLength 100
+   */
+  breadTypesOther?: string;
+  /**
+   * 最喜歡的麵包
+   * @maxLength 500
+   */
+  favoriteBread?: string;
+  /**
+   * 想吃的麵包
+   * @maxLength 500
+   */
+  desiredBread?: string;
+  /** LINE 用戶 ID */
+  lineUserId?: string;
+  /** LINE 顯示名稱 */
+  displayName?: string;
+  /**
+   * 關聯的會員 ID（POS 系統）
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  userId?: number;
+  /** 建立時間（UTC） */
+  createdAt?: string;
+  /** 更新時間（UTC） */
+  updatedAt?: string;
+};
+
+/**
+ * 分頁資訊
+ */
+export type SurveyListResponsePagination = {
+  /**
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  page: number;
+  /**
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  limit: number;
+  /** @minimum 0 */
+  total: number;
+  /** @minimum 0 */
+  totalPages: number;
+};
+
+export interface SurveyListResponse {
+  /** 問卷列表 */
+  surveys: SurveyListResponseSurveysItem[];
+  /** 分頁資訊 */
+  pagination: SurveyListResponsePagination;
+}
+
+/**
+ * 年齡分佈
+ */
+export type SurveyStatsAgeDistribution = {[key: string]: number};
+
+/**
+ * 性別分佈
+ */
+export type SurveyStatsGenderDistribution = {[key: string]: number};
+
+/**
+ * 購買頻率分佈
+ */
+export type SurveyStatsPurchaseFrequencyDistribution = {[key: string]: number};
+
+export interface SurveyStats {
+  /**
+   * 總問卷數
+   * @minimum 0
+   */
+  totalSurveys: number;
+  /** 年齡分佈 */
+  ageDistribution: SurveyStatsAgeDistribution;
+  /** 性別分佈 */
+  genderDistribution: SurveyStatsGenderDistribution;
+  /** 購買頻率分佈 */
+  purchaseFrequencyDistribution?: SurveyStatsPurchaseFrequencyDistribution;
+}
+
 export type GetHealth200 = {
   /** 健康狀態 */
   ok: boolean;
@@ -3508,6 +3990,572 @@ export type OrdersGetTodayStats500 = {
 };
 
 /**
+ * 年齡範圍
+ */
+export type PostApiSurveys200Age = typeof PostApiSurveys200Age[keyof typeof PostApiSurveys200Age];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostApiSurveys200Age = {
+  '25歲以下': '25歲以下',
+  '26-45歲': '26-45歲',
+  '46歲以上': '46歲以上',
+} as const;
+
+/**
+ * 性別
+ */
+export type PostApiSurveys200Gender = typeof PostApiSurveys200Gender[keyof typeof PostApiSurveys200Gender];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostApiSurveys200Gender = {
+  男: '男',
+  女: '女',
+} as const;
+
+/**
+ * 居住地
+ */
+export type PostApiSurveys200Location = typeof PostApiSurveys200Location[keyof typeof PostApiSurveys200Location];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostApiSurveys200Location = {
+  附近: '附近',
+  外地: '外地',
+} as const;
+
+/**
+ * 購買頻率
+ */
+export type PostApiSurveys200PurchaseFrequency = typeof PostApiSurveys200PurchaseFrequency[keyof typeof PostApiSurveys200PurchaseFrequency];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostApiSurveys200PurchaseFrequency = {
+  每週3次以上: '每週3次以上',
+  '每週1~3次': '每週1~3次',
+  偶爾: '偶爾',
+} as const;
+
+export type PostApiSurveys200PurchaseLocationItem = typeof PostApiSurveys200PurchaseLocationItem[keyof typeof PostApiSurveys200PurchaseLocationItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostApiSurveys200PurchaseLocationItem = {
+  麵包店: '麵包店',
+  便利商店: '便利商店',
+  量販超市: '量販超市',
+  網購: '網購',
+} as const;
+
+/**
+ * 購買時間
+ */
+export type PostApiSurveys200PurchaseTime = typeof PostApiSurveys200PurchaseTime[keyof typeof PostApiSurveys200PurchaseTime];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostApiSurveys200PurchaseTime = {
+  '早上(6:00~12:00)': '早上(6:00~12:00)',
+  '下午(12:00~17:00)': '下午(12:00~17:00)',
+  '晚上(17:00後)': '晚上(17:00後)',
+} as const;
+
+/**
+ * 用餐時機
+ */
+export type PostApiSurveys200MealType = typeof PostApiSurveys200MealType[keyof typeof PostApiSurveys200MealType];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostApiSurveys200MealType = {
+  早餐: '早餐',
+  點心: '點心',
+  其他: '其他',
+} as const;
+
+export type PostApiSurveys200PurchaseFactorsItem = typeof PostApiSurveys200PurchaseFactorsItem[keyof typeof PostApiSurveys200PurchaseFactorsItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostApiSurveys200PurchaseFactorsItem = {
+  價格: '價格',
+  健康: '健康',
+  好吃: '好吃',
+  口味嚐鮮: '口味嚐鮮',
+  美觀: '美觀',
+  衛生: '衛生',
+} as const;
+
+/**
+ * 會因健康考量而選擇較貴的麵包嗎
+ */
+export type PostApiSurveys200HealthPrice = typeof PostApiSurveys200HealthPrice[keyof typeof PostApiSurveys200HealthPrice];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostApiSurveys200HealthPrice = {
+  會: '會',
+  不會: '不會',
+} as const;
+
+/**
+ * 在意天然食材嗎
+ */
+export type PostApiSurveys200NaturalPreference = typeof PostApiSurveys200NaturalPreference[keyof typeof PostApiSurveys200NaturalPreference];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostApiSurveys200NaturalPreference = {
+  在意: '在意',
+  不在意: '不在意',
+} as const;
+
+export type PostApiSurveys200TastePreferenceItem = typeof PostApiSurveys200TastePreferenceItem[keyof typeof PostApiSurveys200TastePreferenceItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostApiSurveys200TastePreferenceItem = {
+  原味: '原味',
+  鹹: '鹹',
+  甜: '甜',
+} as const;
+
+export type PostApiSurveys200BreadTypesItem = typeof PostApiSurveys200BreadTypesItem[keyof typeof PostApiSurveys200BreadTypesItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostApiSurveys200BreadTypesItem = {
+  吐司: '吐司',
+  '台式、日式麵包': '台式、日式麵包',
+  歐式麵包: '歐式麵包',
+  法國麵包: '法國麵包',
+  丹麥可頌: '丹麥可頌',
+  貝果系列: '貝果系列',
+  無麩質麵包: '無麩質麵包',
+  其他: '其他',
+} as const;
+
+export type PostApiSurveys200 = {
+  /**
+   * 問卷 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  id?: number;
+  /**
+   * 會員 ID（手機號碼）
+   * @pattern ^09\d{8}$
+   */
+  memberId: string;
+  /**
+   * 手機號碼
+   * @pattern ^09\d{8}$
+   */
+  phone: string;
+  /** 年齡範圍 */
+  age: PostApiSurveys200Age;
+  /** 性別 */
+  gender: PostApiSurveys200Gender;
+  /** 居住地 */
+  location?: PostApiSurveys200Location;
+  /** 購買頻率 */
+  purchaseFrequency?: PostApiSurveys200PurchaseFrequency;
+  /** 購買地點（可複選） */
+  purchaseLocation?: PostApiSurveys200PurchaseLocationItem[];
+  /** 購買時間 */
+  purchaseTime?: PostApiSurveys200PurchaseTime;
+  /** 用餐時機 */
+  mealType?: PostApiSurveys200MealType;
+  /** 選購考量因素（可複選） */
+  purchaseFactors?: PostApiSurveys200PurchaseFactorsItem[];
+  /** 會因健康考量而選擇較貴的麵包嗎 */
+  healthPrice?: PostApiSurveys200HealthPrice;
+  /** 在意天然食材嗎 */
+  naturalPreference?: PostApiSurveys200NaturalPreference;
+  /** 口味偏好（可複選） */
+  tastePreference?: PostApiSurveys200TastePreferenceItem[];
+  /** 喜歡的麵包種類（可複選） */
+  breadTypes?: PostApiSurveys200BreadTypesItem[];
+  /**
+   * 其他麵包種類（自行填寫）
+   * @maxLength 100
+   */
+  breadTypesOther?: string;
+  /**
+   * 最喜歡的麵包
+   * @maxLength 500
+   */
+  favoriteBread?: string;
+  /**
+   * 想吃的麵包
+   * @maxLength 500
+   */
+  desiredBread?: string;
+  /** LINE 用戶 ID */
+  lineUserId?: string;
+  /** LINE 顯示名稱 */
+  displayName?: string;
+  /**
+   * 關聯的會員 ID（POS 系統）
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  userId?: number;
+  /** 建立時間（UTC） */
+  createdAt?: string;
+  /** 更新時間（UTC） */
+  updatedAt?: string;
+};
+
+export type PostApiSurveys400 = {
+  /** 操作失敗 */
+  success: boolean;
+  /** 錯誤訊息 */
+  error: string;
+  /** 錯誤時間戳 */
+  timestamp: string;
+};
+
+export type PostApiSurveys409 = {
+  /** 操作失敗 */
+  success: boolean;
+  /** 錯誤訊息 */
+  error: string;
+  /** 錯誤時間戳 */
+  timestamp: string;
+};
+
+export type PostApiSurveys500 = {
+  /** 操作失敗 */
+  success: boolean;
+  /** 錯誤訊息 */
+  error: string;
+  /** 錯誤時間戳 */
+  timestamp: string;
+};
+
+export type GetApiSurveysParams = {
+/**
+ * 頁碼
+ */
+page?: string;
+/**
+ * 每頁筆數
+ */
+limit?: string;
+/**
+ * 篩選年齡
+ */
+age?: GetApiSurveysAge;
+/**
+ * 篩選性別
+ */
+gender?: GetApiSurveysGender;
+};
+
+export type GetApiSurveysAge = typeof GetApiSurveysAge[keyof typeof GetApiSurveysAge];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiSurveysAge = {
+  '25歲以下': '25歲以下',
+  '26-45歲': '26-45歲',
+  '46歲以上': '46歲以上',
+} as const;
+
+export type GetApiSurveysGender = typeof GetApiSurveysGender[keyof typeof GetApiSurveysGender];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiSurveysGender = {
+  男: '男',
+  女: '女',
+} as const;
+
+export type GetApiSurveys500 = {
+  /** 操作失敗 */
+  success: boolean;
+  /** 錯誤訊息 */
+  error: string;
+  /** 錯誤時間戳 */
+  timestamp: string;
+};
+
+/**
+ * 年齡範圍
+ */
+export type GetApiSurveysMemberId200Age = typeof GetApiSurveysMemberId200Age[keyof typeof GetApiSurveysMemberId200Age];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiSurveysMemberId200Age = {
+  '25歲以下': '25歲以下',
+  '26-45歲': '26-45歲',
+  '46歲以上': '46歲以上',
+} as const;
+
+/**
+ * 性別
+ */
+export type GetApiSurveysMemberId200Gender = typeof GetApiSurveysMemberId200Gender[keyof typeof GetApiSurveysMemberId200Gender];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiSurveysMemberId200Gender = {
+  男: '男',
+  女: '女',
+} as const;
+
+/**
+ * 居住地
+ */
+export type GetApiSurveysMemberId200Location = typeof GetApiSurveysMemberId200Location[keyof typeof GetApiSurveysMemberId200Location];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiSurveysMemberId200Location = {
+  附近: '附近',
+  外地: '外地',
+} as const;
+
+/**
+ * 購買頻率
+ */
+export type GetApiSurveysMemberId200PurchaseFrequency = typeof GetApiSurveysMemberId200PurchaseFrequency[keyof typeof GetApiSurveysMemberId200PurchaseFrequency];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiSurveysMemberId200PurchaseFrequency = {
+  每週3次以上: '每週3次以上',
+  '每週1~3次': '每週1~3次',
+  偶爾: '偶爾',
+} as const;
+
+export type GetApiSurveysMemberId200PurchaseLocationItem = typeof GetApiSurveysMemberId200PurchaseLocationItem[keyof typeof GetApiSurveysMemberId200PurchaseLocationItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiSurveysMemberId200PurchaseLocationItem = {
+  麵包店: '麵包店',
+  便利商店: '便利商店',
+  量販超市: '量販超市',
+  網購: '網購',
+} as const;
+
+/**
+ * 購買時間
+ */
+export type GetApiSurveysMemberId200PurchaseTime = typeof GetApiSurveysMemberId200PurchaseTime[keyof typeof GetApiSurveysMemberId200PurchaseTime];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiSurveysMemberId200PurchaseTime = {
+  '早上(6:00~12:00)': '早上(6:00~12:00)',
+  '下午(12:00~17:00)': '下午(12:00~17:00)',
+  '晚上(17:00後)': '晚上(17:00後)',
+} as const;
+
+/**
+ * 用餐時機
+ */
+export type GetApiSurveysMemberId200MealType = typeof GetApiSurveysMemberId200MealType[keyof typeof GetApiSurveysMemberId200MealType];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiSurveysMemberId200MealType = {
+  早餐: '早餐',
+  點心: '點心',
+  其他: '其他',
+} as const;
+
+export type GetApiSurveysMemberId200PurchaseFactorsItem = typeof GetApiSurveysMemberId200PurchaseFactorsItem[keyof typeof GetApiSurveysMemberId200PurchaseFactorsItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiSurveysMemberId200PurchaseFactorsItem = {
+  價格: '價格',
+  健康: '健康',
+  好吃: '好吃',
+  口味嚐鮮: '口味嚐鮮',
+  美觀: '美觀',
+  衛生: '衛生',
+} as const;
+
+/**
+ * 會因健康考量而選擇較貴的麵包嗎
+ */
+export type GetApiSurveysMemberId200HealthPrice = typeof GetApiSurveysMemberId200HealthPrice[keyof typeof GetApiSurveysMemberId200HealthPrice];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiSurveysMemberId200HealthPrice = {
+  會: '會',
+  不會: '不會',
+} as const;
+
+/**
+ * 在意天然食材嗎
+ */
+export type GetApiSurveysMemberId200NaturalPreference = typeof GetApiSurveysMemberId200NaturalPreference[keyof typeof GetApiSurveysMemberId200NaturalPreference];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiSurveysMemberId200NaturalPreference = {
+  在意: '在意',
+  不在意: '不在意',
+} as const;
+
+export type GetApiSurveysMemberId200TastePreferenceItem = typeof GetApiSurveysMemberId200TastePreferenceItem[keyof typeof GetApiSurveysMemberId200TastePreferenceItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiSurveysMemberId200TastePreferenceItem = {
+  原味: '原味',
+  鹹: '鹹',
+  甜: '甜',
+} as const;
+
+export type GetApiSurveysMemberId200BreadTypesItem = typeof GetApiSurveysMemberId200BreadTypesItem[keyof typeof GetApiSurveysMemberId200BreadTypesItem];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiSurveysMemberId200BreadTypesItem = {
+  吐司: '吐司',
+  '台式、日式麵包': '台式、日式麵包',
+  歐式麵包: '歐式麵包',
+  法國麵包: '法國麵包',
+  丹麥可頌: '丹麥可頌',
+  貝果系列: '貝果系列',
+  無麩質麵包: '無麩質麵包',
+  其他: '其他',
+} as const;
+
+export type GetApiSurveysMemberId200 = {
+  /**
+   * 問卷 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  id?: number;
+  /**
+   * 會員 ID（手機號碼）
+   * @pattern ^09\d{8}$
+   */
+  memberId: string;
+  /**
+   * 手機號碼
+   * @pattern ^09\d{8}$
+   */
+  phone: string;
+  /** 年齡範圍 */
+  age: GetApiSurveysMemberId200Age;
+  /** 性別 */
+  gender: GetApiSurveysMemberId200Gender;
+  /** 居住地 */
+  location?: GetApiSurveysMemberId200Location;
+  /** 購買頻率 */
+  purchaseFrequency?: GetApiSurveysMemberId200PurchaseFrequency;
+  /** 購買地點（可複選） */
+  purchaseLocation?: GetApiSurveysMemberId200PurchaseLocationItem[];
+  /** 購買時間 */
+  purchaseTime?: GetApiSurveysMemberId200PurchaseTime;
+  /** 用餐時機 */
+  mealType?: GetApiSurveysMemberId200MealType;
+  /** 選購考量因素（可複選） */
+  purchaseFactors?: GetApiSurveysMemberId200PurchaseFactorsItem[];
+  /** 會因健康考量而選擇較貴的麵包嗎 */
+  healthPrice?: GetApiSurveysMemberId200HealthPrice;
+  /** 在意天然食材嗎 */
+  naturalPreference?: GetApiSurveysMemberId200NaturalPreference;
+  /** 口味偏好（可複選） */
+  tastePreference?: GetApiSurveysMemberId200TastePreferenceItem[];
+  /** 喜歡的麵包種類（可複選） */
+  breadTypes?: GetApiSurveysMemberId200BreadTypesItem[];
+  /**
+   * 其他麵包種類（自行填寫）
+   * @maxLength 100
+   */
+  breadTypesOther?: string;
+  /**
+   * 最喜歡的麵包
+   * @maxLength 500
+   */
+  favoriteBread?: string;
+  /**
+   * 想吃的麵包
+   * @maxLength 500
+   */
+  desiredBread?: string;
+  /** LINE 用戶 ID */
+  lineUserId?: string;
+  /** LINE 顯示名稱 */
+  displayName?: string;
+  /**
+   * 關聯的會員 ID（POS 系統）
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  userId?: number;
+  /** 建立時間（UTC） */
+  createdAt?: string;
+  /** 更新時間（UTC） */
+  updatedAt?: string;
+};
+
+export type GetApiSurveysMemberId404 = {
+  /** 操作失敗 */
+  success: boolean;
+  /** 錯誤訊息 */
+  error: string;
+  /** 錯誤時間戳 */
+  timestamp: string;
+};
+
+export type GetApiSurveysMemberId500 = {
+  /** 操作失敗 */
+  success: boolean;
+  /** 錯誤訊息 */
+  error: string;
+  /** 錯誤時間戳 */
+  timestamp: string;
+};
+
+export type GetApiSurveysStatsSummary500 = {
+  /** 操作失敗 */
+  success: boolean;
+  /** 錯誤訊息 */
+  error: string;
+  /** 錯誤時間戳 */
+  timestamp: string;
+};
+
+export type DeleteApiSurveysId200 = {
+  success: boolean;
+  message: string;
+};
+
+export type DeleteApiSurveysId404 = {
+  /** 操作失敗 */
+  success: boolean;
+  /** 錯誤訊息 */
+  error: string;
+  /** 錯誤時間戳 */
+  timestamp: string;
+};
+
+export type DeleteApiSurveysId500 = {
+  /** 操作失敗 */
+  success: boolean;
+  /** 錯誤訊息 */
+  error: string;
+  /** 錯誤時間戳 */
+  timestamp: string;
+};
+
+/**
  * WebP 檔案（檔案上傳）
  * @nullable
  */
@@ -6410,6 +7458,507 @@ export function useOrdersGetTodayStats<TData = Awaited<ReturnType<typeof ordersG
 
 
 
+/**
+ * 提交 LIFF 問卷調查資料。每個手機號碼只能提交一次。
+ * @summary 提交問卷
+ */
+export type postApiSurveysResponse200 = {
+  data: PostApiSurveys200
+  status: 200
+}
+
+export type postApiSurveysResponse400 = {
+  data: PostApiSurveys400
+  status: 400
+}
+
+export type postApiSurveysResponse409 = {
+  data: PostApiSurveys409
+  status: 409
+}
+
+export type postApiSurveysResponse500 = {
+  data: PostApiSurveys500
+  status: 500
+}
+    
+export type postApiSurveysResponseComposite = postApiSurveysResponse200 | postApiSurveysResponse400 | postApiSurveysResponse409 | postApiSurveysResponse500;
+    
+export type postApiSurveysResponse = postApiSurveysResponseComposite & {
+  headers: Headers;
+}
+
+export const getPostApiSurveysUrl = () => {
+
+
+  
+
+  return createFullURL(`/api/surveys`)
+}
+
+export const postApiSurveys = async (createSurveyRequest: CreateSurveyRequest, options?: RequestInit): Promise<postApiSurveysResponse> => {
+  
+  const res = await fetch(getPostApiSurveysUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createSurveyRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: postApiSurveysResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as postApiSurveysResponse
+}
+
+
+
+
+export const getPostApiSurveysMutationOptions = <TError = PostApiSurveys400 | PostApiSurveys409 | PostApiSurveys500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiSurveys>>, TError,{data: CreateSurveyRequest}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiSurveys>>, TError,{data: CreateSurveyRequest}, TContext> => {
+
+const mutationKey = ['postApiSurveys'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiSurveys>>, {data: CreateSurveyRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiSurveys(data,fetchOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiSurveysMutationResult = NonNullable<Awaited<ReturnType<typeof postApiSurveys>>>
+    export type PostApiSurveysMutationBody = CreateSurveyRequest
+    export type PostApiSurveysMutationError = PostApiSurveys400 | PostApiSurveys409 | PostApiSurveys500
+
+    /**
+ * @summary 提交問卷
+ */
+export const usePostApiSurveys = <TError = PostApiSurveys400 | PostApiSurveys409 | PostApiSurveys500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiSurveys>>, TError,{data: CreateSurveyRequest}, TContext>, fetch?: RequestInit}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof postApiSurveys>>,
+        TError,
+        {data: CreateSurveyRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiSurveysMutationOptions(options);
+
+      return useMutation(mutationOptions );
+    }
+    
+/**
+ * 查詢問卷列表，支援分頁和篩選
+ * @summary 查詢問卷列表
+ */
+export type getApiSurveysResponse200 = {
+  data: SurveyListResponse
+  status: 200
+}
+
+export type getApiSurveysResponse500 = {
+  data: GetApiSurveys500
+  status: 500
+}
+    
+export type getApiSurveysResponseComposite = getApiSurveysResponse200 | getApiSurveysResponse500;
+    
+export type getApiSurveysResponse = getApiSurveysResponseComposite & {
+  headers: Headers;
+}
+
+export const getGetApiSurveysUrl = (params?: GetApiSurveysParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? createFullURL(`/api/surveys?${stringifiedParams}`) : createFullURL(`/api/surveys`)
+}
+
+export const getApiSurveys = async (params?: GetApiSurveysParams, options?: RequestInit): Promise<getApiSurveysResponse> => {
+  
+  const res = await fetch(getGetApiSurveysUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: getApiSurveysResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as getApiSurveysResponse
+}
+
+
+
+export const getGetApiSurveysQueryKey = (params?: GetApiSurveysParams,) => {
+    return [`/api/surveys`, ...(params ? [params]: [])] as const;
+    }
+
+    
+export const getGetApiSurveysQueryOptions = <TData = Awaited<ReturnType<typeof getApiSurveys>>, TError = GetApiSurveys500>(params?: GetApiSurveysParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveys>>, TError, TData>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiSurveysQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiSurveys>>> = ({ signal }) => getApiSurveys(params, { signal, ...fetchOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiSurveys>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetApiSurveysQueryResult = NonNullable<Awaited<ReturnType<typeof getApiSurveys>>>
+export type GetApiSurveysQueryError = GetApiSurveys500
+
+
+/**
+ * @summary 查詢問卷列表
+ */
+
+export function useGetApiSurveys<TData = Awaited<ReturnType<typeof getApiSurveys>>, TError = GetApiSurveys500>(
+ params?: GetApiSurveysParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveys>>, TError, TData>, fetch?: RequestInit}
+  
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetApiSurveysQueryOptions(params,options)
+
+  const query = useQuery(queryOptions ) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * 根據手機號碼（會員 ID）查詢問卷資料
+ * @summary 查詢問卷
+ */
+export type getApiSurveysMemberIdResponse200 = {
+  data: GetApiSurveysMemberId200
+  status: 200
+}
+
+export type getApiSurveysMemberIdResponse404 = {
+  data: GetApiSurveysMemberId404
+  status: 404
+}
+
+export type getApiSurveysMemberIdResponse500 = {
+  data: GetApiSurveysMemberId500
+  status: 500
+}
+    
+export type getApiSurveysMemberIdResponseComposite = getApiSurveysMemberIdResponse200 | getApiSurveysMemberIdResponse404 | getApiSurveysMemberIdResponse500;
+    
+export type getApiSurveysMemberIdResponse = getApiSurveysMemberIdResponseComposite & {
+  headers: Headers;
+}
+
+export const getGetApiSurveysMemberIdUrl = (memberId: string,) => {
+
+
+  
+
+  return createFullURL(`/api/surveys/${memberId}`)
+}
+
+export const getApiSurveysMemberId = async (memberId: string, options?: RequestInit): Promise<getApiSurveysMemberIdResponse> => {
+  
+  const res = await fetch(getGetApiSurveysMemberIdUrl(memberId),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: getApiSurveysMemberIdResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as getApiSurveysMemberIdResponse
+}
+
+
+
+export const getGetApiSurveysMemberIdQueryKey = (memberId?: string,) => {
+    return [`/api/surveys/${memberId}`] as const;
+    }
+
+    
+export const getGetApiSurveysMemberIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiSurveysMemberId>>, TError = GetApiSurveysMemberId404 | GetApiSurveysMemberId500>(memberId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysMemberId>>, TError, TData>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiSurveysMemberIdQueryKey(memberId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiSurveysMemberId>>> = ({ signal }) => getApiSurveysMemberId(memberId, { signal, ...fetchOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(memberId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysMemberId>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetApiSurveysMemberIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiSurveysMemberId>>>
+export type GetApiSurveysMemberIdQueryError = GetApiSurveysMemberId404 | GetApiSurveysMemberId500
+
+
+/**
+ * @summary 查詢問卷
+ */
+
+export function useGetApiSurveysMemberId<TData = Awaited<ReturnType<typeof getApiSurveysMemberId>>, TError = GetApiSurveysMemberId404 | GetApiSurveysMemberId500>(
+ memberId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysMemberId>>, TError, TData>, fetch?: RequestInit}
+  
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetApiSurveysMemberIdQueryOptions(memberId,options)
+
+  const query = useQuery(queryOptions ) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * 取得問卷統計資料（總數、年齡分佈、性別分佈等）
+ * @summary 問卷統計
+ */
+export type getApiSurveysStatsSummaryResponse200 = {
+  data: SurveyStats
+  status: 200
+}
+
+export type getApiSurveysStatsSummaryResponse500 = {
+  data: GetApiSurveysStatsSummary500
+  status: 500
+}
+    
+export type getApiSurveysStatsSummaryResponseComposite = getApiSurveysStatsSummaryResponse200 | getApiSurveysStatsSummaryResponse500;
+    
+export type getApiSurveysStatsSummaryResponse = getApiSurveysStatsSummaryResponseComposite & {
+  headers: Headers;
+}
+
+export const getGetApiSurveysStatsSummaryUrl = () => {
+
+
+  
+
+  return createFullURL(`/api/surveys/stats/summary`)
+}
+
+export const getApiSurveysStatsSummary = async ( options?: RequestInit): Promise<getApiSurveysStatsSummaryResponse> => {
+  
+  const res = await fetch(getGetApiSurveysStatsSummaryUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: getApiSurveysStatsSummaryResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as getApiSurveysStatsSummaryResponse
+}
+
+
+
+export const getGetApiSurveysStatsSummaryQueryKey = () => {
+    return [`/api/surveys/stats/summary`] as const;
+    }
+
+    
+export const getGetApiSurveysStatsSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getApiSurveysStatsSummary>>, TError = GetApiSurveysStatsSummary500>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysStatsSummary>>, TError, TData>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiSurveysStatsSummaryQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiSurveysStatsSummary>>> = ({ signal }) => getApiSurveysStatsSummary({ signal, ...fetchOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysStatsSummary>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetApiSurveysStatsSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getApiSurveysStatsSummary>>>
+export type GetApiSurveysStatsSummaryQueryError = GetApiSurveysStatsSummary500
+
+
+/**
+ * @summary 問卷統計
+ */
+
+export function useGetApiSurveysStatsSummary<TData = Awaited<ReturnType<typeof getApiSurveysStatsSummary>>, TError = GetApiSurveysStatsSummary500>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysStatsSummary>>, TError, TData>, fetch?: RequestInit}
+  
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetApiSurveysStatsSummaryQueryOptions(options)
+
+  const query = useQuery(queryOptions ) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * 刪除指定 ID 的問卷（管理功能）
+ * @summary 刪除問卷
+ */
+export type deleteApiSurveysIdResponse200 = {
+  data: DeleteApiSurveysId200
+  status: 200
+}
+
+export type deleteApiSurveysIdResponse404 = {
+  data: DeleteApiSurveysId404
+  status: 404
+}
+
+export type deleteApiSurveysIdResponse500 = {
+  data: DeleteApiSurveysId500
+  status: 500
+}
+    
+export type deleteApiSurveysIdResponseComposite = deleteApiSurveysIdResponse200 | deleteApiSurveysIdResponse404 | deleteApiSurveysIdResponse500;
+    
+export type deleteApiSurveysIdResponse = deleteApiSurveysIdResponseComposite & {
+  headers: Headers;
+}
+
+export const getDeleteApiSurveysIdUrl = () => {
+
+
+  
+
+  return createFullURL(`/api/surveys/:id`)
+}
+
+export const deleteApiSurveysId = async ( options?: RequestInit): Promise<deleteApiSurveysIdResponse> => {
+  
+  const res = await fetch(getDeleteApiSurveysIdUrl(),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: deleteApiSurveysIdResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as deleteApiSurveysIdResponse
+}
+
+
+
+
+export const getDeleteApiSurveysIdMutationOptions = <TError = DeleteApiSurveysId404 | DeleteApiSurveysId500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiSurveysId>>, TError,void, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiSurveysId>>, TError,void, TContext> => {
+
+const mutationKey = ['deleteApiSurveysId'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiSurveysId>>, void> = () => {
+          
+
+          return  deleteApiSurveysId(fetchOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiSurveysIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiSurveysId>>>
+    
+    export type DeleteApiSurveysIdMutationError = DeleteApiSurveysId404 | DeleteApiSurveysId500
+
+    /**
+ * @summary 刪除問卷
+ */
+export const useDeleteApiSurveysId = <TError = DeleteApiSurveysId404 | DeleteApiSurveysId500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiSurveysId>>, TError,void, TContext>, fetch?: RequestInit}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiSurveysId>>,
+        TError,
+        void,
+        TContext
+      > => {
+
+      const mutationOptions = getDeleteApiSurveysIdMutationOptions(options);
+
+      return useMutation(mutationOptions );
+    }
+    
 /**
  * 上傳 WebP 格式的產品圖片到本地檔案系統
  * @summary 上傳產品圖片

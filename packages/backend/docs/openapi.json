@@ -37,6 +37,10 @@
       "description": "訂單管理端點"
     },
     {
+      "name": "Surveys",
+      "description": "問卷調查端點"
+    },
+    {
       "name": "Uploads",
       "description": "檔案上傳端點"
     },
@@ -45,6 +49,528 @@
       "description": "檔案存取端點"
     }
   ],
+  "components": {
+    "schemas": {
+      "CreateSurveyRequest": {
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "pattern": "^09\\d{8}$",
+            "example": "0912345678",
+            "description": "會員 ID（手機號碼）"
+          },
+          "phone": {
+            "type": "string",
+            "pattern": "^09\\d{8}$",
+            "example": "0912345678",
+            "description": "手機號碼"
+          },
+          "age": {
+            "type": "string",
+            "enum": [
+              "25歲以下",
+              "26-45歲",
+              "46歲以上"
+            ],
+            "example": "26-45歲",
+            "description": "年齡範圍"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "男",
+              "女"
+            ],
+            "example": "男",
+            "description": "性別"
+          },
+          "location": {
+            "type": "string",
+            "enum": [
+              "附近",
+              "外地"
+            ],
+            "example": "附近",
+            "description": "居住地"
+          },
+          "purchaseFrequency": {
+            "type": "string",
+            "enum": [
+              "每週3次以上",
+              "每週1~3次",
+              "偶爾"
+            ],
+            "example": "每週1~3次",
+            "description": "購買頻率"
+          },
+          "purchaseLocation": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "麵包店",
+                "便利商店",
+                "量販超市",
+                "網購"
+              ]
+            },
+            "example": [
+              "麵包店",
+              "便利商店"
+            ],
+            "description": "購買地點（可複選）"
+          },
+          "purchaseTime": {
+            "type": "string",
+            "enum": [
+              "早上(6:00~12:00)",
+              "下午(12:00~17:00)",
+              "晚上(17:00後)"
+            ],
+            "example": "早上(6:00~12:00)",
+            "description": "購買時間"
+          },
+          "mealType": {
+            "type": "string",
+            "enum": [
+              "早餐",
+              "點心",
+              "其他"
+            ],
+            "example": "早餐",
+            "description": "用餐時機"
+          },
+          "purchaseFactors": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "價格",
+                "健康",
+                "好吃",
+                "口味嚐鮮",
+                "美觀",
+                "衛生"
+              ]
+            },
+            "example": [
+              "健康",
+              "好吃"
+            ],
+            "description": "選購考量因素（可複選）"
+          },
+          "healthPrice": {
+            "type": "string",
+            "enum": [
+              "會",
+              "不會"
+            ],
+            "example": "會",
+            "description": "會因健康考量而選擇較貴的麵包嗎"
+          },
+          "naturalPreference": {
+            "type": "string",
+            "enum": [
+              "在意",
+              "不在意"
+            ],
+            "example": "在意",
+            "description": "在意天然食材嗎"
+          },
+          "tastePreference": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "原味",
+                "鹹",
+                "甜"
+              ]
+            },
+            "example": [
+              "原味",
+              "甜"
+            ],
+            "description": "口味偏好（可複選）"
+          },
+          "breadTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "吐司",
+                "台式、日式麵包",
+                "歐式麵包",
+                "法國麵包",
+                "丹麥可頌",
+                "貝果系列",
+                "無麩質麵包",
+                "其他"
+              ]
+            },
+            "example": [
+              "吐司",
+              "歐式麵包"
+            ],
+            "description": "喜歡的麵包種類（可複選）"
+          },
+          "breadTypesOther": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "雜糧麵包",
+            "description": "其他麵包種類（自行填寫）"
+          },
+          "favoriteBread": {
+            "type": "string",
+            "maxLength": 500,
+            "example": "我最喜歡吃剛出爐的法國麵包，外酥內軟很好吃",
+            "description": "最喜歡的麵包"
+          },
+          "desiredBread": {
+            "type": "string",
+            "maxLength": 500,
+            "example": "希望能有全麥核桃麵包",
+            "description": "想吃的麵包"
+          },
+          "lineUserId": {
+            "type": "string",
+            "example": "U1234567890abcdef",
+            "description": "LINE 用戶 ID"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "王小明",
+            "description": "LINE 顯示名稱"
+          }
+        },
+        "required": [
+          "memberId",
+          "phone",
+          "age",
+          "gender"
+        ]
+      },
+      "SurveyListResponse": {
+        "type": "object",
+        "properties": {
+          "surveys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "exclusiveMinimum": true,
+                  "example": 1,
+                  "description": "問卷 ID"
+                },
+                "memberId": {
+                  "type": "string",
+                  "pattern": "^09\\d{8}$",
+                  "example": "0912345678",
+                  "description": "會員 ID（手機號碼）"
+                },
+                "phone": {
+                  "type": "string",
+                  "pattern": "^09\\d{8}$",
+                  "example": "0912345678",
+                  "description": "手機號碼"
+                },
+                "age": {
+                  "type": "string",
+                  "enum": [
+                    "25歲以下",
+                    "26-45歲",
+                    "46歲以上"
+                  ],
+                  "example": "26-45歲",
+                  "description": "年齡範圍"
+                },
+                "gender": {
+                  "type": "string",
+                  "enum": [
+                    "男",
+                    "女"
+                  ],
+                  "example": "男",
+                  "description": "性別"
+                },
+                "location": {
+                  "type": "string",
+                  "enum": [
+                    "附近",
+                    "外地"
+                  ],
+                  "example": "附近",
+                  "description": "居住地"
+                },
+                "purchaseFrequency": {
+                  "type": "string",
+                  "enum": [
+                    "每週3次以上",
+                    "每週1~3次",
+                    "偶爾"
+                  ],
+                  "example": "每週1~3次",
+                  "description": "購買頻率"
+                },
+                "purchaseLocation": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "麵包店",
+                      "便利商店",
+                      "量販超市",
+                      "網購"
+                    ]
+                  },
+                  "example": [
+                    "麵包店",
+                    "便利商店"
+                  ],
+                  "description": "購買地點（可複選）"
+                },
+                "purchaseTime": {
+                  "type": "string",
+                  "enum": [
+                    "早上(6:00~12:00)",
+                    "下午(12:00~17:00)",
+                    "晚上(17:00後)"
+                  ],
+                  "example": "早上(6:00~12:00)",
+                  "description": "購買時間"
+                },
+                "mealType": {
+                  "type": "string",
+                  "enum": [
+                    "早餐",
+                    "點心",
+                    "其他"
+                  ],
+                  "example": "早餐",
+                  "description": "用餐時機"
+                },
+                "purchaseFactors": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "價格",
+                      "健康",
+                      "好吃",
+                      "口味嚐鮮",
+                      "美觀",
+                      "衛生"
+                    ]
+                  },
+                  "example": [
+                    "健康",
+                    "好吃"
+                  ],
+                  "description": "選購考量因素（可複選）"
+                },
+                "healthPrice": {
+                  "type": "string",
+                  "enum": [
+                    "會",
+                    "不會"
+                  ],
+                  "example": "會",
+                  "description": "會因健康考量而選擇較貴的麵包嗎"
+                },
+                "naturalPreference": {
+                  "type": "string",
+                  "enum": [
+                    "在意",
+                    "不在意"
+                  ],
+                  "example": "在意",
+                  "description": "在意天然食材嗎"
+                },
+                "tastePreference": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "原味",
+                      "鹹",
+                      "甜"
+                    ]
+                  },
+                  "example": [
+                    "原味",
+                    "甜"
+                  ],
+                  "description": "口味偏好（可複選）"
+                },
+                "breadTypes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "吐司",
+                      "台式、日式麵包",
+                      "歐式麵包",
+                      "法國麵包",
+                      "丹麥可頌",
+                      "貝果系列",
+                      "無麩質麵包",
+                      "其他"
+                    ]
+                  },
+                  "example": [
+                    "吐司",
+                    "歐式麵包"
+                  ],
+                  "description": "喜歡的麵包種類（可複選）"
+                },
+                "breadTypesOther": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "example": "雜糧麵包",
+                  "description": "其他麵包種類（自行填寫）"
+                },
+                "favoriteBread": {
+                  "type": "string",
+                  "maxLength": 500,
+                  "example": "我最喜歡吃剛出爐的法國麵包，外酥內軟很好吃",
+                  "description": "最喜歡的麵包"
+                },
+                "desiredBread": {
+                  "type": "string",
+                  "maxLength": 500,
+                  "example": "希望能有全麥核桃麵包",
+                  "description": "想吃的麵包"
+                },
+                "lineUserId": {
+                  "type": "string",
+                  "example": "U1234567890abcdef",
+                  "description": "LINE 用戶 ID"
+                },
+                "displayName": {
+                  "type": "string",
+                  "example": "王小明",
+                  "description": "LINE 顯示名稱"
+                },
+                "userId": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "exclusiveMinimum": true,
+                  "example": 1,
+                  "description": "關聯的會員 ID（POS 系統）"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "example": "2025-01-12T10:30:00.000Z",
+                  "description": "建立時間（UTC）"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "example": "2025-01-12T10:30:00.000Z",
+                  "description": "更新時間（UTC）"
+                }
+              },
+              "required": [
+                "memberId",
+                "phone",
+                "age",
+                "gender"
+              ]
+            },
+            "description": "問卷列表"
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "integer",
+                "minimum": 0,
+                "exclusiveMinimum": true
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 0,
+                "exclusiveMinimum": true
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "totalPages": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "page",
+              "limit",
+              "total",
+              "totalPages"
+            ],
+            "description": "分頁資訊"
+          }
+        },
+        "required": [
+          "surveys",
+          "pagination"
+        ]
+      },
+      "SurveyStats": {
+        "type": "object",
+        "properties": {
+          "totalSurveys": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 150,
+            "description": "總問卷數"
+          },
+          "ageDistribution": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "example": {
+              "25歲以下": 30,
+              "26-45歲": 80,
+              "46歲以上": 40
+            },
+            "description": "年齡分佈"
+          },
+          "genderDistribution": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "example": {
+              "男": 70,
+              "女": 80
+            },
+            "description": "性別分佈"
+          },
+          "purchaseFrequencyDistribution": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "example": {
+              "每週3次以上": 40,
+              "每週1~3次": 60,
+              "偶爾": 50
+            },
+            "description": "購買頻率分佈"
+          }
+        },
+        "required": [
+          "totalSurveys",
+          "ageDistribution",
+          "genderDistribution"
+        ]
+      }
+    }
+  },
   "paths": {
     "/health": {
       "get": {
@@ -6793,6 +7319,948 @@
             }
           }
         }
+      }
+    },
+    "/api/surveys": {
+      "post": {
+        "tags": [
+          "Surveys"
+        ],
+        "summary": "提交問卷",
+        "description": "提交 LIFF 問卷調查資料。每個手機號碼只能提交一次。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSurveyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "問卷提交成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "exclusiveMinimum": true,
+                      "example": 1,
+                      "description": "問卷 ID"
+                    },
+                    "memberId": {
+                      "type": "string",
+                      "pattern": "^09\\d{8}$",
+                      "example": "0912345678",
+                      "description": "會員 ID（手機號碼）"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "pattern": "^09\\d{8}$",
+                      "example": "0912345678",
+                      "description": "手機號碼"
+                    },
+                    "age": {
+                      "type": "string",
+                      "enum": [
+                        "25歲以下",
+                        "26-45歲",
+                        "46歲以上"
+                      ],
+                      "example": "26-45歲",
+                      "description": "年齡範圍"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "enum": [
+                        "男",
+                        "女"
+                      ],
+                      "example": "男",
+                      "description": "性別"
+                    },
+                    "location": {
+                      "type": "string",
+                      "enum": [
+                        "附近",
+                        "外地"
+                      ],
+                      "example": "附近",
+                      "description": "居住地"
+                    },
+                    "purchaseFrequency": {
+                      "type": "string",
+                      "enum": [
+                        "每週3次以上",
+                        "每週1~3次",
+                        "偶爾"
+                      ],
+                      "example": "每週1~3次",
+                      "description": "購買頻率"
+                    },
+                    "purchaseLocation": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "麵包店",
+                          "便利商店",
+                          "量販超市",
+                          "網購"
+                        ]
+                      },
+                      "example": [
+                        "麵包店",
+                        "便利商店"
+                      ],
+                      "description": "購買地點（可複選）"
+                    },
+                    "purchaseTime": {
+                      "type": "string",
+                      "enum": [
+                        "早上(6:00~12:00)",
+                        "下午(12:00~17:00)",
+                        "晚上(17:00後)"
+                      ],
+                      "example": "早上(6:00~12:00)",
+                      "description": "購買時間"
+                    },
+                    "mealType": {
+                      "type": "string",
+                      "enum": [
+                        "早餐",
+                        "點心",
+                        "其他"
+                      ],
+                      "example": "早餐",
+                      "description": "用餐時機"
+                    },
+                    "purchaseFactors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "價格",
+                          "健康",
+                          "好吃",
+                          "口味嚐鮮",
+                          "美觀",
+                          "衛生"
+                        ]
+                      },
+                      "example": [
+                        "健康",
+                        "好吃"
+                      ],
+                      "description": "選購考量因素（可複選）"
+                    },
+                    "healthPrice": {
+                      "type": "string",
+                      "enum": [
+                        "會",
+                        "不會"
+                      ],
+                      "example": "會",
+                      "description": "會因健康考量而選擇較貴的麵包嗎"
+                    },
+                    "naturalPreference": {
+                      "type": "string",
+                      "enum": [
+                        "在意",
+                        "不在意"
+                      ],
+                      "example": "在意",
+                      "description": "在意天然食材嗎"
+                    },
+                    "tastePreference": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "原味",
+                          "鹹",
+                          "甜"
+                        ]
+                      },
+                      "example": [
+                        "原味",
+                        "甜"
+                      ],
+                      "description": "口味偏好（可複選）"
+                    },
+                    "breadTypes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "吐司",
+                          "台式、日式麵包",
+                          "歐式麵包",
+                          "法國麵包",
+                          "丹麥可頌",
+                          "貝果系列",
+                          "無麩質麵包",
+                          "其他"
+                        ]
+                      },
+                      "example": [
+                        "吐司",
+                        "歐式麵包"
+                      ],
+                      "description": "喜歡的麵包種類（可複選）"
+                    },
+                    "breadTypesOther": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "example": "雜糧麵包",
+                      "description": "其他麵包種類（自行填寫）"
+                    },
+                    "favoriteBread": {
+                      "type": "string",
+                      "maxLength": 500,
+                      "example": "我最喜歡吃剛出爐的法國麵包，外酥內軟很好吃",
+                      "description": "最喜歡的麵包"
+                    },
+                    "desiredBread": {
+                      "type": "string",
+                      "maxLength": 500,
+                      "example": "希望能有全麥核桃麵包",
+                      "description": "想吃的麵包"
+                    },
+                    "lineUserId": {
+                      "type": "string",
+                      "example": "U1234567890abcdef",
+                      "description": "LINE 用戶 ID"
+                    },
+                    "displayName": {
+                      "type": "string",
+                      "example": "王小明",
+                      "description": "LINE 顯示名稱"
+                    },
+                    "userId": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "exclusiveMinimum": true,
+                      "example": 1,
+                      "description": "關聯的會員 ID（POS 系統）"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "example": "2025-01-12T10:30:00.000Z",
+                      "description": "建立時間（UTC）"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "example": "2025-01-12T10:30:00.000Z",
+                      "description": "更新時間（UTC）"
+                    }
+                  },
+                  "required": [
+                    "memberId",
+                    "phone",
+                    "age",
+                    "gender"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "驗證錯誤",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "操作失敗"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "錯誤時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "問卷已存在（重複提交）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "操作失敗"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "錯誤時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "伺服器錯誤",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "操作失敗"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "錯誤時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "post--api-surveys"
+      },
+      "get": {
+        "tags": [
+          "Surveys"
+        ],
+        "summary": "查詢問卷列表",
+        "description": "查詢問卷列表，支援分頁和篩選",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "example": "1",
+              "description": "頁碼"
+            },
+            "required": false,
+            "description": "頁碼",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "example": "20",
+              "description": "每頁筆數"
+            },
+            "required": false,
+            "description": "每頁筆數",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "25歲以下",
+                "26-45歲",
+                "46歲以上"
+              ],
+              "example": "26-45歲",
+              "description": "篩選年齡"
+            },
+            "required": false,
+            "description": "篩選年齡",
+            "name": "age",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "男",
+                "女"
+              ],
+              "example": "男",
+              "description": "篩選性別"
+            },
+            "required": false,
+            "description": "篩選性別",
+            "name": "gender",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "問卷列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SurveyListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "伺服器錯誤",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "操作失敗"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "錯誤時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get--api-surveys"
+      }
+    },
+    "/api/surveys/{memberId}": {
+      "get": {
+        "tags": [
+          "Surveys"
+        ],
+        "summary": "查詢問卷",
+        "description": "根據手機號碼（會員 ID）查詢問卷資料",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^09\\d{8}$",
+              "example": "0912345678",
+              "description": "會員 ID（手機號碼）"
+            },
+            "required": true,
+            "description": "會員 ID（手機號碼）",
+            "name": "memberId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "問卷資料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "exclusiveMinimum": true,
+                      "example": 1,
+                      "description": "問卷 ID"
+                    },
+                    "memberId": {
+                      "type": "string",
+                      "pattern": "^09\\d{8}$",
+                      "example": "0912345678",
+                      "description": "會員 ID（手機號碼）"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "pattern": "^09\\d{8}$",
+                      "example": "0912345678",
+                      "description": "手機號碼"
+                    },
+                    "age": {
+                      "type": "string",
+                      "enum": [
+                        "25歲以下",
+                        "26-45歲",
+                        "46歲以上"
+                      ],
+                      "example": "26-45歲",
+                      "description": "年齡範圍"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "enum": [
+                        "男",
+                        "女"
+                      ],
+                      "example": "男",
+                      "description": "性別"
+                    },
+                    "location": {
+                      "type": "string",
+                      "enum": [
+                        "附近",
+                        "外地"
+                      ],
+                      "example": "附近",
+                      "description": "居住地"
+                    },
+                    "purchaseFrequency": {
+                      "type": "string",
+                      "enum": [
+                        "每週3次以上",
+                        "每週1~3次",
+                        "偶爾"
+                      ],
+                      "example": "每週1~3次",
+                      "description": "購買頻率"
+                    },
+                    "purchaseLocation": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "麵包店",
+                          "便利商店",
+                          "量販超市",
+                          "網購"
+                        ]
+                      },
+                      "example": [
+                        "麵包店",
+                        "便利商店"
+                      ],
+                      "description": "購買地點（可複選）"
+                    },
+                    "purchaseTime": {
+                      "type": "string",
+                      "enum": [
+                        "早上(6:00~12:00)",
+                        "下午(12:00~17:00)",
+                        "晚上(17:00後)"
+                      ],
+                      "example": "早上(6:00~12:00)",
+                      "description": "購買時間"
+                    },
+                    "mealType": {
+                      "type": "string",
+                      "enum": [
+                        "早餐",
+                        "點心",
+                        "其他"
+                      ],
+                      "example": "早餐",
+                      "description": "用餐時機"
+                    },
+                    "purchaseFactors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "價格",
+                          "健康",
+                          "好吃",
+                          "口味嚐鮮",
+                          "美觀",
+                          "衛生"
+                        ]
+                      },
+                      "example": [
+                        "健康",
+                        "好吃"
+                      ],
+                      "description": "選購考量因素（可複選）"
+                    },
+                    "healthPrice": {
+                      "type": "string",
+                      "enum": [
+                        "會",
+                        "不會"
+                      ],
+                      "example": "會",
+                      "description": "會因健康考量而選擇較貴的麵包嗎"
+                    },
+                    "naturalPreference": {
+                      "type": "string",
+                      "enum": [
+                        "在意",
+                        "不在意"
+                      ],
+                      "example": "在意",
+                      "description": "在意天然食材嗎"
+                    },
+                    "tastePreference": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "原味",
+                          "鹹",
+                          "甜"
+                        ]
+                      },
+                      "example": [
+                        "原味",
+                        "甜"
+                      ],
+                      "description": "口味偏好（可複選）"
+                    },
+                    "breadTypes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "吐司",
+                          "台式、日式麵包",
+                          "歐式麵包",
+                          "法國麵包",
+                          "丹麥可頌",
+                          "貝果系列",
+                          "無麩質麵包",
+                          "其他"
+                        ]
+                      },
+                      "example": [
+                        "吐司",
+                        "歐式麵包"
+                      ],
+                      "description": "喜歡的麵包種類（可複選）"
+                    },
+                    "breadTypesOther": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "example": "雜糧麵包",
+                      "description": "其他麵包種類（自行填寫）"
+                    },
+                    "favoriteBread": {
+                      "type": "string",
+                      "maxLength": 500,
+                      "example": "我最喜歡吃剛出爐的法國麵包，外酥內軟很好吃",
+                      "description": "最喜歡的麵包"
+                    },
+                    "desiredBread": {
+                      "type": "string",
+                      "maxLength": 500,
+                      "example": "希望能有全麥核桃麵包",
+                      "description": "想吃的麵包"
+                    },
+                    "lineUserId": {
+                      "type": "string",
+                      "example": "U1234567890abcdef",
+                      "description": "LINE 用戶 ID"
+                    },
+                    "displayName": {
+                      "type": "string",
+                      "example": "王小明",
+                      "description": "LINE 顯示名稱"
+                    },
+                    "userId": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "exclusiveMinimum": true,
+                      "example": 1,
+                      "description": "關聯的會員 ID（POS 系統）"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "example": "2025-01-12T10:30:00.000Z",
+                      "description": "建立時間（UTC）"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "example": "2025-01-12T10:30:00.000Z",
+                      "description": "更新時間（UTC）"
+                    }
+                  },
+                  "required": [
+                    "memberId",
+                    "phone",
+                    "age",
+                    "gender"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "找不到問卷資料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "操作失敗"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "錯誤時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "伺服器錯誤",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "操作失敗"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "錯誤時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get--api-surveys--memberId-"
+      }
+    },
+    "/api/surveys/stats/summary": {
+      "get": {
+        "tags": [
+          "Surveys"
+        ],
+        "summary": "問卷統計",
+        "description": "取得問卷統計資料（總數、年齡分佈、性別分佈等）",
+        "responses": {
+          "200": {
+            "description": "統計資料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SurveyStats"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "伺服器錯誤",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "操作失敗"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "錯誤時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get--api-surveys-stats-summary"
+      }
+    },
+    "/api/surveys/:id": {
+      "delete": {
+        "tags": [
+          "Surveys"
+        ],
+        "summary": "刪除問卷",
+        "description": "刪除指定 ID 的問卷（管理功能）",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+$",
+              "example": "1",
+              "description": "問卷 ID"
+            },
+            "required": true,
+            "description": "問卷 ID",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "刪除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "找不到問卷",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "操作失敗"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "錯誤時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "伺服器錯誤",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "操作失敗"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "錯誤時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "delete--api-surveys--id"
       }
     },
     "/api/uploads/products": {

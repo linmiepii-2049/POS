@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { format } from 'date-fns';
-import { zhTW } from 'date-fns/locale';
 import {
   useOrdersList,
   useOrdersUpdateStatus,
@@ -72,21 +70,21 @@ export function AdminOrders() {
   };
 
   /**
-   * 取消訂單
+   * 取消訂單（暫時未使用）
    */
-  const handleCancelOrder = async (order: OrdersList200DataItem) => {
-    if (!confirm(`確定要取消訂單 ${order.order_number} 嗎？`)) return;
+  // const handleCancelOrder = async (order: OrdersList200DataItem) => {
+  //   if (!confirm(`確定要取消訂單 ${order.order_number} 嗎？`)) return;
 
-    try {
-      await cancelOrderMutation.mutateAsync({
-        id: order.id,
-      });
-      toast.success('訂單取消成功');
-      refetch();
-    } catch (error: any) {
-      toast.error(error?.response?.data?.error || '取消訂單失敗');
-    }
-  };
+  //   try {
+  //     await cancelOrderMutation.mutateAsync({
+  //       id: order.id,
+  //     });
+  //     toast.success('訂單取消成功');
+  //     refetch();
+  //   } catch (error: any) {
+  //     toast.error(error?.response?.data?.error || '取消訂單失敗');
+  //   }
+  // };
 
   /**
    * 檢視訂單詳情
@@ -142,12 +140,10 @@ export function AdminOrders() {
     {
       key: 'user_id',
       label: '客戶',
-      render: (value, record) => (
+      render: (_value, record) => (
         <div>
-          <div className="font-medium">{record.user_name}</div>
-          {record.user_phone && (
-            <div className="text-sm text-gray-500">{record.user_phone}</div>
-          )}
+          <div className="font-medium">{record.user_id ? `會員 #${record.user_id}` : '訪客'}</div>
+          <div className="text-sm text-gray-500">ID: {record.user_id || '-'}</div>
         </div>
       ),
     },
@@ -295,7 +291,7 @@ export function AdminOrders() {
       </div>
 
       {/* 統計資訊 */}
-      {ordersData?.data && (
+      {ordersData && 'data' in ordersData && ordersData.data && (
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="bg-white p-4 rounded-lg shadow">
             <div className="text-sm text-gray-500">總訂單數</div>
@@ -333,7 +329,7 @@ export function AdminOrders() {
       {/* 訂單列表 */}
       <Table
         columns={columns}
-        data={ordersData?.data || []}
+        data={(ordersData && 'data' in ordersData) ? (ordersData.data || []) : []}
         loading={isLoading}
         emptyText="暫無訂單資料"
       />

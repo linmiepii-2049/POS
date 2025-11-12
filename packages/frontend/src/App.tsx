@@ -54,7 +54,7 @@ function App() {
 
       {/* 主要內容 */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {error && (
+        {!!error && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
             <div className="flex">
               <div className="flex-shrink-0">
@@ -99,16 +99,16 @@ function App() {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">時區:</span>
-                  <span className="text-sm text-gray-900">{healthData.timezone}</span>
+                  <span className="text-sm text-gray-600">環境:</span>
+                  <span className="text-sm text-gray-900">{healthData.env}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">UTC 時間:</span>
-                  <span className="text-sm text-gray-900">{healthData.timestamp}</span>
+                  <span className="text-sm text-gray-900">{healthData.now_utc}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">本地時間:</span>
-                  <span className="text-sm text-gray-900">{healthData.localTime}</span>
+                  <span className="text-sm text-gray-900">{healthData.now_local}</span>
                 </div>
               </div>
             ) : (
@@ -133,14 +133,14 @@ function App() {
             ) : versionData ? (
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">套件名稱:</span>
-                  <span className="text-sm text-gray-900 font-mono">{versionData.name}</span>
-                </div>
-                <div className="flex justify-between">
                   <span className="text-sm text-gray-600">版本號:</span>
                   <span className="text-sm text-gray-900 font-mono bg-gray-100 px-2 py-1 rounded">
                     {versionData.version}
                   </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">環境:</span>
+                  <span className="text-sm text-gray-900">{versionData.env}</span>
                 </div>
               </div>
             ) : (
