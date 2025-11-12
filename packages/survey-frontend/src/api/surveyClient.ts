@@ -66,7 +66,7 @@ export async function getSurvey(memberId: string): Promise<unknown> {
     throw new Error('API 位址未設定');
   }
 
-  const response = await fetch(`${apiBase}/api/surveys/${memberId}`, {
+  const response = await fetch(`${apiBase}/api/surveys/by-phone/${memberId}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

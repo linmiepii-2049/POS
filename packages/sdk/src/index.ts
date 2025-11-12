@@ -4287,11 +4287,11 @@ export type GetApiSurveys500 = {
 /**
  * 年齡範圍
  */
-export type GetApiSurveysMemberId200Age = typeof GetApiSurveysMemberId200Age[keyof typeof GetApiSurveysMemberId200Age];
+export type GetApiSurveysByPhoneMemberId200Age = typeof GetApiSurveysByPhoneMemberId200Age[keyof typeof GetApiSurveysByPhoneMemberId200Age];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysMemberId200Age = {
+export const GetApiSurveysByPhoneMemberId200Age = {
   '25歲以下': '25歲以下',
   '26-45歲': '26-45歲',
   '46歲以上': '46歲以上',
@@ -4300,11 +4300,11 @@ export const GetApiSurveysMemberId200Age = {
 /**
  * 性別
  */
-export type GetApiSurveysMemberId200Gender = typeof GetApiSurveysMemberId200Gender[keyof typeof GetApiSurveysMemberId200Gender];
+export type GetApiSurveysByPhoneMemberId200Gender = typeof GetApiSurveysByPhoneMemberId200Gender[keyof typeof GetApiSurveysByPhoneMemberId200Gender];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysMemberId200Gender = {
+export const GetApiSurveysByPhoneMemberId200Gender = {
   男: '男',
   女: '女',
 } as const;
@@ -4312,11 +4312,11 @@ export const GetApiSurveysMemberId200Gender = {
 /**
  * 居住地
  */
-export type GetApiSurveysMemberId200Location = typeof GetApiSurveysMemberId200Location[keyof typeof GetApiSurveysMemberId200Location];
+export type GetApiSurveysByPhoneMemberId200Location = typeof GetApiSurveysByPhoneMemberId200Location[keyof typeof GetApiSurveysByPhoneMemberId200Location];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysMemberId200Location = {
+export const GetApiSurveysByPhoneMemberId200Location = {
   附近: '附近',
   外地: '外地',
 } as const;
@@ -4324,21 +4324,21 @@ export const GetApiSurveysMemberId200Location = {
 /**
  * 購買頻率
  */
-export type GetApiSurveysMemberId200PurchaseFrequency = typeof GetApiSurveysMemberId200PurchaseFrequency[keyof typeof GetApiSurveysMemberId200PurchaseFrequency];
+export type GetApiSurveysByPhoneMemberId200PurchaseFrequency = typeof GetApiSurveysByPhoneMemberId200PurchaseFrequency[keyof typeof GetApiSurveysByPhoneMemberId200PurchaseFrequency];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysMemberId200PurchaseFrequency = {
+export const GetApiSurveysByPhoneMemberId200PurchaseFrequency = {
   每週3次以上: '每週3次以上',
   '每週1~3次': '每週1~3次',
   偶爾: '偶爾',
 } as const;
 
-export type GetApiSurveysMemberId200PurchaseLocationItem = typeof GetApiSurveysMemberId200PurchaseLocationItem[keyof typeof GetApiSurveysMemberId200PurchaseLocationItem];
+export type GetApiSurveysByPhoneMemberId200PurchaseLocationItem = typeof GetApiSurveysByPhoneMemberId200PurchaseLocationItem[keyof typeof GetApiSurveysByPhoneMemberId200PurchaseLocationItem];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysMemberId200PurchaseLocationItem = {
+export const GetApiSurveysByPhoneMemberId200PurchaseLocationItem = {
   麵包店: '麵包店',
   便利商店: '便利商店',
   量販超市: '量販超市',
@@ -4348,11 +4348,11 @@ export const GetApiSurveysMemberId200PurchaseLocationItem = {
 /**
  * 購買時間
  */
-export type GetApiSurveysMemberId200PurchaseTime = typeof GetApiSurveysMemberId200PurchaseTime[keyof typeof GetApiSurveysMemberId200PurchaseTime];
+export type GetApiSurveysByPhoneMemberId200PurchaseTime = typeof GetApiSurveysByPhoneMemberId200PurchaseTime[keyof typeof GetApiSurveysByPhoneMemberId200PurchaseTime];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysMemberId200PurchaseTime = {
+export const GetApiSurveysByPhoneMemberId200PurchaseTime = {
   '早上(6:00~12:00)': '早上(6:00~12:00)',
   '下午(12:00~17:00)': '下午(12:00~17:00)',
   '晚上(17:00後)': '晚上(17:00後)',
@@ -4361,21 +4361,21 @@ export const GetApiSurveysMemberId200PurchaseTime = {
 /**
  * 用餐時機
  */
-export type GetApiSurveysMemberId200MealType = typeof GetApiSurveysMemberId200MealType[keyof typeof GetApiSurveysMemberId200MealType];
+export type GetApiSurveysByPhoneMemberId200MealType = typeof GetApiSurveysByPhoneMemberId200MealType[keyof typeof GetApiSurveysByPhoneMemberId200MealType];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysMemberId200MealType = {
+export const GetApiSurveysByPhoneMemberId200MealType = {
   早餐: '早餐',
   點心: '點心',
   其他: '其他',
 } as const;
 
-export type GetApiSurveysMemberId200PurchaseFactorsItem = typeof GetApiSurveysMemberId200PurchaseFactorsItem[keyof typeof GetApiSurveysMemberId200PurchaseFactorsItem];
+export type GetApiSurveysByPhoneMemberId200PurchaseFactorsItem = typeof GetApiSurveysByPhoneMemberId200PurchaseFactorsItem[keyof typeof GetApiSurveysByPhoneMemberId200PurchaseFactorsItem];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysMemberId200PurchaseFactorsItem = {
+export const GetApiSurveysByPhoneMemberId200PurchaseFactorsItem = {
   價格: '價格',
   健康: '健康',
   好吃: '好吃',
@@ -4387,11 +4387,11 @@ export const GetApiSurveysMemberId200PurchaseFactorsItem = {
 /**
  * 會因健康考量而選擇較貴的麵包嗎
  */
-export type GetApiSurveysMemberId200HealthPrice = typeof GetApiSurveysMemberId200HealthPrice[keyof typeof GetApiSurveysMemberId200HealthPrice];
+export type GetApiSurveysByPhoneMemberId200HealthPrice = typeof GetApiSurveysByPhoneMemberId200HealthPrice[keyof typeof GetApiSurveysByPhoneMemberId200HealthPrice];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysMemberId200HealthPrice = {
+export const GetApiSurveysByPhoneMemberId200HealthPrice = {
   會: '會',
   不會: '不會',
 } as const;
@@ -4399,30 +4399,30 @@ export const GetApiSurveysMemberId200HealthPrice = {
 /**
  * 在意天然食材嗎
  */
-export type GetApiSurveysMemberId200NaturalPreference = typeof GetApiSurveysMemberId200NaturalPreference[keyof typeof GetApiSurveysMemberId200NaturalPreference];
+export type GetApiSurveysByPhoneMemberId200NaturalPreference = typeof GetApiSurveysByPhoneMemberId200NaturalPreference[keyof typeof GetApiSurveysByPhoneMemberId200NaturalPreference];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysMemberId200NaturalPreference = {
+export const GetApiSurveysByPhoneMemberId200NaturalPreference = {
   在意: '在意',
   不在意: '不在意',
 } as const;
 
-export type GetApiSurveysMemberId200TastePreferenceItem = typeof GetApiSurveysMemberId200TastePreferenceItem[keyof typeof GetApiSurveysMemberId200TastePreferenceItem];
+export type GetApiSurveysByPhoneMemberId200TastePreferenceItem = typeof GetApiSurveysByPhoneMemberId200TastePreferenceItem[keyof typeof GetApiSurveysByPhoneMemberId200TastePreferenceItem];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysMemberId200TastePreferenceItem = {
+export const GetApiSurveysByPhoneMemberId200TastePreferenceItem = {
   原味: '原味',
   鹹: '鹹',
   甜: '甜',
 } as const;
 
-export type GetApiSurveysMemberId200BreadTypesItem = typeof GetApiSurveysMemberId200BreadTypesItem[keyof typeof GetApiSurveysMemberId200BreadTypesItem];
+export type GetApiSurveysByPhoneMemberId200BreadTypesItem = typeof GetApiSurveysByPhoneMemberId200BreadTypesItem[keyof typeof GetApiSurveysByPhoneMemberId200BreadTypesItem];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysMemberId200BreadTypesItem = {
+export const GetApiSurveysByPhoneMemberId200BreadTypesItem = {
   吐司: '吐司',
   '台式、日式麵包': '台式、日式麵包',
   歐式麵包: '歐式麵包',
@@ -4433,7 +4433,7 @@ export const GetApiSurveysMemberId200BreadTypesItem = {
   其他: '其他',
 } as const;
 
-export type GetApiSurveysMemberId200 = {
+export type GetApiSurveysByPhoneMemberId200 = {
   /**
    * 問卷 ID
    * @minimum 0
@@ -4451,29 +4451,29 @@ export type GetApiSurveysMemberId200 = {
    */
   phone: string;
   /** 年齡範圍 */
-  age: GetApiSurveysMemberId200Age;
+  age: GetApiSurveysByPhoneMemberId200Age;
   /** 性別 */
-  gender: GetApiSurveysMemberId200Gender;
+  gender: GetApiSurveysByPhoneMemberId200Gender;
   /** 居住地 */
-  location?: GetApiSurveysMemberId200Location;
+  location?: GetApiSurveysByPhoneMemberId200Location;
   /** 購買頻率 */
-  purchaseFrequency?: GetApiSurveysMemberId200PurchaseFrequency;
+  purchaseFrequency?: GetApiSurveysByPhoneMemberId200PurchaseFrequency;
   /** 購買地點（可複選） */
-  purchaseLocation?: GetApiSurveysMemberId200PurchaseLocationItem[];
+  purchaseLocation?: GetApiSurveysByPhoneMemberId200PurchaseLocationItem[];
   /** 購買時間 */
-  purchaseTime?: GetApiSurveysMemberId200PurchaseTime;
+  purchaseTime?: GetApiSurveysByPhoneMemberId200PurchaseTime;
   /** 用餐時機 */
-  mealType?: GetApiSurveysMemberId200MealType;
+  mealType?: GetApiSurveysByPhoneMemberId200MealType;
   /** 選購考量因素（可複選） */
-  purchaseFactors?: GetApiSurveysMemberId200PurchaseFactorsItem[];
+  purchaseFactors?: GetApiSurveysByPhoneMemberId200PurchaseFactorsItem[];
   /** 會因健康考量而選擇較貴的麵包嗎 */
-  healthPrice?: GetApiSurveysMemberId200HealthPrice;
+  healthPrice?: GetApiSurveysByPhoneMemberId200HealthPrice;
   /** 在意天然食材嗎 */
-  naturalPreference?: GetApiSurveysMemberId200NaturalPreference;
+  naturalPreference?: GetApiSurveysByPhoneMemberId200NaturalPreference;
   /** 口味偏好（可複選） */
-  tastePreference?: GetApiSurveysMemberId200TastePreferenceItem[];
+  tastePreference?: GetApiSurveysByPhoneMemberId200TastePreferenceItem[];
   /** 喜歡的麵包種類（可複選） */
-  breadTypes?: GetApiSurveysMemberId200BreadTypesItem[];
+  breadTypes?: GetApiSurveysByPhoneMemberId200BreadTypesItem[];
   /**
    * 其他麵包種類（自行填寫）
    * @maxLength 100
@@ -4505,7 +4505,7 @@ export type GetApiSurveysMemberId200 = {
   updatedAt?: string;
 };
 
-export type GetApiSurveysMemberId404 = {
+export type GetApiSurveysByPhoneMemberId404 = {
   /** 操作失敗 */
   success: boolean;
   /** 錯誤訊息 */
@@ -4514,7 +4514,7 @@ export type GetApiSurveysMemberId404 = {
   timestamp: string;
 };
 
-export type GetApiSurveysMemberId500 = {
+export type GetApiSurveysByPhoneMemberId500 = {
   /** 操作失敗 */
   success: boolean;
   /** 錯誤訊息 */
@@ -7669,38 +7669,38 @@ export function useGetApiSurveys<TData = Awaited<ReturnType<typeof getApiSurveys
  * 根據手機號碼（會員 ID）查詢問卷資料
  * @summary 查詢問卷
  */
-export type getApiSurveysMemberIdResponse200 = {
-  data: GetApiSurveysMemberId200
+export type getApiSurveysByPhoneMemberIdResponse200 = {
+  data: GetApiSurveysByPhoneMemberId200
   status: 200
 }
 
-export type getApiSurveysMemberIdResponse404 = {
-  data: GetApiSurveysMemberId404
+export type getApiSurveysByPhoneMemberIdResponse404 = {
+  data: GetApiSurveysByPhoneMemberId404
   status: 404
 }
 
-export type getApiSurveysMemberIdResponse500 = {
-  data: GetApiSurveysMemberId500
+export type getApiSurveysByPhoneMemberIdResponse500 = {
+  data: GetApiSurveysByPhoneMemberId500
   status: 500
 }
     
-export type getApiSurveysMemberIdResponseComposite = getApiSurveysMemberIdResponse200 | getApiSurveysMemberIdResponse404 | getApiSurveysMemberIdResponse500;
+export type getApiSurveysByPhoneMemberIdResponseComposite = getApiSurveysByPhoneMemberIdResponse200 | getApiSurveysByPhoneMemberIdResponse404 | getApiSurveysByPhoneMemberIdResponse500;
     
-export type getApiSurveysMemberIdResponse = getApiSurveysMemberIdResponseComposite & {
+export type getApiSurveysByPhoneMemberIdResponse = getApiSurveysByPhoneMemberIdResponseComposite & {
   headers: Headers;
 }
 
-export const getGetApiSurveysMemberIdUrl = (memberId: string,) => {
+export const getGetApiSurveysByPhoneMemberIdUrl = (memberId: string,) => {
 
 
   
 
-  return createFullURL(`/api/surveys/${memberId}`)
+  return createFullURL(`/api/surveys/by-phone/${memberId}`)
 }
 
-export const getApiSurveysMemberId = async (memberId: string, options?: RequestInit): Promise<getApiSurveysMemberIdResponse> => {
+export const getApiSurveysByPhoneMemberId = async (memberId: string, options?: RequestInit): Promise<getApiSurveysByPhoneMemberIdResponse> => {
   
-  const res = await fetch(getGetApiSurveysMemberIdUrl(memberId),
+  const res = await fetch(getGetApiSurveysByPhoneMemberIdUrl(memberId),
   {      
     ...options,
     method: 'GET'
@@ -7710,50 +7710,50 @@ export const getApiSurveysMemberId = async (memberId: string, options?: RequestI
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text()
-  const data: getApiSurveysMemberIdResponse['data'] = body ? JSON.parse(body) : {}
+  const data: getApiSurveysByPhoneMemberIdResponse['data'] = body ? JSON.parse(body) : {}
 
-  return { data, status: res.status, headers: res.headers } as getApiSurveysMemberIdResponse
+  return { data, status: res.status, headers: res.headers } as getApiSurveysByPhoneMemberIdResponse
 }
 
 
 
-export const getGetApiSurveysMemberIdQueryKey = (memberId?: string,) => {
-    return [`/api/surveys/${memberId}`] as const;
+export const getGetApiSurveysByPhoneMemberIdQueryKey = (memberId?: string,) => {
+    return [`/api/surveys/by-phone/${memberId}`] as const;
     }
 
     
-export const getGetApiSurveysMemberIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiSurveysMemberId>>, TError = GetApiSurveysMemberId404 | GetApiSurveysMemberId500>(memberId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysMemberId>>, TError, TData>, fetch?: RequestInit}
+export const getGetApiSurveysByPhoneMemberIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiSurveysByPhoneMemberId>>, TError = GetApiSurveysByPhoneMemberId404 | GetApiSurveysByPhoneMemberId500>(memberId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysByPhoneMemberId>>, TError, TData>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiSurveysMemberIdQueryKey(memberId);
+  const queryKey =  queryOptions?.queryKey ?? getGetApiSurveysByPhoneMemberIdQueryKey(memberId);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiSurveysMemberId>>> = ({ signal }) => getApiSurveysMemberId(memberId, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiSurveysByPhoneMemberId>>> = ({ signal }) => getApiSurveysByPhoneMemberId(memberId, { signal, ...fetchOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(memberId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysMemberId>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(memberId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysByPhoneMemberId>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type GetApiSurveysMemberIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiSurveysMemberId>>>
-export type GetApiSurveysMemberIdQueryError = GetApiSurveysMemberId404 | GetApiSurveysMemberId500
+export type GetApiSurveysByPhoneMemberIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiSurveysByPhoneMemberId>>>
+export type GetApiSurveysByPhoneMemberIdQueryError = GetApiSurveysByPhoneMemberId404 | GetApiSurveysByPhoneMemberId500
 
 
 /**
  * @summary 查詢問卷
  */
 
-export function useGetApiSurveysMemberId<TData = Awaited<ReturnType<typeof getApiSurveysMemberId>>, TError = GetApiSurveysMemberId404 | GetApiSurveysMemberId500>(
- memberId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysMemberId>>, TError, TData>, fetch?: RequestInit}
+export function useGetApiSurveysByPhoneMemberId<TData = Awaited<ReturnType<typeof getApiSurveysByPhoneMemberId>>, TError = GetApiSurveysByPhoneMemberId404 | GetApiSurveysByPhoneMemberId500>(
+ memberId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysByPhoneMemberId>>, TError, TData>, fetch?: RequestInit}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetApiSurveysMemberIdQueryOptions(memberId,options)
+  const queryOptions = getGetApiSurveysByPhoneMemberIdQueryOptions(memberId,options)
 
   const query = useQuery(queryOptions ) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -7885,17 +7885,17 @@ export type deleteApiSurveysIdResponse = deleteApiSurveysIdResponseComposite & {
   headers: Headers;
 }
 
-export const getDeleteApiSurveysIdUrl = () => {
+export const getDeleteApiSurveysIdUrl = (id: string,) => {
 
 
   
 
-  return createFullURL(`/api/surveys/:id`)
+  return createFullURL(`/api/surveys/${id}`)
 }
 
-export const deleteApiSurveysId = async ( options?: RequestInit): Promise<deleteApiSurveysIdResponse> => {
+export const deleteApiSurveysId = async (id: string, options?: RequestInit): Promise<deleteApiSurveysIdResponse> => {
   
-  const res = await fetch(getDeleteApiSurveysIdUrl(),
+  const res = await fetch(getDeleteApiSurveysIdUrl(id),
   {      
     ...options,
     method: 'DELETE'
@@ -7914,8 +7914,8 @@ export const deleteApiSurveysId = async ( options?: RequestInit): Promise<delete
 
 
 export const getDeleteApiSurveysIdMutationOptions = <TError = DeleteApiSurveysId404 | DeleteApiSurveysId500,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiSurveysId>>, TError,void, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteApiSurveysId>>, TError,void, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiSurveysId>>, TError,{id: string}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiSurveysId>>, TError,{id: string}, TContext> => {
 
 const mutationKey = ['deleteApiSurveysId'];
 const {mutation: mutationOptions, fetch: fetchOptions} = options ?
@@ -7927,10 +7927,10 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiSurveysId>>, void> = () => {
-          
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiSurveysId>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
 
-          return  deleteApiSurveysId(fetchOptions)
+          return  deleteApiSurveysId(id,fetchOptions)
         }
 
         
@@ -7946,11 +7946,11 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
  * @summary 刪除問卷
  */
 export const useDeleteApiSurveysId = <TError = DeleteApiSurveysId404 | DeleteApiSurveysId500,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiSurveysId>>, TError,void, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiSurveysId>>, TError,{id: string}, TContext>, fetch?: RequestInit}
  ): UseMutationResult<
         Awaited<ReturnType<typeof deleteApiSurveysId>>,
         TError,
-        void,
+        {id: string},
         TContext
       > => {
 
