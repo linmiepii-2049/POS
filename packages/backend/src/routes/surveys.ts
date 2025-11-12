@@ -112,11 +112,11 @@ surveysRouter.openapi(createSurveyRoute, async (c) => {
 });
 
 // ================================
-// GET /api/surveys/:memberId - 查詢問卷（根據手機號碼）
+// GET /api/surveys/by-phone/:memberId - 查詢問卷（根據手機號碼）
 // ================================
 const getSurveyByMemberIdRoute = createRoute({
   method: 'get',
-  path: '/surveys/{memberId}',
+  path: '/surveys/by-phone/{memberId}',
   tags: ['Surveys'],
   summary: '查詢問卷',
   description: '根據手機號碼（會員 ID）查詢問卷資料',
@@ -293,13 +293,14 @@ surveysRouter.openapi(getSurveyStatsRoute, async (c) => {
 // ================================
 const deleteSurveyRoute = createRoute({
   method: 'delete',
-  path: '/surveys/:id',
+  path: '/surveys/{id}',
   tags: ['Surveys'],
   summary: '刪除問卷',
   description: '刪除指定 ID 的問卷（管理功能）',
   request: {
     params: z.object({
       id: z.string().regex(/^\d+$/, 'ID 必須是數字').openapi({
+        param: { name: 'id', in: 'path' },
         example: '1',
         description: '問卷 ID',
       }),

@@ -7776,7 +7776,7 @@
         "operationId": "get--api-surveys"
       }
     },
-    "/api/surveys/{memberId}": {
+    "/api/surveys/by-phone/{memberId}": {
       "get": {
         "tags": [
           "Surveys"
@@ -8094,7 +8094,7 @@
             }
           }
         },
-        "operationId": "get--api-surveys--memberId-"
+        "operationId": "get--api-surveys-by-phone--memberId-"
       }
     },
     "/api/surveys/stats/summary": {
@@ -8151,7 +8151,7 @@
         "operationId": "get--api-surveys-stats-summary"
       }
     },
-    "/api/surveys/:id": {
+    "/api/surveys/{id}": {
       "delete": {
         "tags": [
           "Surveys"
@@ -8260,7 +8260,7 @@
             }
           }
         },
-        "operationId": "delete--api-surveys--id"
+        "operationId": "delete--api-surveys--id-"
       }
     },
     "/api/uploads/products": {

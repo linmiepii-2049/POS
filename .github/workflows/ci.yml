@@ -70,9 +70,10 @@ jobs:
           pnpm run typecheck || true
 
       - name: 🧪 前端 - 執行測試
+        continue-on-error: true
         run: |
           cd packages/frontend
-          pnpm run test:run || true
+          pnpm run test:run
 
       - name: 🔍 Survey 前端 - ESLint 檢查
         run: |
