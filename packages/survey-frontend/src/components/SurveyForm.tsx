@@ -1,10 +1,30 @@
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { SurveySection } from './SurveySection';
 import { RadioGroup } from './RadioGroup';
 import { CheckboxGroup } from './CheckboxGroup';
 
+interface SurveyData {
+  phone: string;
+  age: string;
+  gender: string;
+  location: string;
+  purchaseFrequency: string;
+  purchaseLocation: string[];
+  purchaseTime: string;
+  mealType: string;
+  purchaseFactors: string[];
+  healthPrice: string;
+  naturalPreference: string;
+  tastePreference: string[];
+  breadTypes: string[];
+  breadTypesOther: string;
+  favoriteBread: string;
+  desiredBread: string;
+  memberId: string;
+}
+
 interface SurveyFormProps {
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: SurveyData) => Promise<void>;
   isSubmitting: boolean;
 }
 
@@ -32,7 +52,7 @@ export function SurveyForm({ onSubmit, isSubmitting }: SurveyFormProps) {
     desiredBread: '',
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
     // 驗證必填欄位

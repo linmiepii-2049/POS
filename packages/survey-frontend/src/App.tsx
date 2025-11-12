@@ -13,7 +13,7 @@ function App() {
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: Record<string, unknown>) => {
     setSubmitStatus('loading');
     
     try {
@@ -31,10 +31,10 @@ function App() {
           liff.closeWindow();
         }
       }, 2000);
-    } catch (error: any) {
+    } catch (error) {
       console.error('提交錯誤:', error);
       setSubmitStatus('error');
-      setErrorMessage(error.message || '提交失敗，請稍後再試');
+      setErrorMessage(error instanceof Error ? error.message : '提交失敗，請稍後再試');
     }
   };
 

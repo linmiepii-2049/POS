@@ -28,7 +28,7 @@ interface SurveyData {
 /**
  * 提交問卷資料
  */
-export async function submitSurvey(data: SurveyData): Promise<any> {
+export async function submitSurvey(data: SurveyData): Promise<unknown> {
   const apiBase = import.meta.env.VITE_API_BASE;
   
   if (!apiBase) {
@@ -59,7 +59,7 @@ export async function submitSurvey(data: SurveyData): Promise<any> {
 /**
  * 查詢問卷資料（根據手機號碼）
  */
-export async function getSurvey(memberId: string): Promise<any> {
+export async function getSurvey(memberId: string): Promise<unknown> {
   const apiBase = import.meta.env.VITE_API_BASE;
   
   if (!apiBase) {

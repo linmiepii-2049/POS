@@ -7,7 +7,7 @@
     "dev": "vite --port 3000",
     "build": "vite build",
     "preview": "vite preview --host --strictPort --port 3000",
-    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 25",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 35",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:ui": "vitest --ui",

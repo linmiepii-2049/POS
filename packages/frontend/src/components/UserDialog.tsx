@@ -61,7 +61,7 @@ export const UserDialog: React.FC<UserDialogProps> = ({
       await onSubmit(data);
       onClose();
       reset();
-    } catch (error) {
+    } catch {
       // 錯誤處理在父組件中進行
     }
   };
