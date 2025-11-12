@@ -2,7 +2,8 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
+  // 優先從 process.env 讀取（GitHub Actions），然後從 .env 檔案讀取（本地）
+  const env = { ...loadEnv(mode, process.cwd(), ''), ...process.env };
   
   // GitHub Pages 的 base 路徑（僅在 production 時使用）
   const base = mode === 'production' 
