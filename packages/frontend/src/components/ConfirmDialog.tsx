@@ -123,24 +123,111 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
       }
     } else {
       // LINE ID 查詢
-      if (!lineId.trim()) return;
+      if (!lineId.trim()) {
+        console.warn('⚠️ LINE ID 為空，無法查詢');
+        toast.error('請輸入 LINE ID');
+        return;
+      }
       
       try {
-        console.log('開始查詢會員（LINE ID）:', lineId);
+        console.log('🔍 [LINE ID 查詢] 開始查詢:', {
+          lineId: lineId.substring(0, 10) + '...',
+          lineIdLength: lineId.length,
+          timestamp: new Date().toISOString(),
+        });
+        
         const userResult = await refetchLineIdUser();
-        console.log('LINE ID 查詢結果:', userResult.data);
+        
+        console.log('📊 [LINE ID 查詢] API 回應:', {
+          hasData: !!userResult.data,
+          success: userResult.data?.success,
+          error: userResult.data?.error,
+          dataStructure: userResult.data ? Object.keys(userResult.data) : [],
+          fullResponse: userResult.data,
+        });
+        
+        // 檢查 API 錯誤回應
+        if (userResult.data && 'success' in userResult.data && !userResult.data.success) {
+          const errorMsg = userResult.data.error || '查詢失敗';
+          const details = (userResult.data as any).details;
+          const requestId = (userResult.data as any).requestId;
+          
+          console.error('❌ [LINE ID 查詢] API 返回錯誤:', {
+            error: errorMsg,
+            details,
+            requestId,
+          });
+          
+          // 顯示詳細錯誤訊息
+          let userFriendlyMsg = errorMsg;
+          if (details) {
+            if (typeof details === 'string') {
+              userFriendlyMsg = details;
+            } else if (details.message) {
+              userFriendlyMsg = details.message;
+            } else if (details.suggestion) {
+              userFriendlyMsg = `${errorMsg}\n${details.suggestion}`;
+            }
+          }
+          
+          toast.error(userFriendlyMsg, { duration: 5000 });
+          setUserData(null);
+          return;
+        }
         
         // 類型守衛：檢查是否為成功回應
         if (userResult.data && 'data' in userResult.data && userResult.data.data) {
+          const userInfo = userResult.data.data;
+          console.log('✅ [LINE ID 查詢] 查詢成功:', {
+            userId: userInfo.id,
+            name: userInfo.name,
+            points: userInfo.points,
+            pointsYuan: userInfo.points_yuan_equivalent,
+          });
+          
           setUserData(userResult.data);
           setRedeemAmount(0); // 重置點數折抵
-          console.log('設置 LINE ID userData:', userResult.data);
+          toast.success(`找到會員：${userInfo.name || '未知'}`);
         } else {
+          console.warn('⚠️ [LINE ID 查詢] 未找到會員資料:', {
+            response: userResult.data,
+            hasData: !!userResult.data,
+          });
           setUserData(null);
-          console.log('未找到 LINE ID 會員資料');
+          toast.error('未找到此 LINE ID 的會員資料', { duration: 3000 });
         }
-      } catch (error) {
-        console.error('LINE ID 查詢會員失敗:', error);
+      } catch (error: any) {
+        console.error('❌ [LINE ID 查詢] 查詢失敗:', {
+          error,
+          errorType: error?.constructor?.name,
+          errorMessage: error?.message,
+          errorStack: error?.stack,
+          response: error?.response,
+          responseData: error?.response?.data,
+          status: error?.response?.status,
+        });
+        
+        // 解析錯誤訊息
+        let errorMessage = '查詢會員失敗';
+        if (error?.response?.data) {
+          const errorData = error.response.data;
+          if (errorData.error) {
+            errorMessage = errorData.error;
+            if (errorData.details) {
+              if (typeof errorData.details === 'string') {
+                errorMessage += `: ${errorData.details}`;
+              } else if (errorData.details.message) {
+                errorMessage = errorData.details.message;
+              }
+            }
+          } else if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } else if (error?.message) {
+          errorMessage = error.message;
+        }
+        
+        toast.error(errorMessage, { duration: 5000 });
         setUserData(null);
       }
     }
@@ -149,12 +236,19 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
   // 自動偵測 LINE ID 輸入（當有輸入時自動查詢）
   useEffect(() => {
     if (searchType === 'lineId' && lineId.trim().length > 0) {
-      console.log('LINE ID 輸入變化，自動查詢:', lineId);
+      console.log('🔄 [LINE ID] 輸入變化，準備自動查詢:', {
+        lineId: lineId.substring(0, 10) + '...',
+        length: lineId.length,
+      });
       const timer = setTimeout(() => {
+        console.log('⏰ [LINE ID] 延遲結束，開始查詢');
         handleSearchUser();
       }, 500); // 延遲 500ms 以避免頻繁查詢
       
-      return () => clearTimeout(timer);
+      return () => {
+        console.log('🛑 [LINE ID] 取消自動查詢');
+        clearTimeout(timer);
+      };
     }
   }, [lineId, searchType, handleSearchUser]);
 

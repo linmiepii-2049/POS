@@ -11,6 +11,7 @@ import { ProductCard } from '../../components/ProductCard';
 import { Cart } from '../../components/Cart';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { PaymentDialog } from '../../components/PaymentDialog';
+import toast from 'react-hot-toast';
 
 /**
  * 訂單狀態
@@ -140,6 +141,17 @@ export function POSPage() {
    * 完成付款
    */
   const handlePaymentComplete = async () => {
+    const requestId = `order-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    console.log(`📦 [建立訂單] 開始:`, {
+      requestId,
+      itemCount: state.items.length,
+      totalAmount: state.totalAmount,
+      finalAmount,
+      userId: selectedUserId,
+      pointsToRedeem,
+      timestamp: new Date().toISOString(),
+    });
+    
     try {
       // 建立訂單
       const orderData: any = {
@@ -152,11 +164,15 @@ export function POSPage() {
       // 只有在有會員時才添加 user_id
       if (selectedUserId) {
         orderData.user_id = selectedUserId;
+        console.log(`👤 [建立訂單] 包含會員 ID: ${selectedUserId}`);
+      } else {
+        console.log(`👤 [建立訂單] 非會員訂單`);
       }
 
       // 添加點數折抵（如果有的話）
       if (pointsToRedeem > 0) {
         orderData.points_to_redeem = pointsToRedeem;
+        console.log(`💰 [建立訂單] 點數折抵: ${pointsToRedeem} 元`);
       }
 
       // TODO: 優惠券功能已停用
@@ -165,8 +181,19 @@ export function POSPage() {
       //   orderData.coupon_code_id = selectedCouponCodeId;
       // }
 
+      console.log(`📤 [建立訂單] 發送訂單資料:`, {
+        ...orderData,
+        items: orderData.items.map((i: any) => ({ product_id: i.product_id, quantity: i.quantity })),
+      });
+
       const orderResponse = await createOrderMutation.mutateAsync({
         data: orderData,
+      });
+
+      console.log(`✅ [建立訂單] API 回應:`, {
+        success: orderResponse.data?.success,
+        orderNumber: orderResponse.data?.order_number,
+        fullResponse: orderResponse.data,
       });
 
       // 設定訂單編號和重新獲取統計
@@ -175,6 +202,8 @@ export function POSPage() {
         : `ORD-${Date.now()}`;
       setOrderNumber(newOrderNumber);
       refetchTodayStats(); // 重新獲取今日訂單統計
+      
+      console.log(`🎉 [建立訂單] 訂單建立成功: ${newOrderNumber}`);
       
       // 清空購物車、用戶選擇和點數折抵
       clearCart();
@@ -189,7 +218,44 @@ export function POSPage() {
       setCurrentStep('completed');
       
       handleSuccess('訂單建立成功！');
-    } catch (error) {
+    } catch (error: any) {
+      console.error(`❌ [建立訂單] 錯誤:`, {
+        requestId,
+        error,
+        errorType: error?.constructor?.name,
+        errorMessage: error?.message,
+        errorStack: error?.stack,
+        response: error?.response,
+        responseData: error?.response?.data,
+        status: error?.response?.status,
+        statusText: error?.response?.statusText,
+      });
+      
+      // 解析詳細錯誤訊息
+      let errorMessage = '建立訂單失敗';
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        if (errorData.error) {
+          errorMessage = errorData.error;
+          if (errorData.details) {
+            if (Array.isArray(errorData.details)) {
+              // Zod validation errors
+              const validationErrors = errorData.details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
+              errorMessage = `驗證錯誤: ${validationErrors}`;
+            } else if (typeof errorData.details === 'string') {
+              errorMessage += `: ${errorData.details}`;
+            } else if (errorData.details.message) {
+              errorMessage = errorData.details.message;
+            }
+          }
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage, { duration: 6000 });
       handleError(error, '建立訂單');
     }
   };

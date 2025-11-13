@@ -607,19 +607,69 @@ const getUserByLineIdRoute = createRoute({
 });
 
 usersRouter.openapi(getUserByLineIdRoute, async (c) => {
+  const requestId = `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const startTime = Date.now();
+  
   try {
+    // 詳細日誌：接收到的參數
     const { lineId } = c.req.valid('param');
+    console.log(`[${requestId}] 🔍 LINE ID 查詢開始:`, {
+      lineId: lineId ? `${lineId.substring(0, 10)}...` : 'empty',
+      lineIdLength: lineId?.length || 0,
+      userAgent: c.req.header('User-Agent'),
+      origin: c.req.header('Origin'),
+      timestamp: new Date().toISOString(),
+    });
+    
+    // 驗證 LINE ID 格式
+    if (!lineId || lineId.trim().length === 0) {
+      console.error(`[${requestId}] ❌ LINE ID 為空`);
+      return c.json({
+        success: false,
+        error: 'LINE ID 不能為空',
+        details: {
+          received: lineId || '(空值)',
+          message: '請提供有效的 LINE ID',
+        },
+        requestId,
+        timestamp: new Date().toISOString(),
+      }, 400);
+    }
+    
+    if (lineId === 'dummy') {
+      console.warn(`[${requestId}] ⚠️ 收到 dummy LINE ID，可能是前端初始化問題`);
+    }
+    
     const userService = new UserService(c.env.DB);
     
+    // 執行查詢
+    console.log(`[${requestId}] 📊 開始查詢資料庫...`);
     const user = await userService.getUserByLineId(lineId);
     
     if (!user) {
+      console.warn(`[${requestId}] ⚠️ 未找到使用者:`, {
+        lineId: lineId.substring(0, 10) + '...',
+        searchTime: `${Date.now() - startTime}ms`,
+      });
       return c.json({
         success: false,
         error: '找不到此 LINE ID 對應的使用者',
+        details: {
+          lineId: lineId.substring(0, 10) + '...',
+          message: '此 LINE ID 尚未註冊為會員，請先註冊',
+          suggestion: '請確認 LINE ID 是否正確，或聯繫客服協助註冊',
+        },
+        requestId,
         timestamp: new Date().toISOString(),
       }, 404);
     }
+    
+    console.log(`[${requestId}] ✅ 查詢成功:`, {
+      userId: user.id,
+      name: user.name,
+      points: user.points,
+      searchTime: `${Date.now() - startTime}ms`,
+    });
     
     return c.json({
       success: true,
@@ -629,13 +679,28 @@ usersRouter.openapi(getUserByLineIdRoute, async (c) => {
         points: user.points,
         points_yuan_equivalent: user.points_yuan_equivalent,
       },
+      requestId,
       timestamp: new Date().toISOString(),
     }, 200);
   } catch (error) {
-    console.error('根據 LINE ID 查詢使用者時發生錯誤:', error);
+    const errorDetails = {
+      requestId,
+      lineId: c.req.param('lineId')?.substring(0, 10) + '...' || 'unknown',
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorStack: error instanceof Error ? error.stack : undefined,
+      searchTime: `${Date.now() - startTime}ms`,
+    };
+    
+    console.error(`[${requestId}] ❌ LINE ID 查詢錯誤:`, errorDetails);
     return c.json({
       success: false,
       error: '查詢使用者時發生錯誤',
+      details: {
+        message: errorDetails.errorMessage,
+        type: errorDetails.errorType,
+      },
+      requestId,
       timestamp: new Date().toISOString(),
     }, 500);
   }

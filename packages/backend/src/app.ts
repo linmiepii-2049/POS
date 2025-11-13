@@ -267,17 +267,43 @@ export const createApp = () => {
 
   // 全域錯誤處理器
   app.onError((err, c) => {
-    console.error('全域錯誤處理器:', err);
+    const requestId = `err-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const errorDetails = {
+      requestId,
+      method: c.req.method,
+      path: c.req.path,
+      url: c.req.url,
+      userAgent: c.req.header('User-Agent'),
+      origin: c.req.header('Origin'),
+      errorType: err.name || err.constructor?.name || typeof err,
+      errorMessage: err instanceof Error ? err.message : String(err),
+      timestamp: new Date().toISOString(),
+    };
+    
+    console.error(`[${requestId}] ❌ 全域錯誤處理器:`, errorDetails);
+    console.error(`[${requestId}] 錯誤堆疊:`, err instanceof Error ? err.stack : 'N/A');
     
     // 處理 Zod 驗證錯誤
     if (err.name === 'ZodError' && 'issues' in err) {
+      const zodError = err as { issues: Array<{ path: (string | number)[]; message: string; code: string }> };
+      const validationDetails = zodError.issues.map((issue) => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+        code: issue.code,
+        path: issue.path,
+      }));
+      
+      console.error(`[${requestId}] 🔍 Zod 驗證錯誤詳情:`, {
+        issues: validationDetails,
+        totalIssues: validationDetails.length,
+      });
+      
       return c.json({
         success: false,
         error: '請求參數驗證失敗',
-        details: (err as { issues: Array<{ path: (string | number)[]; message: string }> }).issues.map((issue: { path: (string | number)[]; message: string }) => ({
-          field: issue.path.join('.'),
-          message: issue.message,
-        })),
+        details: validationDetails,
+        summary: `共有 ${validationDetails.length} 個驗證錯誤`,
+        requestId,
         timestamp: new Date().toISOString(),
       }, 400);
     }
@@ -286,6 +312,12 @@ export const createApp = () => {
     return c.json({
       success: false,
       error: '伺服器內部錯誤',
+      details: {
+        type: errorDetails.errorType,
+        message: errorDetails.errorMessage,
+        path: errorDetails.path,
+      },
+      requestId,
       timestamp: new Date().toISOString(),
     }, 500);
   });
