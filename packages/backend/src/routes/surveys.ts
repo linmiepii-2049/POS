@@ -84,8 +84,16 @@ surveysRouter.openapi(createSurveyRoute, async (c) => {
   const body = c.req.valid('json');
   const db = c.env.DB;
 
+  // 從 request 中提取 IP 和 user agent
+  // Cloudflare Workers 會在 CF-Connecting-IP header 中提供真實的客戶端 IP
+  const ipAddress = c.req.header('CF-Connecting-IP') || 
+                    c.req.header('X-Forwarded-For')?.split(',')[0]?.trim() || 
+                    c.req.header('X-Real-IP') || 
+                    null;
+  const userAgent = c.req.header('User-Agent') || null;
+
   try {
-    const result = await createSurvey(db, body);
+    const result = await createSurvey(db, body, ipAddress || undefined, userAgent || undefined);
     return c.json(result, 200);
   } catch (error: any) {
     console.error('問卷提交錯誤:', error);

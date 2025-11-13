@@ -8,9 +8,18 @@ import type { CreateSurveyRequest, SurveyResponse, SurveyListQuery, SurveyStats 
 
 /**
  * 建立問卷
+ * @param db 資料庫實例
+ * @param data 問卷資料
+ * @param ipAddress 客戶端 IP 位址（可選）
+ * @param userAgent 瀏覽器資訊（可選）
  * @throws {Error} 如果手機號碼已存在（重複提交）
  */
-export async function createSurvey(db: D1Database, data: CreateSurveyRequest): Promise<SurveyResponse> {
+export async function createSurvey(
+  db: D1Database, 
+  data: CreateSurveyRequest,
+  ipAddress?: string,
+  userAgent?: string
+): Promise<SurveyResponse> {
   // 檢查是否已存在該會員的問卷
   const existing = await db
     .prepare('SELECT id FROM survey_responses WHERE member_id = ?')
@@ -29,8 +38,8 @@ export async function createSurvey(db: D1Database, data: CreateSurveyRequest): P
         purchase_frequency, purchase_location, purchase_time, meal_type,
         purchase_factors, health_price, natural_preference, taste_preference,
         bread_types, bread_types_other, favorite_bread, desired_bread,
-        line_user_id, display_name
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        line_user_id, display_name, ip_address, user_agent
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     .bind(
       data.memberId,
@@ -51,7 +60,9 @@ export async function createSurvey(db: D1Database, data: CreateSurveyRequest): P
       data.favoriteBread || null,
       data.desiredBread || null,
       data.lineUserId || null,
-      data.displayName || null
+      data.displayName || null,
+      ipAddress || null,
+      userAgent || null
     )
     .run();
 
@@ -242,6 +253,8 @@ function parseSurveyRow(row: any): SurveyResponse {
     desiredBread: row.desired_bread || undefined,
     lineUserId: row.line_user_id || undefined,
     displayName: row.display_name || undefined,
+    ipAddress: row.ip_address || undefined,
+    userAgent: row.user_agent || undefined,
     userId: row.user_id || undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

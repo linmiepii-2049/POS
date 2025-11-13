@@ -109,6 +109,16 @@ export const SurveyResponseSchema = z.object({
     description: 'LINE 顯示名稱',
   }),
   
+  ipAddress: z.string().optional().openapi({
+    example: '192.168.1.1',
+    description: 'IP 位址',
+  }),
+  
+  userAgent: z.string().optional().openapi({
+    example: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    description: '瀏覽器資訊',
+  }),
+  
   userId: z.number().int().positive().optional().openapi({
     example: 1,
     description: '關聯的會員 ID（POS 系統）',
@@ -127,10 +137,13 @@ export const SurveyResponseSchema = z.object({
 
 /**
  * 建立問卷請求 Schema
+ * 注意：ip_address 和 user_agent 由後端自動從 request 中提取，前端不需要傳送
  */
 export const CreateSurveyRequestSchema = SurveyResponseSchema.omit({ 
   id: true, 
   userId: true,
+  ipAddress: true,  // 由後端自動提取
+  userAgent: true, // 由後端自動提取
   createdAt: true, 
   updatedAt: true 
 }).openapi('CreateSurveyRequest');

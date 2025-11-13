@@ -83,7 +83,8 @@ dataRouter.openapi(getDataRoute, async (c) => {
       'coupon_codes',
       'coupon_grants',
       'coupon_redemptions',
-      'cost'
+      'cost',
+      'survey_responses'
     ];
 
     const data = [];
