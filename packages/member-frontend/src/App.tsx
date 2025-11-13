@@ -93,13 +93,23 @@ export function App() {
       return;
     }
 
-    if (!isLoggedIn || !profile) {
+    // 如果已登入但 profile 還在載入中，繼續等待
+    if (isLoggedIn && !profile) {
+      // 保持 loading 狀態，等待 profile 載入完成
+      return;
+    }
+
+    // 只有在確認未登入時才顯示錯誤
+    if (!isLoggedIn) {
       setError('請先登入 LINE');
       setLoading(false);
       return;
     }
 
-    fetchUserData();
+    // profile 已載入，開始取得使用者資料
+    if (profile) {
+      fetchUserData();
+    }
   }, [isReady, isLoggedIn, profile, liffError, fetchUserData]);
 
   if (!isReady || loading) {
