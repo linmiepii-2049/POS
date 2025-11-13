@@ -52,7 +52,7 @@ export async function submitSurvey(data: SurveyData): Promise<unknown> {
       console.error('❌ 提交失敗:', error);
       // 處理不同的錯誤格式
       errorMessage = error.error || error.message || errorMessage;
-    } catch (e) {
+    } catch {
       // 如果無法解析 JSON，使用狀態碼訊息
       console.error('❌ 提交失敗（無法解析錯誤）:', response.status, response.statusText);
       errorMessage = `提交失敗 (${response.status}): ${response.statusText || '請稍後再試'}`;
