@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useLiff } from './hooks/useLiff';
 import { getUserByLineId, getUserDetail } from './api/memberClient';
 import { MemberInfo } from './components/MemberInfo';
 import { PointsInfo } from './components/PointsInfo';
 import { PointsHistory } from './components/PointsHistory';
 import { OrderHistory } from './components/OrderHistory';
+import { RegisterForm } from './components/RegisterForm';
 import { Loading } from './components/Loading';
 
 interface UserData {
@@ -22,6 +23,66 @@ export function App() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
+
+  const fetchUserData = useCallback(async () => {
+    if (!profile) return;
+
+    setLoading(true);
+    setError(null);
+    setShowRegisterForm(false);
+    
+    try {
+      // 先透過 LINE ID 取得基本資訊
+      const lineIdResponse = await getUserByLineId(profile.userId);
+      
+      if (!lineIdResponse.success || !lineIdResponse.data) {
+        // 找不到會員，顯示註冊表單
+        setShowRegisterForm(true);
+        setLoading(false);
+        return;
+      }
+
+      // 再取得完整的使用者詳細資訊
+      const detailResponse = await getUserDetail(lineIdResponse.data.id);
+      
+      if (!detailResponse.success || !detailResponse.data) {
+        setError('取得使用者詳細資訊失敗');
+        setLoading(false);
+        return;
+      }
+
+      const user = detailResponse.data;
+      setUserData({
+        id: user.id,
+        name: user.name,
+        phone: user.phone,
+        lineId: user.line_id,
+        points: user.points,
+        pointsYuanEquivalent: user.points_yuan_equivalent,
+        createdAt: user.created_at,
+      });
+    } catch (err) {
+      console.error('取得使用者資料失敗:', err);
+      if (err instanceof Error) {
+        // 檢查是否為 404 錯誤（找不到會員）
+        const isNotFound = (err as any).status === 404 || 
+                          err.message.includes('找不到此 LINE ID') || 
+                          err.message.includes('尚未註冊');
+        
+        if (isNotFound) {
+          // 找不到會員，顯示註冊表單
+          setShowRegisterForm(true);
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError('取得使用者資料時發生錯誤');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [profile]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -38,57 +99,8 @@ export function App() {
       return;
     }
 
-    const fetchUserData = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // 先透過 LINE ID 取得基本資訊
-        const lineIdResponse = await getUserByLineId(profile.userId);
-        
-        if (!lineIdResponse.success || !lineIdResponse.data) {
-          setError('找不到此 LINE ID 對應的使用者');
-          setLoading(false);
-          return;
-        }
-
-        // 再取得完整的使用者詳細資訊
-        const detailResponse = await getUserDetail(lineIdResponse.data.id);
-        
-        if (!detailResponse.success || !detailResponse.data) {
-          setError('取得使用者詳細資訊失敗');
-          setLoading(false);
-          return;
-        }
-
-        const user = detailResponse.data;
-        setUserData({
-          id: user.id,
-          name: user.name,
-          phone: user.phone,
-          lineId: user.line_id,
-          points: user.points,
-          pointsYuanEquivalent: user.points_yuan_equivalent,
-          createdAt: user.created_at,
-        });
-      } catch (err) {
-        console.error('取得使用者資料失敗:', err);
-        if (err instanceof Error) {
-          if (err.message.includes('找不到此 LINE ID')) {
-            setError('尚未註冊為會員，請先註冊');
-          } else {
-            setError(err.message);
-          }
-        } else {
-          setError('取得使用者資料時發生錯誤');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUserData();
-  }, [isReady, isLoggedIn, profile, liffError]);
+  }, [isReady, isLoggedIn, profile, liffError, fetchUserData]);
 
   if (!isReady || loading) {
     return (
@@ -127,6 +139,17 @@ export function App() {
           </button>
         </div>
       </div>
+    );
+  }
+
+  // 顯示註冊表單
+  if (showRegisterForm && profile) {
+    return (
+      <RegisterForm
+        displayName={profile.displayName}
+        lineId={profile.userId}
+        onSuccess={fetchUserData}
+      />
     );
   }
 
