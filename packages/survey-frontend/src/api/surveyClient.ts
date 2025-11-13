@@ -35,14 +35,27 @@ export async function submitSurvey(data: SurveyData): Promise<unknown> {
     throw new Error('API 位址未設定，請檢查環境變數 VITE_API_BASE');
   }
 
-  console.log('📤 提交問卷:', { apiBase, data });
+  // 過濾空值：移除空字串、空陣列，只保留有效值
+  // 這樣可以避免 Zod enum 驗證失敗（enum 不接受空字串）
+  const cleanedData: Record<string, unknown> = {};
+  
+  for (const [key, value] of Object.entries(data)) {
+    // 跳過空字串（enum 欄位不接受空字串）
+    if (value === '') continue;
+    // 跳過空陣列
+    if (Array.isArray(value) && value.length === 0) continue;
+    // 保留其他值（包括 null、undefined 會自動被 JSON.stringify 處理）
+    cleanedData[key] = value;
+  }
+
+  console.log('📤 提交問卷:', { apiBase, original: data, cleaned: cleanedData });
 
   const response = await fetch(`${apiBase}/api/surveys`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(cleanedData),
   });
 
   if (!response.ok) {
