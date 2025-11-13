@@ -9,6 +9,15 @@ import { useCart } from '../hooks/useCart';
 import { CartItem } from '../store/cart.tsx';
 import { formatMoney, calculateDiscountedAmount } from '../utils/money';
 import { useUsersGetByPhone, useUsersGetByLineId } from '../api/posClient';
+import type { 
+  UsersGetByLineId200, 
+  UsersGetByLineId404, 
+  UsersGetByLineId500,
+  UsersGetByPhone200,
+  UsersGetByPhone400,
+  UsersGetByPhone404,
+  UsersGetByPhone500,
+} from '@pos/sdk';
 import { Html5Qrcode } from 'html5-qrcode';
 import toast from 'react-hot-toast';
 // Coupon feature hidden - 優惠券功能已隱藏 (2024-11-11)
@@ -55,26 +64,30 @@ export interface ConfirmDialogRef {
 }
 
 /**
- * API 響應類型
+ * API 響應類型（使用 SDK 生成的類型）
  */
-interface UserApiResponse {
-  success: boolean;
-  data?: {
-    data: {
-      id: number;
-      name: string;
-      points: number;
-      points_yuan_equivalent: number;
-    };
-  };
-  error?: string;
-  details?: {
-    message?: string;
-    suggestion?: string;
-    [key: string]: unknown;
-  } | string;
-  requestId?: string;
-  timestamp?: string;
+type UserLineIdApiResponse = UsersGetByLineId200 | UsersGetByLineId404 | UsersGetByLineId500;
+type UserPhoneApiResponse = UsersGetByPhone200 | UsersGetByPhone400 | UsersGetByPhone404 | UsersGetByPhone500;
+
+/**
+ * 類型守衛：檢查 LINE ID 查詢是否為成功響應
+ */
+function isLineIdSuccessResponse(response: UserLineIdApiResponse): response is UsersGetByLineId200 {
+  return response.success === true && 'data' in response;
+}
+
+/**
+ * 類型守衛：檢查 LINE ID 查詢是否為錯誤響應
+ */
+function isLineIdErrorResponse(response: UserLineIdApiResponse): response is UsersGetByLineId404 | UsersGetByLineId500 {
+  return response.success === false && 'error' in response;
+}
+
+/**
+ * 類型守衛：檢查手機號碼查詢是否為成功響應
+ */
+function isPhoneSuccessResponse(response: UserPhoneApiResponse): response is UsersGetByPhone200 {
+  return response.success === true && 'data' in response;
 }
 
 /**
@@ -92,7 +105,8 @@ export const ConfirmDialog = forwardRef<ConfirmDialogRef, ConfirmDialogProps>(({
   // Coupon feature hidden - 優惠券功能已隱藏 (2024-11-11)
   // const [selectedCoupons, setSelectedCoupons] = useState<number[]>([]);
   // const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>([]);
-  const [userData, setUserData] = useState<UserApiResponse | null>(null);
+  // 使用聯合類型來存儲不同查詢方式的響應
+  const [userData, setUserData] = useState<UserLineIdApiResponse | UserPhoneApiResponse | null>(null);
   
   // 查詢會員（手機號碼）
   const { refetch: refetchUser } = useUsersGetByPhone(
@@ -137,12 +151,21 @@ export const ConfirmDialog = forwardRef<ConfirmDialogRef, ConfirmDialogProps>(({
         const userResult = await refetchUser();
         console.log('會員查詢結果:', userResult.data);
         
+        // 檢查響應數據
+        if (!userResult.data?.data) {
+          console.warn('⚠️ [手機查詢] 無響應數據');
+          setUserData(null);
+          return;
+        }
+        
+        const responseData = userResult.data.data as UserPhoneApiResponse;
+        
         // 類型守衛：檢查是否為成功回應
-        if (userResult.data && 'data' in userResult.data && userResult.data.data) {
+        if (isPhoneSuccessResponse(responseData)) {
           // 正確設置 userData，包含完整的 API 回應結構
-          setUserData(userResult.data);
+          setUserData(responseData);
           setRedeemAmount(0); // 重置點數折抵
-          console.log('設置 userData:', userResult.data);
+          console.log('設置 userData:', responseData);
         } else {
           setUserData(null);
           console.log('未找到會員資料');
@@ -168,47 +191,40 @@ export const ConfirmDialog = forwardRef<ConfirmDialogRef, ConfirmDialogProps>(({
         
         const userResult = await refetchLineIdUser();
         
+        // 檢查響應數據
+        if (!userResult.data?.data) {
+          console.warn('⚠️ [LINE ID 查詢] 無響應數據');
+          setUserData(null);
+          toast.error('查詢失敗：無響應數據', { duration: 3000 });
+          return;
+        }
+        
+        const responseData = userResult.data.data as UserLineIdApiResponse;
+        
         console.log('📊 [LINE ID 查詢] API 回應:', {
-          hasData: !!userResult.data,
-          success: userResult.data?.success,
-          error: userResult.data?.error,
-          dataStructure: userResult.data ? Object.keys(userResult.data) : [],
-          fullResponse: userResult.data,
+          hasData: !!responseData,
+          success: responseData.success,
+          status: userResult.data.status,
+          fullResponse: responseData,
         });
         
         // 檢查 API 錯誤回應
-        if (userResult.data && 'success' in userResult.data && !userResult.data.success) {
-          const errorMsg = userResult.data.error || '查詢失敗';
-          const apiResponse = userResult.data as UserApiResponse;
-          const details = apiResponse.details;
-          const requestId = apiResponse.requestId;
+        if (isLineIdErrorResponse(responseData)) {
+          const errorMsg = responseData.error || '查詢失敗';
           
           console.error('❌ [LINE ID 查詢] API 返回錯誤:', {
             error: errorMsg,
-            details,
-            requestId,
+            status: userResult.data.status,
           });
           
-          // 顯示詳細錯誤訊息
-          let userFriendlyMsg = errorMsg;
-          if (details) {
-            if (typeof details === 'string') {
-              userFriendlyMsg = details;
-            } else if (details.message) {
-              userFriendlyMsg = details.message;
-            } else if (details.suggestion) {
-              userFriendlyMsg = `${errorMsg}\n${details.suggestion}`;
-            }
-          }
-          
-          toast.error(userFriendlyMsg, { duration: 5000 });
+          toast.error(errorMsg, { duration: 5000 });
           setUserData(null);
           return;
         }
         
-        // 類型守衛：檢查是否為成功回應
-        if (userResult.data && 'data' in userResult.data && userResult.data.data) {
-          const userInfo = userResult.data.data;
+        // 檢查成功回應
+        if (isLineIdSuccessResponse(responseData)) {
+          const userInfo = responseData.data;
           console.log('✅ [LINE ID 查詢] 查詢成功:', {
             userId: userInfo.id,
             name: userInfo.name,
@@ -216,13 +232,12 @@ export const ConfirmDialog = forwardRef<ConfirmDialogRef, ConfirmDialogProps>(({
             pointsYuan: userInfo.points_yuan_equivalent,
           });
           
-          setUserData(userResult.data);
+          setUserData(responseData);
           setRedeemAmount(0); // 重置點數折抵
           toast.success(`找到會員：${userInfo.name || '未知'}`);
         } else {
           console.warn('⚠️ [LINE ID 查詢] 未找到會員資料:', {
-            response: userResult.data,
-            hasData: !!userResult.data,
+            response: responseData,
           });
           setUserData(null);
           toast.error('未找到此 LINE ID 的會員資料', { duration: 3000 });
@@ -233,7 +248,9 @@ export const ConfirmDialog = forwardRef<ConfirmDialogRef, ConfirmDialogProps>(({
           message?: string;
           stack?: string;
           response?: {
-            data?: UserApiResponse;
+            data?: {
+              data?: UserLineIdApiResponse | UserPhoneApiResponse;
+            };
             status?: number;
           };
         };
@@ -250,16 +267,15 @@ export const ConfirmDialog = forwardRef<ConfirmDialogRef, ConfirmDialogProps>(({
         
         // 解析錯誤訊息
         let errorMessage = '查詢會員失敗';
-        if (errorObj?.response?.data) {
-          const errorData = errorObj.response.data;
-          if (errorData.error) {
-            errorMessage = errorData.error;
-            if (errorData.details) {
-              if (typeof errorData.details === 'string') {
-                errorMessage += `: ${errorData.details}`;
-              } else if (typeof errorData.details === 'object' && errorData.details.message) {
-                errorMessage = errorData.details.message;
-              }
+        if (errorObj?.response?.data?.data) {
+          const errorData = errorObj.response.data.data;
+          // 檢查是否為 LINE ID 錯誤響應
+          if (typeof errorData === 'object' && errorData !== null && 'success' in errorData && !errorData.success) {
+            const lineIdError = errorData as UserLineIdApiResponse;
+            if (isLineIdErrorResponse(lineIdError)) {
+              errorMessage = lineIdError.error;
+            } else if ('error' in errorData && typeof (errorData as { error?: string }).error === 'string') {
+              errorMessage = (errorData as { error: string }).error;
             }
           }
         } else if (errorObj?.message) {
@@ -508,12 +524,72 @@ export const ConfirmDialog = forwardRef<ConfirmDialogRef, ConfirmDialogProps>(({
   const finalAmount = calculateDiscountedAmount(state.totalAmount, discountAmount);
 
   /**
+   * 獲取用戶 ID（從不同類型的響應中提取）
+   */
+  const getUserId = (): number | undefined => {
+    if (!userData) return undefined;
+    
+    // 使用類型守衛來檢查類型
+    if ('data' in userData && typeof userData === 'object' && userData !== null) {
+      // 嘗試作為 LINE ID 響應處理
+      const lineIdResponse = userData as UserLineIdApiResponse;
+      if (isLineIdSuccessResponse(lineIdResponse)) {
+        return lineIdResponse.data.id;
+      }
+      
+      // 嘗試作為手機號碼響應處理
+      const phoneResponse = userData as UserPhoneApiResponse;
+      if (isPhoneSuccessResponse(phoneResponse)) {
+        return phoneResponse.data.id;
+      }
+    }
+    
+    return undefined;
+  };
+
+  /**
+   * 獲取用戶資訊（用於顯示）
+   * 注意：手機號碼查詢不包含點數資訊，只有 LINE ID 查詢包含
+   */
+  const getUserInfo = () => {
+    if (!userData) return null;
+    
+    // 使用類型守衛來檢查類型
+    if ('data' in userData && typeof userData === 'object' && userData !== null) {
+      // 嘗試作為 LINE ID 響應處理
+      const lineIdResponse = userData as UserLineIdApiResponse;
+      if (isLineIdSuccessResponse(lineIdResponse)) {
+        return {
+          id: lineIdResponse.data.id,
+          name: lineIdResponse.data.name,
+          points: lineIdResponse.data.points,
+          points_yuan_equivalent: lineIdResponse.data.points_yuan_equivalent,
+        };
+      }
+      
+      // 嘗試作為手機號碼響應處理
+      const phoneResponse = userData as UserPhoneApiResponse;
+      if (isPhoneSuccessResponse(phoneResponse)) {
+        // 手機號碼查詢不包含點數資訊，返回 0
+        return {
+          id: phoneResponse.data.id,
+          name: phoneResponse.data.name,
+          points: 0,
+          points_yuan_equivalent: 0,
+        };
+      }
+    }
+    
+    return null;
+  };
+
+  /**
    * 確認訂單
    */
   const handleConfirm = () => {
     onConfirm({
       items: state.items,
-      userId: userData?.data?.data?.id,
+      userId: getUserId(),
       // couponCodeId: selectedCoupons.length > 0 ? selectedCoupons[0] : undefined, // Coupon feature hidden
       points_to_redeem: pointsToRedeem, // 使用 snake_case 符合後端 schema
       totalAmount: finalAmount, // 使用折扣後的最終金額
@@ -663,7 +739,7 @@ export const ConfirmDialog = forwardRef<ConfirmDialogRef, ConfirmDialogProps>(({
               </div>
             )}
             
-            {userData?.data?.data && (
+            {getUserInfo() && (
               <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg shadow-sm">
                 <div className="flex items-center space-x-3">
                   <div className="flex-shrink-0">
@@ -675,17 +751,17 @@ export const ConfirmDialog = forwardRef<ConfirmDialogRef, ConfirmDialogProps>(({
                   </div>
                   <div className="flex-1">
                     <h4 className="text-lg font-semibold text-green-800">
-                      很高興看到你, {userData.data.data.name}
+                      很高興看到你, {getUserInfo()?.name}
                     </h4>
                     {/* 顯示點數信息（所有會員都顯示） */}
-                    {userData.data.data.points !== undefined && (
+                    {getUserInfo()?.points !== undefined && (
                       <div className="mt-2 flex items-center space-x-2">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                           <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
                           </svg>
-                          {userData.data.data.points} 點數（可折抵 ${userData.data.data.points_yuan_equivalent}）
+                          {getUserInfo()!.points} 點數（可折抵 ${getUserInfo()!.points_yuan_equivalent}）
                         </span>
                         {/* 電話查詢時提示 */}
                         {searchType === 'phone' && (
@@ -703,38 +779,41 @@ export const ConfirmDialog = forwardRef<ConfirmDialogRef, ConfirmDialogProps>(({
           </div>
 
           {/* 點數折抵（僅 LINE ID 查詢且有點數時顯示） */}
-          {searchType === 'lineId' && userData?.data?.data && userData.data.data.points > 0 && (
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-3">點數折抵</h3>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <span className="text-gray-600">$</span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={redeemAmount || ''}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/[^0-9]/g, ''); // 只允許數字
-                      const numValue = value ? parseInt(value) : 0;
-                      const maxAmount = userData.data.data.points_yuan_equivalent; // 最大可折抵金額
-                      setRedeemAmount(Math.min(numValue, maxAmount));
-                    }}
-                    placeholder="輸入要折抵的金額"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-center text-lg font-semibold"
-                  />
-                  <span className="text-gray-600">元</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">使用點數：</span>
-                  <span className="font-medium text-purple-600">{redeemAmount * 20} 點</span>
-                </div>
-                <div className="text-xs text-gray-500">
-                  * 1元 = 20點，最多可折抵 ${userData.data.data.points_yuan_equivalent}（{userData.data.data.points} 點）
+          {searchType === 'lineId' && getUserInfo() && getUserInfo()!.points > 0 && (() => {
+            const userInfo = getUserInfo()!;
+            return (
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-3">點數折抵</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-gray-600">$</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={redeemAmount || ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^0-9]/g, ''); // 只允許數字
+                        const numValue = value ? parseInt(value) : 0;
+                        const maxAmount = userInfo.points_yuan_equivalent; // 最大可折抵金額
+                        setRedeemAmount(Math.min(numValue, maxAmount));
+                      }}
+                      placeholder="輸入要折抵的金額"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-center text-lg font-semibold"
+                    />
+                    <span className="text-gray-600">元</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">使用點數：</span>
+                    <span className="font-medium text-purple-600">{redeemAmount * 20} 點</span>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    * 1元 = 20點，最多可折抵 ${userInfo.points_yuan_equivalent}（{userInfo.points} 點）
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11) - May be restored in the future
           {availableCoupons.length > 0 && (

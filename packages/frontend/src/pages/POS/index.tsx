@@ -5,6 +5,7 @@
 
 import { useState, useRef } from 'react';
 import { useProductsList, useOrdersCreate, useOrdersGetTodayStats } from '../../api/posClient';
+import type { OrdersCreate201 } from '@pos/sdk';
 import { useCart } from '../../hooks/useCart';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { ProductCard } from '../../components/ProductCard';
@@ -192,14 +193,19 @@ export function POSPage() {
 
       console.log(`✅ [建立訂單] API 回應:`, {
         success: orderResponse.data?.success,
-        orderNumber: orderResponse.data?.order_number,
+        status: orderResponse.status,
         fullResponse: orderResponse.data,
       });
 
       // 設定訂單編號和重新獲取統計
-      const newOrderNumber = (orderResponse.data && 'order_number' in orderResponse.data) 
-        ? String(orderResponse.data.order_number)
-        : `ORD-${Date.now()}`;
+      // 檢查是否為成功響應（201）並包含 order_number
+      let newOrderNumber = `ORD-${Date.now()}`;
+      if (orderResponse.status === 201 && orderResponse.data) {
+        const orderData = orderResponse.data as OrdersCreate201;
+        if (orderData.success && orderData.data && 'order_number' in orderData.data) {
+          newOrderNumber = String(orderData.data.order_number);
+        }
+      }
       setOrderNumber(newOrderNumber);
       refetchTodayStats(); // 重新獲取今日訂單統計
       
