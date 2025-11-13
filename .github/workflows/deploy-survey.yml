@@ -51,7 +51,7 @@ jobs:
       - name: 🏗️ 建置 Survey 前端
         working-directory: packages/survey-frontend
         env:
-          VITE_API_BASE: ${{ secrets.VITE_API_BASE_PROD }}
+          VITE_API_BASE: https://pos-backend-staging.survey-api.workers.dev
           VITE_LIFF_ID: ${{ secrets.VITE_LIFF_ID }}
         run: |
           # Debug: 顯示環境變數
