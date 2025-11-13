@@ -581,16 +581,31 @@ const getUserByLineIdRoute = createRoute({
               points: z.number().int().min(0),
               points_yuan_equivalent: z.number().int().min(0),
             }),
+            requestId: z.string().optional(),
             timestamp: z.string(),
           }),
         },
       },
       description: '成功取得使用者資訊',
     },
+    400: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema.extend({
+            requestId: z.string().optional(),
+            details: z.any().optional(),
+          }),
+        },
+      },
+      description: '請求參數錯誤',
+    },
     404: {
       content: {
         'application/json': {
-          schema: ErrorResponseSchema,
+          schema: ErrorResponseSchema.extend({
+            requestId: z.string().optional(),
+            details: z.any().optional(),
+          }),
         },
       },
       description: '使用者不存在',
@@ -598,7 +613,10 @@ const getUserByLineIdRoute = createRoute({
     500: {
       content: {
         'application/json': {
-          schema: ErrorResponseSchema,
+          schema: ErrorResponseSchema.extend({
+            requestId: z.string().optional(),
+            details: z.any().optional(),
+          }),
         },
       },
       description: '伺服器錯誤',
@@ -621,21 +639,8 @@ usersRouter.openapi(getUserByLineIdRoute, async (c) => {
       timestamp: new Date().toISOString(),
     });
     
-    // 驗證 LINE ID 格式
-    if (!lineId || lineId.trim().length === 0) {
-      console.error(`[${requestId}] ❌ LINE ID 為空`);
-      return c.json({
-        success: false,
-        error: 'LINE ID 不能為空',
-        details: {
-          received: lineId || '(空值)',
-          message: '請提供有效的 LINE ID',
-        },
-        requestId,
-        timestamp: new Date().toISOString(),
-      }, 400);
-    }
-    
+    // 注意：Zod 驗證已經確保 lineId 不為空（min(1)），所以這裡不需要再次檢查
+    // 但我們仍然記錄 dummy LINE ID 的情況
     if (lineId === 'dummy') {
       console.warn(`[${requestId}] ⚠️ 收到 dummy LINE ID，可能是前端初始化問題`);
     }

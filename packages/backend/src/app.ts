@@ -7,7 +7,8 @@ import { dataRouter } from './routes/data.js';
 import { usersRouter } from './routes/users.js';
 import { usersAggregateRouter } from './routes/users-aggregate.js';
 import { productsRouter } from './routes/products.js';
-import { couponsRouter } from './routes/coupons.js';
+// COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11) - May be restored in the future
+// import { couponsRouter } from './routes/coupons.js';
 import { ordersRouter } from './routes/orders.js';
 import { surveysRouter } from './routes/surveys.js';
 import { r2UploadRouter } from './routes/r2-upload.js';
