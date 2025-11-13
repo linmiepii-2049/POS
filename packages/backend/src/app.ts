@@ -100,31 +100,37 @@ export const createApp = () => {
   // CORS 設定：從環境變數讀取允許的來源
   app.use('*', async (c, next) => {
     const env = c.env as Env | undefined;
-    const corsOrigins = env?.CORS_ORIGINS || 'http://localhost:3000';
+    const corsOrigins = env?.CORS_ORIGINS || 'http://localhost:3000,http://localhost:3001';
     const allowedOrigins = parseCorsOrigins(corsOrigins);
     
     const origin = c.req.header('Origin');
     
-    // 設定 CORS headers
+    // 處理 OPTIONS 預檢請求
+    if (c.req.method === 'OPTIONS') {
+      const corsHeaders: Record<string, string> = {
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Max-Age': '86400',
+      };
+      
+      // 只有在 origin 在允許清單中時才設定 Access-Control-Allow-Origin
+      if (origin && allowedOrigins.includes(origin)) {
+        corsHeaders['Access-Control-Allow-Origin'] = origin;
+      }
+      
+      return new Response(null, { 
+        status: 204,
+        headers: corsHeaders,
+      });
+    }
+    
+    // 設定 CORS headers（僅在 origin 在允許清單中時）
     if (origin && allowedOrigins.includes(origin)) {
       c.header('Access-Control-Allow-Origin', origin);
     }
     c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     c.header('Access-Control-Max-Age', '86400');
-    
-    // 處理 OPTIONS 預檢請求
-    if (c.req.method === 'OPTIONS') {
-      return new Response(null, { 
-        status: 204,
-        headers: {
-          'Access-Control-Allow-Origin': origin && allowedOrigins.includes(origin) ? origin : '',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          'Access-Control-Max-Age': '86400'
-        }
-      });
-    }
     
     await next();
   });
@@ -286,3 +292,4 @@ export const createApp = () => {
 
   return app;
 };
+

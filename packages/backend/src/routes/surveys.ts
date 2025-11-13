@@ -34,6 +34,7 @@ const createSurveyRoute = createRoute({
   tags: ['Surveys'],
   summary: '提交問卷',
   description: '提交 LIFF 問卷調查資料。每個手機號碼只能提交一次。',
+  operationId: 'Surveys_Create',
   request: {
     body: {
       content: {
@@ -100,10 +101,15 @@ surveysRouter.openapi(createSurveyRoute, async (c) => {
       );
     }
     
+    // 處理驗證錯誤（Zod 錯誤會由全域錯誤處理器處理）
+    if (error.name === 'ZodError') {
+      throw error; // 讓全域錯誤處理器處理
+    }
+    
     return c.json(
       {
         success: false,
-        error: '問卷提交失敗',
+        error: error.message || '問卷提交失敗',
         timestamp: new Date().toISOString(),
       },
       500
@@ -120,6 +126,7 @@ const getSurveyByMemberIdRoute = createRoute({
   tags: ['Surveys'],
   summary: '查詢問卷',
   description: '根據手機號碼（會員 ID）查詢問卷資料',
+  operationId: 'Surveys_GetByPhone',
   request: {
     params: z.object({
       memberId: z.string().regex(/^09\d{8}$/, '手機號碼格式錯誤').openapi({
@@ -197,6 +204,7 @@ const listSurveysRoute = createRoute({
   tags: ['Surveys'],
   summary: '查詢問卷列表',
   description: '查詢問卷列表，支援分頁和篩選',
+  operationId: 'Surveys_List',
   request: {
     query: SurveyListQuerySchema,
   },
@@ -249,6 +257,7 @@ const getSurveyStatsRoute = createRoute({
   tags: ['Surveys'],
   summary: '問卷統計',
   description: '取得問卷統計資料（總數、年齡分佈、性別分佈等）',
+  operationId: 'Surveys_GetStats',
   responses: {
     200: {
       content: {
@@ -297,6 +306,7 @@ const deleteSurveyRoute = createRoute({
   tags: ['Surveys'],
   summary: '刪除問卷',
   description: '刪除指定 ID 的問卷（管理功能）',
+  operationId: 'Surveys_Delete',
   request: {
     params: z.object({
       id: z.string().regex(/^\d+$/, 'ID 必須是數字').openapi({
