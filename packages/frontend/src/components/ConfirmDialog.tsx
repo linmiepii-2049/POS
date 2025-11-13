@@ -48,9 +48,39 @@ export interface ConfirmDialogProps {
 }
 
 /**
+ * ConfirmDialog 的 ref 類型
+ */
+export interface ConfirmDialogRef {
+  resetForm: () => void;
+}
+
+/**
+ * API 響應類型
+ */
+interface UserApiResponse {
+  success: boolean;
+  data?: {
+    data: {
+      id: number;
+      name: string;
+      points: number;
+      points_yuan_equivalent: number;
+    };
+  };
+  error?: string;
+  details?: {
+    message?: string;
+    suggestion?: string;
+    [key: string]: unknown;
+  } | string;
+  requestId?: string;
+  timestamp?: string;
+}
+
+/**
  * 確認對話框組件
  */
-export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onClose, onConfirm }, ref) => {
+export const ConfirmDialog = forwardRef<ConfirmDialogRef, ConfirmDialogProps>(({ isOpen, onClose, onConfirm }, ref) => {
   const { state } = useCart();
   const [searchType, setSearchType] = useState<'phone' | 'lineId'>('phone'); // 查詢類型
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -62,7 +92,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
   // Coupon feature hidden - 優惠券功能已隱藏 (2024-11-11)
   // const [selectedCoupons, setSelectedCoupons] = useState<number[]>([]);
   // const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>([]);
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState<UserApiResponse | null>(null);
   
   // 查詢會員（手機號碼）
   const { refetch: refetchUser } = useUsersGetByPhone(
@@ -149,8 +179,9 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
         // 檢查 API 錯誤回應
         if (userResult.data && 'success' in userResult.data && !userResult.data.success) {
           const errorMsg = userResult.data.error || '查詢失敗';
-          const details = (userResult.data as any).details;
-          const requestId = (userResult.data as any).requestId;
+          const apiResponse = userResult.data as UserApiResponse;
+          const details = apiResponse.details;
+          const requestId = apiResponse.requestId;
           
           console.error('❌ [LINE ID 查詢] API 返回錯誤:', {
             error: errorMsg,
@@ -196,35 +227,43 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
           setUserData(null);
           toast.error('未找到此 LINE ID 的會員資料', { duration: 3000 });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorObj = error as { 
+          constructor?: { name?: string };
+          message?: string;
+          stack?: string;
+          response?: {
+            data?: UserApiResponse;
+            status?: number;
+          };
+        };
+        
         console.error('❌ [LINE ID 查詢] 查詢失敗:', {
           error,
-          errorType: error?.constructor?.name,
-          errorMessage: error?.message,
-          errorStack: error?.stack,
-          response: error?.response,
-          responseData: error?.response?.data,
-          status: error?.response?.status,
+          errorType: errorObj?.constructor?.name,
+          errorMessage: errorObj?.message,
+          errorStack: errorObj?.stack,
+          response: errorObj?.response,
+          responseData: errorObj?.response?.data,
+          status: errorObj?.response?.status,
         });
         
         // 解析錯誤訊息
         let errorMessage = '查詢會員失敗';
-        if (error?.response?.data) {
-          const errorData = error.response.data;
+        if (errorObj?.response?.data) {
+          const errorData = errorObj.response.data;
           if (errorData.error) {
             errorMessage = errorData.error;
             if (errorData.details) {
               if (typeof errorData.details === 'string') {
                 errorMessage += `: ${errorData.details}`;
-              } else if (errorData.details.message) {
+              } else if (typeof errorData.details === 'object' && errorData.details.message) {
                 errorMessage = errorData.details.message;
               }
             }
-          } else if (errorData.message) {
-            errorMessage = errorData.message;
           }
-        } else if (error?.message) {
-          errorMessage = error.message;
+        } else if (errorObj?.message) {
+          errorMessage = errorObj.message;
         }
         
         toast.error(errorMessage, { duration: 5000 });
@@ -298,11 +337,12 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
       
       toast.success('相機已啟動，請對準 QR code');
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('無法啟動相機:', error);
       setIsScanning(false);
       
-      const errorMsg = error?.message || error?.toString() || '';
+      const errorObj = error as { message?: string; toString?: () => string };
+      const errorMsg = errorObj?.message || errorObj?.toString?.() || String(error);
       
       if (errorMsg.includes('NotAllowedError') || errorMsg.includes('Permission')) {
         toast.error('請允許使用相機權限\n\n設定 → Safari → 相機 → 允許', { duration: 5000 });
@@ -319,7 +359,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
   /**
    * 停止視頻掃描
    */
-  const stopScanning = async () => {
+  const stopScanning = useCallback(async () => {
     if (!scannerRef.current) {
       setIsScanning(false);
       return;
@@ -334,7 +374,7 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
       scannerRef.current = null;
       setIsScanning(false);
     }
-  };
+  }, []);
 
   /**
    * 清理掃描器（組件卸載或對話框關閉時）
@@ -365,10 +405,26 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
     }
   }, [phoneNumber, searchType, handleSearchUser]);
 
+  /**
+   * 重置表單
+   */
+  const resetForm = useCallback(() => {
+    if (isScanning) {
+      stopScanning();
+    }
+    setPhoneNumber('');
+    setLineId('');
+    setRedeemAmount(0);
+    setSearchType('phone');
+    // setSelectedCoupons([]); // Coupon feature hidden
+    // setAvailableCoupons([]); // Coupon feature hidden
+    setUserData(null);
+  }, [isScanning, stopScanning]);
+
   // 暴露重置函數給父組件
   useImperativeHandle(ref, () => ({
     resetForm
-  }), []);
+  }), [resetForm]);
 
   /* COUPON FEATURE HIDDEN - 優惠券功能已隱藏 (2024-11-11)
   // 當優惠券數據變化時，轉換並設置到狀態
@@ -399,22 +455,6 @@ export const ConfirmDialog = forwardRef<any, ConfirmDialogProps>(({ isOpen, onCl
     }
   }, [couponsData?.data]);
   */
-
-  /**
-   * 重置表單
-   */
-  const resetForm = () => {
-    if (isScanning) {
-      stopScanning();
-    }
-    setPhoneNumber('');
-    setLineId('');
-    setRedeemAmount(0);
-    setSearchType('phone');
-    // setSelectedCoupons([]); // Coupon feature hidden
-    // setAvailableCoupons([]); // Coupon feature hidden
-    setUserData(null);
-  };
 
   /**
    * 關閉對話框
