@@ -1,0 +1,13 @@
+{
+  "buildCommand": "cd ../.. && pnpm install --frozen-lockfile && cd packages/sdk && pnpm run build && cd ../survey-frontend && pnpm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
+
