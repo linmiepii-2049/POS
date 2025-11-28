@@ -120,14 +120,13 @@ export function PreorderLandingPage() {
         },
       });
     } catch (error) {
-      const message =
-        typeof error === 'object' && error !== null && 'response' in error
-          ? ((error as { response?: { data?: { message?: string; code?: string } } }).response?.data?.message ??
-            (error as { response?: { data?: { message?: string; code?: string } }).response?.data?.code ??
-            '預購失敗')
-          : error instanceof Error
-            ? error.message
-            : '預購失敗';
+      let message = '預購失敗';
+      if (error instanceof Error) {
+        message = error.message;
+      } else if (typeof error === 'object' && error !== null && 'response' in error) {
+        const errorResponse = error as { response?: { data?: { message?: string; code?: string } } };
+        message = errorResponse.response?.data?.message ?? errorResponse.response?.data?.code ?? '預購失敗';
+      }
       toast.error(message);
     }
   };
