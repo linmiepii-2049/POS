@@ -435,6 +435,10 @@ export type SurveyListResponseSurveysItem = {
   lineUserId?: string;
   /** LINE 顯示名稱 */
   displayName?: string;
+  /** IP 位址 */
+  ipAddress?: string;
+  /** 瀏覽器資訊 */
+  userAgent?: string;
   /**
    * 關聯的會員 ID（POS 系統）
    * @minimum 0
@@ -1365,8 +1369,31 @@ export type UsersGetByLineId200Data = {
 export type UsersGetByLineId200 = {
   success: boolean;
   data: UsersGetByLineId200Data;
+  requestId?: string;
   timestamp: string;
 };
+
+/**
+ * @nullable
+ */
+export type UsersGetByLineId400Details = unknown | null;
+
+export type UsersGetByLineId400 = {
+  /** 操作失敗 */
+  success: boolean;
+  /** 錯誤訊息 */
+  error: string;
+  /** 錯誤時間戳 */
+  timestamp: string;
+  requestId?: string;
+  /** @nullable */
+  details?: UsersGetByLineId400Details;
+};
+
+/**
+ * @nullable
+ */
+export type UsersGetByLineId404Details = unknown | null;
 
 export type UsersGetByLineId404 = {
   /** 操作失敗 */
@@ -1375,7 +1402,15 @@ export type UsersGetByLineId404 = {
   error: string;
   /** 錯誤時間戳 */
   timestamp: string;
+  requestId?: string;
+  /** @nullable */
+  details?: UsersGetByLineId404Details;
 };
+
+/**
+ * @nullable
+ */
+export type UsersGetByLineId500Details = unknown | null;
 
 export type UsersGetByLineId500 = {
   /** 操作失敗 */
@@ -1384,6 +1419,9 @@ export type UsersGetByLineId500 = {
   error: string;
   /** 錯誤時間戳 */
   timestamp: string;
+  requestId?: string;
+  /** @nullable */
+  details?: UsersGetByLineId500Details;
 };
 
 export type UsersGetPointsHistoryParams = {
@@ -3992,11 +4030,11 @@ export type OrdersGetTodayStats500 = {
 /**
  * 年齡範圍
  */
-export type PostApiSurveys200Age = typeof PostApiSurveys200Age[keyof typeof PostApiSurveys200Age];
+export type SurveysCreate200Age = typeof SurveysCreate200Age[keyof typeof SurveysCreate200Age];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiSurveys200Age = {
+export const SurveysCreate200Age = {
   '25歲以下': '25歲以下',
   '26-45歲': '26-45歲',
   '46歲以上': '46歲以上',
@@ -4005,11 +4043,11 @@ export const PostApiSurveys200Age = {
 /**
  * 性別
  */
-export type PostApiSurveys200Gender = typeof PostApiSurveys200Gender[keyof typeof PostApiSurveys200Gender];
+export type SurveysCreate200Gender = typeof SurveysCreate200Gender[keyof typeof SurveysCreate200Gender];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiSurveys200Gender = {
+export const SurveysCreate200Gender = {
   男: '男',
   女: '女',
 } as const;
@@ -4017,11 +4055,11 @@ export const PostApiSurveys200Gender = {
 /**
  * 居住地
  */
-export type PostApiSurveys200Location = typeof PostApiSurveys200Location[keyof typeof PostApiSurveys200Location];
+export type SurveysCreate200Location = typeof SurveysCreate200Location[keyof typeof SurveysCreate200Location];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiSurveys200Location = {
+export const SurveysCreate200Location = {
   附近: '附近',
   外地: '外地',
 } as const;
@@ -4029,21 +4067,21 @@ export const PostApiSurveys200Location = {
 /**
  * 購買頻率
  */
-export type PostApiSurveys200PurchaseFrequency = typeof PostApiSurveys200PurchaseFrequency[keyof typeof PostApiSurveys200PurchaseFrequency];
+export type SurveysCreate200PurchaseFrequency = typeof SurveysCreate200PurchaseFrequency[keyof typeof SurveysCreate200PurchaseFrequency];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiSurveys200PurchaseFrequency = {
+export const SurveysCreate200PurchaseFrequency = {
   每週3次以上: '每週3次以上',
   '每週1~3次': '每週1~3次',
   偶爾: '偶爾',
 } as const;
 
-export type PostApiSurveys200PurchaseLocationItem = typeof PostApiSurveys200PurchaseLocationItem[keyof typeof PostApiSurveys200PurchaseLocationItem];
+export type SurveysCreate200PurchaseLocationItem = typeof SurveysCreate200PurchaseLocationItem[keyof typeof SurveysCreate200PurchaseLocationItem];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiSurveys200PurchaseLocationItem = {
+export const SurveysCreate200PurchaseLocationItem = {
   麵包店: '麵包店',
   便利商店: '便利商店',
   量販超市: '量販超市',
@@ -4053,11 +4091,11 @@ export const PostApiSurveys200PurchaseLocationItem = {
 /**
  * 購買時間
  */
-export type PostApiSurveys200PurchaseTime = typeof PostApiSurveys200PurchaseTime[keyof typeof PostApiSurveys200PurchaseTime];
+export type SurveysCreate200PurchaseTime = typeof SurveysCreate200PurchaseTime[keyof typeof SurveysCreate200PurchaseTime];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiSurveys200PurchaseTime = {
+export const SurveysCreate200PurchaseTime = {
   '早上(6:00~12:00)': '早上(6:00~12:00)',
   '下午(12:00~17:00)': '下午(12:00~17:00)',
   '晚上(17:00後)': '晚上(17:00後)',
@@ -4066,21 +4104,21 @@ export const PostApiSurveys200PurchaseTime = {
 /**
  * 用餐時機
  */
-export type PostApiSurveys200MealType = typeof PostApiSurveys200MealType[keyof typeof PostApiSurveys200MealType];
+export type SurveysCreate200MealType = typeof SurveysCreate200MealType[keyof typeof SurveysCreate200MealType];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiSurveys200MealType = {
+export const SurveysCreate200MealType = {
   早餐: '早餐',
   點心: '點心',
   其他: '其他',
 } as const;
 
-export type PostApiSurveys200PurchaseFactorsItem = typeof PostApiSurveys200PurchaseFactorsItem[keyof typeof PostApiSurveys200PurchaseFactorsItem];
+export type SurveysCreate200PurchaseFactorsItem = typeof SurveysCreate200PurchaseFactorsItem[keyof typeof SurveysCreate200PurchaseFactorsItem];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiSurveys200PurchaseFactorsItem = {
+export const SurveysCreate200PurchaseFactorsItem = {
   價格: '價格',
   健康: '健康',
   好吃: '好吃',
@@ -4092,11 +4130,11 @@ export const PostApiSurveys200PurchaseFactorsItem = {
 /**
  * 會因健康考量而選擇較貴的麵包嗎
  */
-export type PostApiSurveys200HealthPrice = typeof PostApiSurveys200HealthPrice[keyof typeof PostApiSurveys200HealthPrice];
+export type SurveysCreate200HealthPrice = typeof SurveysCreate200HealthPrice[keyof typeof SurveysCreate200HealthPrice];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiSurveys200HealthPrice = {
+export const SurveysCreate200HealthPrice = {
   會: '會',
   不會: '不會',
 } as const;
@@ -4104,30 +4142,30 @@ export const PostApiSurveys200HealthPrice = {
 /**
  * 在意天然食材嗎
  */
-export type PostApiSurveys200NaturalPreference = typeof PostApiSurveys200NaturalPreference[keyof typeof PostApiSurveys200NaturalPreference];
+export type SurveysCreate200NaturalPreference = typeof SurveysCreate200NaturalPreference[keyof typeof SurveysCreate200NaturalPreference];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiSurveys200NaturalPreference = {
+export const SurveysCreate200NaturalPreference = {
   在意: '在意',
   不在意: '不在意',
 } as const;
 
-export type PostApiSurveys200TastePreferenceItem = typeof PostApiSurveys200TastePreferenceItem[keyof typeof PostApiSurveys200TastePreferenceItem];
+export type SurveysCreate200TastePreferenceItem = typeof SurveysCreate200TastePreferenceItem[keyof typeof SurveysCreate200TastePreferenceItem];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiSurveys200TastePreferenceItem = {
+export const SurveysCreate200TastePreferenceItem = {
   原味: '原味',
   鹹: '鹹',
   甜: '甜',
 } as const;
 
-export type PostApiSurveys200BreadTypesItem = typeof PostApiSurveys200BreadTypesItem[keyof typeof PostApiSurveys200BreadTypesItem];
+export type SurveysCreate200BreadTypesItem = typeof SurveysCreate200BreadTypesItem[keyof typeof SurveysCreate200BreadTypesItem];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiSurveys200BreadTypesItem = {
+export const SurveysCreate200BreadTypesItem = {
   吐司: '吐司',
   '台式、日式麵包': '台式、日式麵包',
   歐式麵包: '歐式麵包',
@@ -4138,7 +4176,7 @@ export const PostApiSurveys200BreadTypesItem = {
   其他: '其他',
 } as const;
 
-export type PostApiSurveys200 = {
+export type SurveysCreate200 = {
   /**
    * 問卷 ID
    * @minimum 0
@@ -4156,29 +4194,29 @@ export type PostApiSurveys200 = {
    */
   phone: string;
   /** 年齡範圍 */
-  age: PostApiSurveys200Age;
+  age: SurveysCreate200Age;
   /** 性別 */
-  gender: PostApiSurveys200Gender;
+  gender: SurveysCreate200Gender;
   /** 居住地 */
-  location?: PostApiSurveys200Location;
+  location?: SurveysCreate200Location;
   /** 購買頻率 */
-  purchaseFrequency?: PostApiSurveys200PurchaseFrequency;
+  purchaseFrequency?: SurveysCreate200PurchaseFrequency;
   /** 購買地點（可複選） */
-  purchaseLocation?: PostApiSurveys200PurchaseLocationItem[];
+  purchaseLocation?: SurveysCreate200PurchaseLocationItem[];
   /** 購買時間 */
-  purchaseTime?: PostApiSurveys200PurchaseTime;
+  purchaseTime?: SurveysCreate200PurchaseTime;
   /** 用餐時機 */
-  mealType?: PostApiSurveys200MealType;
+  mealType?: SurveysCreate200MealType;
   /** 選購考量因素（可複選） */
-  purchaseFactors?: PostApiSurveys200PurchaseFactorsItem[];
+  purchaseFactors?: SurveysCreate200PurchaseFactorsItem[];
   /** 會因健康考量而選擇較貴的麵包嗎 */
-  healthPrice?: PostApiSurveys200HealthPrice;
+  healthPrice?: SurveysCreate200HealthPrice;
   /** 在意天然食材嗎 */
-  naturalPreference?: PostApiSurveys200NaturalPreference;
+  naturalPreference?: SurveysCreate200NaturalPreference;
   /** 口味偏好（可複選） */
-  tastePreference?: PostApiSurveys200TastePreferenceItem[];
+  tastePreference?: SurveysCreate200TastePreferenceItem[];
   /** 喜歡的麵包種類（可複選） */
-  breadTypes?: PostApiSurveys200BreadTypesItem[];
+  breadTypes?: SurveysCreate200BreadTypesItem[];
   /**
    * 其他麵包種類（自行填寫）
    * @maxLength 100
@@ -4198,6 +4236,10 @@ export type PostApiSurveys200 = {
   lineUserId?: string;
   /** LINE 顯示名稱 */
   displayName?: string;
+  /** IP 位址 */
+  ipAddress?: string;
+  /** 瀏覽器資訊 */
+  userAgent?: string;
   /**
    * 關聯的會員 ID（POS 系統）
    * @minimum 0
@@ -4210,7 +4252,7 @@ export type PostApiSurveys200 = {
   updatedAt?: string;
 };
 
-export type PostApiSurveys400 = {
+export type SurveysCreate400 = {
   /** 操作失敗 */
   success: boolean;
   /** 錯誤訊息 */
@@ -4219,7 +4261,7 @@ export type PostApiSurveys400 = {
   timestamp: string;
 };
 
-export type PostApiSurveys409 = {
+export type SurveysCreate409 = {
   /** 操作失敗 */
   success: boolean;
   /** 錯誤訊息 */
@@ -4228,7 +4270,7 @@ export type PostApiSurveys409 = {
   timestamp: string;
 };
 
-export type PostApiSurveys500 = {
+export type SurveysCreate500 = {
   /** 操作失敗 */
   success: boolean;
   /** 錯誤訊息 */
@@ -4237,7 +4279,7 @@ export type PostApiSurveys500 = {
   timestamp: string;
 };
 
-export type GetApiSurveysParams = {
+export type SurveysListParams = {
 /**
  * 頁碼
  */
@@ -4249,33 +4291,33 @@ limit?: string;
 /**
  * 篩選年齡
  */
-age?: GetApiSurveysAge;
+age?: SurveysListAge;
 /**
  * 篩選性別
  */
-gender?: GetApiSurveysGender;
+gender?: SurveysListGender;
 };
 
-export type GetApiSurveysAge = typeof GetApiSurveysAge[keyof typeof GetApiSurveysAge];
+export type SurveysListAge = typeof SurveysListAge[keyof typeof SurveysListAge];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysAge = {
+export const SurveysListAge = {
   '25歲以下': '25歲以下',
   '26-45歲': '26-45歲',
   '46歲以上': '46歲以上',
 } as const;
 
-export type GetApiSurveysGender = typeof GetApiSurveysGender[keyof typeof GetApiSurveysGender];
+export type SurveysListGender = typeof SurveysListGender[keyof typeof SurveysListGender];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysGender = {
+export const SurveysListGender = {
   男: '男',
   女: '女',
 } as const;
 
-export type GetApiSurveys500 = {
+export type SurveysList500 = {
   /** 操作失敗 */
   success: boolean;
   /** 錯誤訊息 */
@@ -4287,11 +4329,11 @@ export type GetApiSurveys500 = {
 /**
  * 年齡範圍
  */
-export type GetApiSurveysByPhoneMemberId200Age = typeof GetApiSurveysByPhoneMemberId200Age[keyof typeof GetApiSurveysByPhoneMemberId200Age];
+export type SurveysGetByPhone200Age = typeof SurveysGetByPhone200Age[keyof typeof SurveysGetByPhone200Age];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysByPhoneMemberId200Age = {
+export const SurveysGetByPhone200Age = {
   '25歲以下': '25歲以下',
   '26-45歲': '26-45歲',
   '46歲以上': '46歲以上',
@@ -4300,11 +4342,11 @@ export const GetApiSurveysByPhoneMemberId200Age = {
 /**
  * 性別
  */
-export type GetApiSurveysByPhoneMemberId200Gender = typeof GetApiSurveysByPhoneMemberId200Gender[keyof typeof GetApiSurveysByPhoneMemberId200Gender];
+export type SurveysGetByPhone200Gender = typeof SurveysGetByPhone200Gender[keyof typeof SurveysGetByPhone200Gender];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysByPhoneMemberId200Gender = {
+export const SurveysGetByPhone200Gender = {
   男: '男',
   女: '女',
 } as const;
@@ -4312,11 +4354,11 @@ export const GetApiSurveysByPhoneMemberId200Gender = {
 /**
  * 居住地
  */
-export type GetApiSurveysByPhoneMemberId200Location = typeof GetApiSurveysByPhoneMemberId200Location[keyof typeof GetApiSurveysByPhoneMemberId200Location];
+export type SurveysGetByPhone200Location = typeof SurveysGetByPhone200Location[keyof typeof SurveysGetByPhone200Location];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysByPhoneMemberId200Location = {
+export const SurveysGetByPhone200Location = {
   附近: '附近',
   外地: '外地',
 } as const;
@@ -4324,21 +4366,21 @@ export const GetApiSurveysByPhoneMemberId200Location = {
 /**
  * 購買頻率
  */
-export type GetApiSurveysByPhoneMemberId200PurchaseFrequency = typeof GetApiSurveysByPhoneMemberId200PurchaseFrequency[keyof typeof GetApiSurveysByPhoneMemberId200PurchaseFrequency];
+export type SurveysGetByPhone200PurchaseFrequency = typeof SurveysGetByPhone200PurchaseFrequency[keyof typeof SurveysGetByPhone200PurchaseFrequency];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysByPhoneMemberId200PurchaseFrequency = {
+export const SurveysGetByPhone200PurchaseFrequency = {
   每週3次以上: '每週3次以上',
   '每週1~3次': '每週1~3次',
   偶爾: '偶爾',
 } as const;
 
-export type GetApiSurveysByPhoneMemberId200PurchaseLocationItem = typeof GetApiSurveysByPhoneMemberId200PurchaseLocationItem[keyof typeof GetApiSurveysByPhoneMemberId200PurchaseLocationItem];
+export type SurveysGetByPhone200PurchaseLocationItem = typeof SurveysGetByPhone200PurchaseLocationItem[keyof typeof SurveysGetByPhone200PurchaseLocationItem];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysByPhoneMemberId200PurchaseLocationItem = {
+export const SurveysGetByPhone200PurchaseLocationItem = {
   麵包店: '麵包店',
   便利商店: '便利商店',
   量販超市: '量販超市',
@@ -4348,11 +4390,11 @@ export const GetApiSurveysByPhoneMemberId200PurchaseLocationItem = {
 /**
  * 購買時間
  */
-export type GetApiSurveysByPhoneMemberId200PurchaseTime = typeof GetApiSurveysByPhoneMemberId200PurchaseTime[keyof typeof GetApiSurveysByPhoneMemberId200PurchaseTime];
+export type SurveysGetByPhone200PurchaseTime = typeof SurveysGetByPhone200PurchaseTime[keyof typeof SurveysGetByPhone200PurchaseTime];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysByPhoneMemberId200PurchaseTime = {
+export const SurveysGetByPhone200PurchaseTime = {
   '早上(6:00~12:00)': '早上(6:00~12:00)',
   '下午(12:00~17:00)': '下午(12:00~17:00)',
   '晚上(17:00後)': '晚上(17:00後)',
@@ -4361,21 +4403,21 @@ export const GetApiSurveysByPhoneMemberId200PurchaseTime = {
 /**
  * 用餐時機
  */
-export type GetApiSurveysByPhoneMemberId200MealType = typeof GetApiSurveysByPhoneMemberId200MealType[keyof typeof GetApiSurveysByPhoneMemberId200MealType];
+export type SurveysGetByPhone200MealType = typeof SurveysGetByPhone200MealType[keyof typeof SurveysGetByPhone200MealType];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysByPhoneMemberId200MealType = {
+export const SurveysGetByPhone200MealType = {
   早餐: '早餐',
   點心: '點心',
   其他: '其他',
 } as const;
 
-export type GetApiSurveysByPhoneMemberId200PurchaseFactorsItem = typeof GetApiSurveysByPhoneMemberId200PurchaseFactorsItem[keyof typeof GetApiSurveysByPhoneMemberId200PurchaseFactorsItem];
+export type SurveysGetByPhone200PurchaseFactorsItem = typeof SurveysGetByPhone200PurchaseFactorsItem[keyof typeof SurveysGetByPhone200PurchaseFactorsItem];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysByPhoneMemberId200PurchaseFactorsItem = {
+export const SurveysGetByPhone200PurchaseFactorsItem = {
   價格: '價格',
   健康: '健康',
   好吃: '好吃',
@@ -4387,11 +4429,11 @@ export const GetApiSurveysByPhoneMemberId200PurchaseFactorsItem = {
 /**
  * 會因健康考量而選擇較貴的麵包嗎
  */
-export type GetApiSurveysByPhoneMemberId200HealthPrice = typeof GetApiSurveysByPhoneMemberId200HealthPrice[keyof typeof GetApiSurveysByPhoneMemberId200HealthPrice];
+export type SurveysGetByPhone200HealthPrice = typeof SurveysGetByPhone200HealthPrice[keyof typeof SurveysGetByPhone200HealthPrice];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysByPhoneMemberId200HealthPrice = {
+export const SurveysGetByPhone200HealthPrice = {
   會: '會',
   不會: '不會',
 } as const;
@@ -4399,30 +4441,30 @@ export const GetApiSurveysByPhoneMemberId200HealthPrice = {
 /**
  * 在意天然食材嗎
  */
-export type GetApiSurveysByPhoneMemberId200NaturalPreference = typeof GetApiSurveysByPhoneMemberId200NaturalPreference[keyof typeof GetApiSurveysByPhoneMemberId200NaturalPreference];
+export type SurveysGetByPhone200NaturalPreference = typeof SurveysGetByPhone200NaturalPreference[keyof typeof SurveysGetByPhone200NaturalPreference];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysByPhoneMemberId200NaturalPreference = {
+export const SurveysGetByPhone200NaturalPreference = {
   在意: '在意',
   不在意: '不在意',
 } as const;
 
-export type GetApiSurveysByPhoneMemberId200TastePreferenceItem = typeof GetApiSurveysByPhoneMemberId200TastePreferenceItem[keyof typeof GetApiSurveysByPhoneMemberId200TastePreferenceItem];
+export type SurveysGetByPhone200TastePreferenceItem = typeof SurveysGetByPhone200TastePreferenceItem[keyof typeof SurveysGetByPhone200TastePreferenceItem];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysByPhoneMemberId200TastePreferenceItem = {
+export const SurveysGetByPhone200TastePreferenceItem = {
   原味: '原味',
   鹹: '鹹',
   甜: '甜',
 } as const;
 
-export type GetApiSurveysByPhoneMemberId200BreadTypesItem = typeof GetApiSurveysByPhoneMemberId200BreadTypesItem[keyof typeof GetApiSurveysByPhoneMemberId200BreadTypesItem];
+export type SurveysGetByPhone200BreadTypesItem = typeof SurveysGetByPhone200BreadTypesItem[keyof typeof SurveysGetByPhone200BreadTypesItem];
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const GetApiSurveysByPhoneMemberId200BreadTypesItem = {
+export const SurveysGetByPhone200BreadTypesItem = {
   吐司: '吐司',
   '台式、日式麵包': '台式、日式麵包',
   歐式麵包: '歐式麵包',
@@ -4433,7 +4475,7 @@ export const GetApiSurveysByPhoneMemberId200BreadTypesItem = {
   其他: '其他',
 } as const;
 
-export type GetApiSurveysByPhoneMemberId200 = {
+export type SurveysGetByPhone200 = {
   /**
    * 問卷 ID
    * @minimum 0
@@ -4451,29 +4493,29 @@ export type GetApiSurveysByPhoneMemberId200 = {
    */
   phone: string;
   /** 年齡範圍 */
-  age: GetApiSurveysByPhoneMemberId200Age;
+  age: SurveysGetByPhone200Age;
   /** 性別 */
-  gender: GetApiSurveysByPhoneMemberId200Gender;
+  gender: SurveysGetByPhone200Gender;
   /** 居住地 */
-  location?: GetApiSurveysByPhoneMemberId200Location;
+  location?: SurveysGetByPhone200Location;
   /** 購買頻率 */
-  purchaseFrequency?: GetApiSurveysByPhoneMemberId200PurchaseFrequency;
+  purchaseFrequency?: SurveysGetByPhone200PurchaseFrequency;
   /** 購買地點（可複選） */
-  purchaseLocation?: GetApiSurveysByPhoneMemberId200PurchaseLocationItem[];
+  purchaseLocation?: SurveysGetByPhone200PurchaseLocationItem[];
   /** 購買時間 */
-  purchaseTime?: GetApiSurveysByPhoneMemberId200PurchaseTime;
+  purchaseTime?: SurveysGetByPhone200PurchaseTime;
   /** 用餐時機 */
-  mealType?: GetApiSurveysByPhoneMemberId200MealType;
+  mealType?: SurveysGetByPhone200MealType;
   /** 選購考量因素（可複選） */
-  purchaseFactors?: GetApiSurveysByPhoneMemberId200PurchaseFactorsItem[];
+  purchaseFactors?: SurveysGetByPhone200PurchaseFactorsItem[];
   /** 會因健康考量而選擇較貴的麵包嗎 */
-  healthPrice?: GetApiSurveysByPhoneMemberId200HealthPrice;
+  healthPrice?: SurveysGetByPhone200HealthPrice;
   /** 在意天然食材嗎 */
-  naturalPreference?: GetApiSurveysByPhoneMemberId200NaturalPreference;
+  naturalPreference?: SurveysGetByPhone200NaturalPreference;
   /** 口味偏好（可複選） */
-  tastePreference?: GetApiSurveysByPhoneMemberId200TastePreferenceItem[];
+  tastePreference?: SurveysGetByPhone200TastePreferenceItem[];
   /** 喜歡的麵包種類（可複選） */
-  breadTypes?: GetApiSurveysByPhoneMemberId200BreadTypesItem[];
+  breadTypes?: SurveysGetByPhone200BreadTypesItem[];
   /**
    * 其他麵包種類（自行填寫）
    * @maxLength 100
@@ -4493,6 +4535,10 @@ export type GetApiSurveysByPhoneMemberId200 = {
   lineUserId?: string;
   /** LINE 顯示名稱 */
   displayName?: string;
+  /** IP 位址 */
+  ipAddress?: string;
+  /** 瀏覽器資訊 */
+  userAgent?: string;
   /**
    * 關聯的會員 ID（POS 系統）
    * @minimum 0
@@ -4505,7 +4551,7 @@ export type GetApiSurveysByPhoneMemberId200 = {
   updatedAt?: string;
 };
 
-export type GetApiSurveysByPhoneMemberId404 = {
+export type SurveysGetByPhone404 = {
   /** 操作失敗 */
   success: boolean;
   /** 錯誤訊息 */
@@ -4514,7 +4560,7 @@ export type GetApiSurveysByPhoneMemberId404 = {
   timestamp: string;
 };
 
-export type GetApiSurveysByPhoneMemberId500 = {
+export type SurveysGetByPhone500 = {
   /** 操作失敗 */
   success: boolean;
   /** 錯誤訊息 */
@@ -4523,7 +4569,7 @@ export type GetApiSurveysByPhoneMemberId500 = {
   timestamp: string;
 };
 
-export type GetApiSurveysStatsSummary500 = {
+export type SurveysGetStats500 = {
   /** 操作失敗 */
   success: boolean;
   /** 錯誤訊息 */
@@ -4532,12 +4578,12 @@ export type GetApiSurveysStatsSummary500 = {
   timestamp: string;
 };
 
-export type DeleteApiSurveysId200 = {
+export type SurveysDelete200 = {
   success: boolean;
   message: string;
 };
 
-export type DeleteApiSurveysId404 = {
+export type SurveysDelete404 = {
   /** 操作失敗 */
   success: boolean;
   /** 錯誤訊息 */
@@ -4546,13 +4592,778 @@ export type DeleteApiSurveysId404 = {
   timestamp: string;
 };
 
-export type DeleteApiSurveysId500 = {
+export type SurveysDelete500 = {
   /** 操作失敗 */
   success: boolean;
   /** 錯誤訊息 */
   error: string;
   /** 錯誤時間戳 */
   timestamp: string;
+};
+
+export type PreordersAdminListParams = {
+/**
+ * 頁碼
+ * @minimum 1
+ */
+page?: number;
+/**
+ * 每頁筆數
+ * @minimum 1
+ * @maximum 100
+ */
+limit?: number;
+/**
+ * 排序欄位
+ */
+sortBy?: PreordersAdminListSortBy;
+/**
+ * 排序方向
+ */
+sortDir?: PreordersAdminListSortDir;
+/**
+ * 是否僅顯示啟用檔期
+ */
+isActive?: number | null | boolean | null | PreordersAdminListIsActiveAnyOf;
+};
+
+export type PreordersAdminListSortBy = typeof PreordersAdminListSortBy[keyof typeof PreordersAdminListSortBy];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PreordersAdminListSortBy = {
+  starts_at: 'starts_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type PreordersAdminListSortDir = typeof PreordersAdminListSortDir[keyof typeof PreordersAdminListSortDir];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PreordersAdminListSortDir = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
+
+/**
+ * @nullable
+ */
+export type PreordersAdminListIsActiveAnyOf = unknown | null;
+
+export type PreordersAdminList200DataItemProductsItem = {
+  /**
+   * 產品 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  productId: number;
+  /** 產品名稱 */
+  productName: string;
+  /**
+   * 產品單價 (元)
+   * @minimum 0
+   */
+  productPriceTwd: number;
+  /**
+   * 產品圖片
+   * @nullable
+   */
+  productImageUrl: string | null;
+  /**
+   * 供應數量
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  supplyQuantity: number;
+  /**
+   * 已預購數量
+   * @minimum 0
+   */
+  reservedQuantity: number;
+  /**
+   * 剩餘可預購數量
+   * @minimum 0
+   */
+  remainingQuantity: number;
+};
+
+export type PreordersAdminList200DataItem = {
+  /**
+   * 檔期 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  id: number;
+  /** 預購名稱 */
+  campaignName: string;
+  /** 預購文案 */
+  campaignCopy: string;
+  /** 預購商品列表 */
+  products: PreordersAdminList200DataItemProductsItem[];
+  /** 開始時間 (UTC) */
+  startsAt: string;
+  /** 結束時間 (UTC) */
+  endsAt: string;
+  /** 開始時間 (台北) */
+  startsAtTaipei: string;
+  /** 結束時間 (台北) */
+  endsAtTaipei: string;
+  /** 是否啟用 */
+  isActive: boolean;
+  /** 建立時間 (UTC) */
+  createdAt: string;
+  /** 更新時間 (UTC) */
+  updatedAt: string;
+};
+
+/**
+ * 分頁資訊
+ */
+export type PreordersAdminList200Pagination = {
+  /**
+   * 頁碼
+   * @minimum 1
+   */
+  page: number;
+  /**
+   * 每頁筆數
+   * @minimum 1
+   */
+  limit: number;
+  /**
+   * 總筆數
+   * @minimum 0
+   */
+  total: number;
+  /**
+   * 總頁數
+   * @minimum 0
+   */
+  totalPages: number;
+};
+
+export type PreordersAdminList200 = {
+  /** 操作是否成功 */
+  success: boolean;
+  /** 檔期資料 */
+  data: PreordersAdminList200DataItem[];
+  /** 分頁資訊 */
+  pagination: PreordersAdminList200Pagination;
+  /** 時間戳 */
+  timestamp: string;
+};
+
+/**
+ * 錯誤細節
+ * @nullable
+ */
+export type PreordersAdminList400Details = unknown | null;
+
+export type PreordersAdminList400 = {
+  /** 錯誤代碼 */
+  code: string;
+  /** 錯誤訊息 */
+  message: string;
+  /**
+   * 錯誤細節
+   * @nullable
+   */
+  details?: PreordersAdminList400Details;
+};
+
+export type PreordersAdminCreateBodyProductsItem = {
+  /**
+   * 產品 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  productId: number;
+  /**
+   * 供應數量
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  supplyQuantity: number;
+};
+
+export type PreordersAdminCreateBody = {
+  /**
+   * 預購名稱
+   * @minLength 1
+   * @maxLength 200
+   */
+  campaignName: string;
+  /**
+   * 預購文案
+   * @minLength 1
+   * @maxLength 300
+   */
+  campaignCopy: string;
+  /**
+   * 預購商品列表
+   * @minItems 1
+   */
+  products: PreordersAdminCreateBodyProductsItem[];
+  /**
+   * 檔期開始日期（台北時間，格式：YYYY-MM-DD）
+   * @minLength 10
+   */
+  startsAt: string;
+  /**
+   * 檔期結束日期（台北時間，格式：YYYY-MM-DD）
+   * @minLength 10
+   */
+  endsAt: string;
+  /** 是否立即啟用 */
+  isActive?: boolean;
+};
+
+export type PreordersAdminCreate201DataProductsItem = {
+  /**
+   * 產品 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  productId: number;
+  /** 產品名稱 */
+  productName: string;
+  /**
+   * 產品單價 (元)
+   * @minimum 0
+   */
+  productPriceTwd: number;
+  /**
+   * 產品圖片
+   * @nullable
+   */
+  productImageUrl: string | null;
+  /**
+   * 供應數量
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  supplyQuantity: number;
+  /**
+   * 已預購數量
+   * @minimum 0
+   */
+  reservedQuantity: number;
+  /**
+   * 剩餘可預購數量
+   * @minimum 0
+   */
+  remainingQuantity: number;
+};
+
+/**
+ * 檔期資料
+ */
+export type PreordersAdminCreate201Data = {
+  /**
+   * 檔期 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  id: number;
+  /** 預購名稱 */
+  campaignName: string;
+  /** 預購文案 */
+  campaignCopy: string;
+  /** 預購商品列表 */
+  products: PreordersAdminCreate201DataProductsItem[];
+  /** 開始時間 (UTC) */
+  startsAt: string;
+  /** 結束時間 (UTC) */
+  endsAt: string;
+  /** 開始時間 (台北) */
+  startsAtTaipei: string;
+  /** 結束時間 (台北) */
+  endsAtTaipei: string;
+  /** 是否啟用 */
+  isActive: boolean;
+  /** 建立時間 (UTC) */
+  createdAt: string;
+  /** 更新時間 (UTC) */
+  updatedAt: string;
+};
+
+export type PreordersAdminCreate201 = {
+  /** 操作是否成功 */
+  success: boolean;
+  /** 檔期資料 */
+  data: PreordersAdminCreate201Data;
+  /** 時間戳 */
+  timestamp: string;
+};
+
+/**
+ * 錯誤細節
+ * @nullable
+ */
+export type PreordersAdminCreate400Details = unknown | null;
+
+export type PreordersAdminCreate400 = {
+  /** 錯誤代碼 */
+  code: string;
+  /** 錯誤訊息 */
+  message: string;
+  /**
+   * 錯誤細節
+   * @nullable
+   */
+  details?: PreordersAdminCreate400Details;
+};
+
+export type PreordersAdminGet200DataProductsItem = {
+  /**
+   * 產品 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  productId: number;
+  /** 產品名稱 */
+  productName: string;
+  /**
+   * 產品單價 (元)
+   * @minimum 0
+   */
+  productPriceTwd: number;
+  /**
+   * 產品圖片
+   * @nullable
+   */
+  productImageUrl: string | null;
+  /**
+   * 供應數量
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  supplyQuantity: number;
+  /**
+   * 已預購數量
+   * @minimum 0
+   */
+  reservedQuantity: number;
+  /**
+   * 剩餘可預購數量
+   * @minimum 0
+   */
+  remainingQuantity: number;
+};
+
+/**
+ * 檔期資料
+ */
+export type PreordersAdminGet200Data = {
+  /**
+   * 檔期 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  id: number;
+  /** 預購名稱 */
+  campaignName: string;
+  /** 預購文案 */
+  campaignCopy: string;
+  /** 預購商品列表 */
+  products: PreordersAdminGet200DataProductsItem[];
+  /** 開始時間 (UTC) */
+  startsAt: string;
+  /** 結束時間 (UTC) */
+  endsAt: string;
+  /** 開始時間 (台北) */
+  startsAtTaipei: string;
+  /** 結束時間 (台北) */
+  endsAtTaipei: string;
+  /** 是否啟用 */
+  isActive: boolean;
+  /** 建立時間 (UTC) */
+  createdAt: string;
+  /** 更新時間 (UTC) */
+  updatedAt: string;
+};
+
+export type PreordersAdminGet200 = {
+  /** 操作是否成功 */
+  success: boolean;
+  /** 檔期資料 */
+  data: PreordersAdminGet200Data;
+  /** 時間戳 */
+  timestamp: string;
+};
+
+/**
+ * 錯誤細節
+ * @nullable
+ */
+export type PreordersAdminGet404Details = unknown | null;
+
+export type PreordersAdminGet404 = {
+  /** 錯誤代碼 */
+  code: string;
+  /** 錯誤訊息 */
+  message: string;
+  /**
+   * 錯誤細節
+   * @nullable
+   */
+  details?: PreordersAdminGet404Details;
+};
+
+export type PreordersAdminUpdateBodyProductsItem = {
+  /**
+   * 產品 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  productId: number;
+  /**
+   * 供應數量
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  supplyQuantity: number;
+};
+
+export type PreordersAdminUpdateBody = {
+  /**
+   * 預購名稱
+   * @minLength 1
+   * @maxLength 200
+   */
+  campaignName?: string;
+  /**
+   * 預購文案
+   * @minLength 1
+   * @maxLength 300
+   */
+  campaignCopy?: string;
+  /**
+   * 預購商品列表
+   * @minItems 1
+   */
+  products?: PreordersAdminUpdateBodyProductsItem[];
+  /**
+   * 檔期開始日期（台北時間，格式：YYYY-MM-DD）
+   * @minLength 10
+   */
+  startsAt?: string;
+  /**
+   * 檔期結束日期（台北時間，格式：YYYY-MM-DD）
+   * @minLength 10
+   */
+  endsAt?: string;
+  /** 是否啟用 */
+  isActive?: boolean;
+};
+
+export type PreordersAdminUpdate200DataProductsItem = {
+  /**
+   * 產品 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  productId: number;
+  /** 產品名稱 */
+  productName: string;
+  /**
+   * 產品單價 (元)
+   * @minimum 0
+   */
+  productPriceTwd: number;
+  /**
+   * 產品圖片
+   * @nullable
+   */
+  productImageUrl: string | null;
+  /**
+   * 供應數量
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  supplyQuantity: number;
+  /**
+   * 已預購數量
+   * @minimum 0
+   */
+  reservedQuantity: number;
+  /**
+   * 剩餘可預購數量
+   * @minimum 0
+   */
+  remainingQuantity: number;
+};
+
+/**
+ * 檔期資料
+ */
+export type PreordersAdminUpdate200Data = {
+  /**
+   * 檔期 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  id: number;
+  /** 預購名稱 */
+  campaignName: string;
+  /** 預購文案 */
+  campaignCopy: string;
+  /** 預購商品列表 */
+  products: PreordersAdminUpdate200DataProductsItem[];
+  /** 開始時間 (UTC) */
+  startsAt: string;
+  /** 結束時間 (UTC) */
+  endsAt: string;
+  /** 開始時間 (台北) */
+  startsAtTaipei: string;
+  /** 結束時間 (台北) */
+  endsAtTaipei: string;
+  /** 是否啟用 */
+  isActive: boolean;
+  /** 建立時間 (UTC) */
+  createdAt: string;
+  /** 更新時間 (UTC) */
+  updatedAt: string;
+};
+
+export type PreordersAdminUpdate200 = {
+  /** 操作是否成功 */
+  success: boolean;
+  /** 檔期資料 */
+  data: PreordersAdminUpdate200Data;
+  /** 時間戳 */
+  timestamp: string;
+};
+
+/**
+ * 錯誤細節
+ * @nullable
+ */
+export type PreordersAdminUpdate400Details = unknown | null;
+
+export type PreordersAdminUpdate400 = {
+  /** 錯誤代碼 */
+  code: string;
+  /** 錯誤訊息 */
+  message: string;
+  /**
+   * 錯誤細節
+   * @nullable
+   */
+  details?: PreordersAdminUpdate400Details;
+};
+
+/**
+ * 錯誤細節
+ * @nullable
+ */
+export type PreordersAdminDelete409Details = unknown | null;
+
+export type PreordersAdminDelete409 = {
+  /** 錯誤代碼 */
+  code: string;
+  /** 錯誤訊息 */
+  message: string;
+  /**
+   * 錯誤細節
+   * @nullable
+   */
+  details?: PreordersAdminDelete409Details;
+};
+
+export type PreordersGetActive200DataProductsItem = {
+  /**
+   * 產品 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  productId: number;
+  /** 產品名稱 */
+  productName: string;
+  /**
+   * 產品單價 (元)
+   * @minimum 0
+   */
+  productPriceTwd: number;
+  /**
+   * 產品圖片
+   * @nullable
+   */
+  productImageUrl: string | null;
+  /**
+   * 供應數量
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  supplyQuantity: number;
+  /**
+   * 已預購數量
+   * @minimum 0
+   */
+  reservedQuantity: number;
+  /**
+   * 剩餘可預購數量
+   * @minimum 0
+   */
+  remainingQuantity: number;
+};
+
+/**
+ * 可預購檔期
+ */
+export type PreordersGetActive200Data = {
+  /**
+   * 檔期 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  id: number;
+  /** 預購名稱 */
+  campaignName: string;
+  /** 預購文案 */
+  campaignCopy: string;
+  /** 預購商品列表 */
+  products: PreordersGetActive200DataProductsItem[];
+  /** 開始時間 (UTC) */
+  startsAt: string;
+  /** 結束時間 (UTC) */
+  endsAt: string;
+  /** 開始時間 (台北) */
+  startsAtTaipei: string;
+  /** 結束時間 (台北) */
+  endsAtTaipei: string;
+  /** 是否啟用 */
+  isActive: boolean;
+  /** 建立時間 (UTC) */
+  createdAt: string;
+  /** 更新時間 (UTC) */
+  updatedAt: string;
+};
+
+export type PreordersGetActive200 = {
+  /** 操作是否成功 */
+  success: boolean;
+  /** 可預購檔期 */
+  data: PreordersGetActive200Data;
+  /** 時間戳 */
+  timestamp: string;
+};
+
+/**
+ * 錯誤細節
+ * @nullable
+ */
+export type PreordersGetActive404Details = unknown | null;
+
+export type PreordersGetActive404 = {
+  /** 錯誤代碼 */
+  code: string;
+  /** 錯誤訊息 */
+  message: string;
+  /**
+   * 錯誤細節
+   * @nullable
+   */
+  details?: PreordersGetActive404Details;
+};
+
+export type PreordersCreateOrderBody = {
+  /**
+   * 檔期 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  campaignId: number;
+  /**
+   * 商品 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  productId: number;
+  /**
+   * 預購數量
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  quantity: number;
+  /**
+   * 取餐人姓名
+   * @minLength 1
+   * @maxLength 100
+   */
+  customerName: string;
+  /**
+   * 取餐人手機
+   * @pattern ^09\d{8}$
+   */
+  customerPhone: string;
+  /** 取餐時段（已廢棄，保留相容性） */
+  pickupSlot?: string;
+  /**
+   * 客製備註
+   * @maxLength 500
+   */
+  customerNote?: string;
+  /**
+   * 既有會員 ID（可選）
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  userId?: number;
+};
+
+export type PreordersCreateOrder201Data = {
+  /** 訂單編號 */
+  orderNumber: string;
+  /**
+   * 檔期 ID
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  campaignId: number;
+  /**
+   * 預購數量
+   * @minimum 0
+   * @exclusiveMinimum
+   */
+  quantity: number;
+  /**
+   * 剩餘量
+   * @minimum 0
+   */
+  remainingQuantity: number;
+  /**
+   * 訂單總金額
+   * @minimum 0
+   */
+  totalTwd: number;
+};
+
+export type PreordersCreateOrder201 = {
+  /** 操作是否成功 */
+  success: boolean;
+  data: PreordersCreateOrder201Data;
+  /** 時間戳 */
+  timestamp: string;
+};
+
+/**
+ * 錯誤細節
+ * @nullable
+ */
+export type PreordersCreateOrder409Details = unknown | null;
+
+export type PreordersCreateOrder409 = {
+  /** 錯誤代碼 */
+  code: string;
+  /** 錯誤訊息 */
+  message: string;
+  /**
+   * 錯誤細節
+   * @nullable
+   */
+  details?: PreordersCreateOrder409Details;
 };
 
 /**
@@ -5580,6 +6391,11 @@ export type usersGetByLineIdResponse200 = {
   status: 200
 }
 
+export type usersGetByLineIdResponse400 = {
+  data: UsersGetByLineId400
+  status: 400
+}
+
 export type usersGetByLineIdResponse404 = {
   data: UsersGetByLineId404
   status: 404
@@ -5590,7 +6406,7 @@ export type usersGetByLineIdResponse500 = {
   status: 500
 }
     
-export type usersGetByLineIdResponseComposite = usersGetByLineIdResponse200 | usersGetByLineIdResponse404 | usersGetByLineIdResponse500;
+export type usersGetByLineIdResponseComposite = usersGetByLineIdResponse200 | usersGetByLineIdResponse400 | usersGetByLineIdResponse404 | usersGetByLineIdResponse500;
     
 export type usersGetByLineIdResponse = usersGetByLineIdResponseComposite & {
   headers: Headers;
@@ -5628,7 +6444,7 @@ export const getUsersGetByLineIdQueryKey = (lineId?: string,) => {
     }
 
     
-export const getUsersGetByLineIdQueryOptions = <TData = Awaited<ReturnType<typeof usersGetByLineId>>, TError = UsersGetByLineId404 | UsersGetByLineId500>(lineId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof usersGetByLineId>>, TError, TData>, fetch?: RequestInit}
+export const getUsersGetByLineIdQueryOptions = <TData = Awaited<ReturnType<typeof usersGetByLineId>>, TError = UsersGetByLineId400 | UsersGetByLineId404 | UsersGetByLineId500>(lineId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof usersGetByLineId>>, TError, TData>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
@@ -5647,14 +6463,14 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type UsersGetByLineIdQueryResult = NonNullable<Awaited<ReturnType<typeof usersGetByLineId>>>
-export type UsersGetByLineIdQueryError = UsersGetByLineId404 | UsersGetByLineId500
+export type UsersGetByLineIdQueryError = UsersGetByLineId400 | UsersGetByLineId404 | UsersGetByLineId500
 
 
 /**
  * @summary 根據 LINE ID 查詢使用者
  */
 
-export function useUsersGetByLineId<TData = Awaited<ReturnType<typeof usersGetByLineId>>, TError = UsersGetByLineId404 | UsersGetByLineId500>(
+export function useUsersGetByLineId<TData = Awaited<ReturnType<typeof usersGetByLineId>>, TError = UsersGetByLineId400 | UsersGetByLineId404 | UsersGetByLineId500>(
  lineId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof usersGetByLineId>>, TError, TData>, fetch?: RequestInit}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -7462,33 +8278,33 @@ export function useOrdersGetTodayStats<TData = Awaited<ReturnType<typeof ordersG
  * 提交 LIFF 問卷調查資料。每個手機號碼只能提交一次。
  * @summary 提交問卷
  */
-export type postApiSurveysResponse200 = {
-  data: PostApiSurveys200
+export type surveysCreateResponse200 = {
+  data: SurveysCreate200
   status: 200
 }
 
-export type postApiSurveysResponse400 = {
-  data: PostApiSurveys400
+export type surveysCreateResponse400 = {
+  data: SurveysCreate400
   status: 400
 }
 
-export type postApiSurveysResponse409 = {
-  data: PostApiSurveys409
+export type surveysCreateResponse409 = {
+  data: SurveysCreate409
   status: 409
 }
 
-export type postApiSurveysResponse500 = {
-  data: PostApiSurveys500
+export type surveysCreateResponse500 = {
+  data: SurveysCreate500
   status: 500
 }
     
-export type postApiSurveysResponseComposite = postApiSurveysResponse200 | postApiSurveysResponse400 | postApiSurveysResponse409 | postApiSurveysResponse500;
+export type surveysCreateResponseComposite = surveysCreateResponse200 | surveysCreateResponse400 | surveysCreateResponse409 | surveysCreateResponse500;
     
-export type postApiSurveysResponse = postApiSurveysResponseComposite & {
+export type surveysCreateResponse = surveysCreateResponseComposite & {
   headers: Headers;
 }
 
-export const getPostApiSurveysUrl = () => {
+export const getSurveysCreateUrl = () => {
 
 
   
@@ -7496,9 +8312,9 @@ export const getPostApiSurveysUrl = () => {
   return createFullURL(`/api/surveys`)
 }
 
-export const postApiSurveys = async (createSurveyRequest: CreateSurveyRequest, options?: RequestInit): Promise<postApiSurveysResponse> => {
+export const surveysCreate = async (createSurveyRequest: CreateSurveyRequest, options?: RequestInit): Promise<surveysCreateResponse> => {
   
-  const res = await fetch(getPostApiSurveysUrl(),
+  const res = await fetch(getSurveysCreateUrl(),
   {      
     ...options,
     method: 'POST',
@@ -7509,19 +8325,19 @@ export const postApiSurveys = async (createSurveyRequest: CreateSurveyRequest, o
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text()
-  const data: postApiSurveysResponse['data'] = body ? JSON.parse(body) : {}
+  const data: surveysCreateResponse['data'] = body ? JSON.parse(body) : {}
 
-  return { data, status: res.status, headers: res.headers } as postApiSurveysResponse
+  return { data, status: res.status, headers: res.headers } as surveysCreateResponse
 }
 
 
 
 
-export const getPostApiSurveysMutationOptions = <TError = PostApiSurveys400 | PostApiSurveys409 | PostApiSurveys500,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiSurveys>>, TError,{data: CreateSurveyRequest}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiSurveys>>, TError,{data: CreateSurveyRequest}, TContext> => {
+export const getSurveysCreateMutationOptions = <TError = SurveysCreate400 | SurveysCreate409 | SurveysCreate500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof surveysCreate>>, TError,{data: CreateSurveyRequest}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof surveysCreate>>, TError,{data: CreateSurveyRequest}, TContext> => {
 
-const mutationKey = ['postApiSurveys'];
+const mutationKey = ['surveysCreate'];
 const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -7531,10 +8347,10 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiSurveys>>, {data: CreateSurveyRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof surveysCreate>>, {data: CreateSurveyRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  postApiSurveys(data,fetchOptions)
+          return  surveysCreate(data,fetchOptions)
         }
 
         
@@ -7542,23 +8358,23 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PostApiSurveysMutationResult = NonNullable<Awaited<ReturnType<typeof postApiSurveys>>>
-    export type PostApiSurveysMutationBody = CreateSurveyRequest
-    export type PostApiSurveysMutationError = PostApiSurveys400 | PostApiSurveys409 | PostApiSurveys500
+    export type SurveysCreateMutationResult = NonNullable<Awaited<ReturnType<typeof surveysCreate>>>
+    export type SurveysCreateMutationBody = CreateSurveyRequest
+    export type SurveysCreateMutationError = SurveysCreate400 | SurveysCreate409 | SurveysCreate500
 
     /**
  * @summary 提交問卷
  */
-export const usePostApiSurveys = <TError = PostApiSurveys400 | PostApiSurveys409 | PostApiSurveys500,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiSurveys>>, TError,{data: CreateSurveyRequest}, TContext>, fetch?: RequestInit}
+export const useSurveysCreate = <TError = SurveysCreate400 | SurveysCreate409 | SurveysCreate500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof surveysCreate>>, TError,{data: CreateSurveyRequest}, TContext>, fetch?: RequestInit}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof postApiSurveys>>,
+        Awaited<ReturnType<typeof surveysCreate>>,
         TError,
         {data: CreateSurveyRequest},
         TContext
       > => {
 
-      const mutationOptions = getPostApiSurveysMutationOptions(options);
+      const mutationOptions = getSurveysCreateMutationOptions(options);
 
       return useMutation(mutationOptions );
     }
@@ -7567,23 +8383,23 @@ export const usePostApiSurveys = <TError = PostApiSurveys400 | PostApiSurveys409
  * 查詢問卷列表，支援分頁和篩選
  * @summary 查詢問卷列表
  */
-export type getApiSurveysResponse200 = {
+export type surveysListResponse200 = {
   data: SurveyListResponse
   status: 200
 }
 
-export type getApiSurveysResponse500 = {
-  data: GetApiSurveys500
+export type surveysListResponse500 = {
+  data: SurveysList500
   status: 500
 }
     
-export type getApiSurveysResponseComposite = getApiSurveysResponse200 | getApiSurveysResponse500;
+export type surveysListResponseComposite = surveysListResponse200 | surveysListResponse500;
     
-export type getApiSurveysResponse = getApiSurveysResponseComposite & {
+export type surveysListResponse = surveysListResponseComposite & {
   headers: Headers;
 }
 
-export const getGetApiSurveysUrl = (params?: GetApiSurveysParams,) => {
+export const getSurveysListUrl = (params?: SurveysListParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -7598,9 +8414,9 @@ export const getGetApiSurveysUrl = (params?: GetApiSurveysParams,) => {
   return stringifiedParams.length > 0 ? createFullURL(`/api/surveys?${stringifiedParams}`) : createFullURL(`/api/surveys`)
 }
 
-export const getApiSurveys = async (params?: GetApiSurveysParams, options?: RequestInit): Promise<getApiSurveysResponse> => {
+export const surveysList = async (params?: SurveysListParams, options?: RequestInit): Promise<surveysListResponse> => {
   
-  const res = await fetch(getGetApiSurveysUrl(params),
+  const res = await fetch(getSurveysListUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -7610,50 +8426,50 @@ export const getApiSurveys = async (params?: GetApiSurveysParams, options?: Requ
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text()
-  const data: getApiSurveysResponse['data'] = body ? JSON.parse(body) : {}
+  const data: surveysListResponse['data'] = body ? JSON.parse(body) : {}
 
-  return { data, status: res.status, headers: res.headers } as getApiSurveysResponse
+  return { data, status: res.status, headers: res.headers } as surveysListResponse
 }
 
 
 
-export const getGetApiSurveysQueryKey = (params?: GetApiSurveysParams,) => {
+export const getSurveysListQueryKey = (params?: SurveysListParams,) => {
     return [`/api/surveys`, ...(params ? [params]: [])] as const;
     }
 
     
-export const getGetApiSurveysQueryOptions = <TData = Awaited<ReturnType<typeof getApiSurveys>>, TError = GetApiSurveys500>(params?: GetApiSurveysParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveys>>, TError, TData>, fetch?: RequestInit}
+export const getSurveysListQueryOptions = <TData = Awaited<ReturnType<typeof surveysList>>, TError = SurveysList500>(params?: SurveysListParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof surveysList>>, TError, TData>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiSurveysQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getSurveysListQueryKey(params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiSurveys>>> = ({ signal }) => getApiSurveys(params, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof surveysList>>> = ({ signal }) => surveysList(params, { signal, ...fetchOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiSurveys>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof surveysList>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type GetApiSurveysQueryResult = NonNullable<Awaited<ReturnType<typeof getApiSurveys>>>
-export type GetApiSurveysQueryError = GetApiSurveys500
+export type SurveysListQueryResult = NonNullable<Awaited<ReturnType<typeof surveysList>>>
+export type SurveysListQueryError = SurveysList500
 
 
 /**
  * @summary 查詢問卷列表
  */
 
-export function useGetApiSurveys<TData = Awaited<ReturnType<typeof getApiSurveys>>, TError = GetApiSurveys500>(
- params?: GetApiSurveysParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveys>>, TError, TData>, fetch?: RequestInit}
+export function useSurveysList<TData = Awaited<ReturnType<typeof surveysList>>, TError = SurveysList500>(
+ params?: SurveysListParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof surveysList>>, TError, TData>, fetch?: RequestInit}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetApiSurveysQueryOptions(params,options)
+  const queryOptions = getSurveysListQueryOptions(params,options)
 
   const query = useQuery(queryOptions ) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -7669,28 +8485,28 @@ export function useGetApiSurveys<TData = Awaited<ReturnType<typeof getApiSurveys
  * 根據手機號碼（會員 ID）查詢問卷資料
  * @summary 查詢問卷
  */
-export type getApiSurveysByPhoneMemberIdResponse200 = {
-  data: GetApiSurveysByPhoneMemberId200
+export type surveysGetByPhoneResponse200 = {
+  data: SurveysGetByPhone200
   status: 200
 }
 
-export type getApiSurveysByPhoneMemberIdResponse404 = {
-  data: GetApiSurveysByPhoneMemberId404
+export type surveysGetByPhoneResponse404 = {
+  data: SurveysGetByPhone404
   status: 404
 }
 
-export type getApiSurveysByPhoneMemberIdResponse500 = {
-  data: GetApiSurveysByPhoneMemberId500
+export type surveysGetByPhoneResponse500 = {
+  data: SurveysGetByPhone500
   status: 500
 }
     
-export type getApiSurveysByPhoneMemberIdResponseComposite = getApiSurveysByPhoneMemberIdResponse200 | getApiSurveysByPhoneMemberIdResponse404 | getApiSurveysByPhoneMemberIdResponse500;
+export type surveysGetByPhoneResponseComposite = surveysGetByPhoneResponse200 | surveysGetByPhoneResponse404 | surveysGetByPhoneResponse500;
     
-export type getApiSurveysByPhoneMemberIdResponse = getApiSurveysByPhoneMemberIdResponseComposite & {
+export type surveysGetByPhoneResponse = surveysGetByPhoneResponseComposite & {
   headers: Headers;
 }
 
-export const getGetApiSurveysByPhoneMemberIdUrl = (memberId: string,) => {
+export const getSurveysGetByPhoneUrl = (memberId: string,) => {
 
 
   
@@ -7698,9 +8514,9 @@ export const getGetApiSurveysByPhoneMemberIdUrl = (memberId: string,) => {
   return createFullURL(`/api/surveys/by-phone/${memberId}`)
 }
 
-export const getApiSurveysByPhoneMemberId = async (memberId: string, options?: RequestInit): Promise<getApiSurveysByPhoneMemberIdResponse> => {
+export const surveysGetByPhone = async (memberId: string, options?: RequestInit): Promise<surveysGetByPhoneResponse> => {
   
-  const res = await fetch(getGetApiSurveysByPhoneMemberIdUrl(memberId),
+  const res = await fetch(getSurveysGetByPhoneUrl(memberId),
   {      
     ...options,
     method: 'GET'
@@ -7710,50 +8526,50 @@ export const getApiSurveysByPhoneMemberId = async (memberId: string, options?: R
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text()
-  const data: getApiSurveysByPhoneMemberIdResponse['data'] = body ? JSON.parse(body) : {}
+  const data: surveysGetByPhoneResponse['data'] = body ? JSON.parse(body) : {}
 
-  return { data, status: res.status, headers: res.headers } as getApiSurveysByPhoneMemberIdResponse
+  return { data, status: res.status, headers: res.headers } as surveysGetByPhoneResponse
 }
 
 
 
-export const getGetApiSurveysByPhoneMemberIdQueryKey = (memberId?: string,) => {
+export const getSurveysGetByPhoneQueryKey = (memberId?: string,) => {
     return [`/api/surveys/by-phone/${memberId}`] as const;
     }
 
     
-export const getGetApiSurveysByPhoneMemberIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiSurveysByPhoneMemberId>>, TError = GetApiSurveysByPhoneMemberId404 | GetApiSurveysByPhoneMemberId500>(memberId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysByPhoneMemberId>>, TError, TData>, fetch?: RequestInit}
+export const getSurveysGetByPhoneQueryOptions = <TData = Awaited<ReturnType<typeof surveysGetByPhone>>, TError = SurveysGetByPhone404 | SurveysGetByPhone500>(memberId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof surveysGetByPhone>>, TError, TData>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiSurveysByPhoneMemberIdQueryKey(memberId);
+  const queryKey =  queryOptions?.queryKey ?? getSurveysGetByPhoneQueryKey(memberId);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiSurveysByPhoneMemberId>>> = ({ signal }) => getApiSurveysByPhoneMemberId(memberId, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof surveysGetByPhone>>> = ({ signal }) => surveysGetByPhone(memberId, { signal, ...fetchOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(memberId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysByPhoneMemberId>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(memberId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof surveysGetByPhone>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type GetApiSurveysByPhoneMemberIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiSurveysByPhoneMemberId>>>
-export type GetApiSurveysByPhoneMemberIdQueryError = GetApiSurveysByPhoneMemberId404 | GetApiSurveysByPhoneMemberId500
+export type SurveysGetByPhoneQueryResult = NonNullable<Awaited<ReturnType<typeof surveysGetByPhone>>>
+export type SurveysGetByPhoneQueryError = SurveysGetByPhone404 | SurveysGetByPhone500
 
 
 /**
  * @summary 查詢問卷
  */
 
-export function useGetApiSurveysByPhoneMemberId<TData = Awaited<ReturnType<typeof getApiSurveysByPhoneMemberId>>, TError = GetApiSurveysByPhoneMemberId404 | GetApiSurveysByPhoneMemberId500>(
- memberId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysByPhoneMemberId>>, TError, TData>, fetch?: RequestInit}
+export function useSurveysGetByPhone<TData = Awaited<ReturnType<typeof surveysGetByPhone>>, TError = SurveysGetByPhone404 | SurveysGetByPhone500>(
+ memberId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof surveysGetByPhone>>, TError, TData>, fetch?: RequestInit}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetApiSurveysByPhoneMemberIdQueryOptions(memberId,options)
+  const queryOptions = getSurveysGetByPhoneQueryOptions(memberId,options)
 
   const query = useQuery(queryOptions ) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -7769,23 +8585,23 @@ export function useGetApiSurveysByPhoneMemberId<TData = Awaited<ReturnType<typeo
  * 取得問卷統計資料（總數、年齡分佈、性別分佈等）
  * @summary 問卷統計
  */
-export type getApiSurveysStatsSummaryResponse200 = {
+export type surveysGetStatsResponse200 = {
   data: SurveyStats
   status: 200
 }
 
-export type getApiSurveysStatsSummaryResponse500 = {
-  data: GetApiSurveysStatsSummary500
+export type surveysGetStatsResponse500 = {
+  data: SurveysGetStats500
   status: 500
 }
     
-export type getApiSurveysStatsSummaryResponseComposite = getApiSurveysStatsSummaryResponse200 | getApiSurveysStatsSummaryResponse500;
+export type surveysGetStatsResponseComposite = surveysGetStatsResponse200 | surveysGetStatsResponse500;
     
-export type getApiSurveysStatsSummaryResponse = getApiSurveysStatsSummaryResponseComposite & {
+export type surveysGetStatsResponse = surveysGetStatsResponseComposite & {
   headers: Headers;
 }
 
-export const getGetApiSurveysStatsSummaryUrl = () => {
+export const getSurveysGetStatsUrl = () => {
 
 
   
@@ -7793,9 +8609,9 @@ export const getGetApiSurveysStatsSummaryUrl = () => {
   return createFullURL(`/api/surveys/stats/summary`)
 }
 
-export const getApiSurveysStatsSummary = async ( options?: RequestInit): Promise<getApiSurveysStatsSummaryResponse> => {
+export const surveysGetStats = async ( options?: RequestInit): Promise<surveysGetStatsResponse> => {
   
-  const res = await fetch(getGetApiSurveysStatsSummaryUrl(),
+  const res = await fetch(getSurveysGetStatsUrl(),
   {      
     ...options,
     method: 'GET'
@@ -7805,50 +8621,50 @@ export const getApiSurveysStatsSummary = async ( options?: RequestInit): Promise
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text()
-  const data: getApiSurveysStatsSummaryResponse['data'] = body ? JSON.parse(body) : {}
+  const data: surveysGetStatsResponse['data'] = body ? JSON.parse(body) : {}
 
-  return { data, status: res.status, headers: res.headers } as getApiSurveysStatsSummaryResponse
+  return { data, status: res.status, headers: res.headers } as surveysGetStatsResponse
 }
 
 
 
-export const getGetApiSurveysStatsSummaryQueryKey = () => {
+export const getSurveysGetStatsQueryKey = () => {
     return [`/api/surveys/stats/summary`] as const;
     }
 
     
-export const getGetApiSurveysStatsSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getApiSurveysStatsSummary>>, TError = GetApiSurveysStatsSummary500>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysStatsSummary>>, TError, TData>, fetch?: RequestInit}
+export const getSurveysGetStatsQueryOptions = <TData = Awaited<ReturnType<typeof surveysGetStats>>, TError = SurveysGetStats500>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof surveysGetStats>>, TError, TData>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiSurveysStatsSummaryQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getSurveysGetStatsQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiSurveysStatsSummary>>> = ({ signal }) => getApiSurveysStatsSummary({ signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof surveysGetStats>>> = ({ signal }) => surveysGetStats({ signal, ...fetchOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysStatsSummary>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof surveysGetStats>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type GetApiSurveysStatsSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getApiSurveysStatsSummary>>>
-export type GetApiSurveysStatsSummaryQueryError = GetApiSurveysStatsSummary500
+export type SurveysGetStatsQueryResult = NonNullable<Awaited<ReturnType<typeof surveysGetStats>>>
+export type SurveysGetStatsQueryError = SurveysGetStats500
 
 
 /**
  * @summary 問卷統計
  */
 
-export function useGetApiSurveysStatsSummary<TData = Awaited<ReturnType<typeof getApiSurveysStatsSummary>>, TError = GetApiSurveysStatsSummary500>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getApiSurveysStatsSummary>>, TError, TData>, fetch?: RequestInit}
+export function useSurveysGetStats<TData = Awaited<ReturnType<typeof surveysGetStats>>, TError = SurveysGetStats500>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof surveysGetStats>>, TError, TData>, fetch?: RequestInit}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetApiSurveysStatsSummaryQueryOptions(options)
+  const queryOptions = getSurveysGetStatsQueryOptions(options)
 
   const query = useQuery(queryOptions ) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -7864,28 +8680,28 @@ export function useGetApiSurveysStatsSummary<TData = Awaited<ReturnType<typeof g
  * 刪除指定 ID 的問卷（管理功能）
  * @summary 刪除問卷
  */
-export type deleteApiSurveysIdResponse200 = {
-  data: DeleteApiSurveysId200
+export type surveysDeleteResponse200 = {
+  data: SurveysDelete200
   status: 200
 }
 
-export type deleteApiSurveysIdResponse404 = {
-  data: DeleteApiSurveysId404
+export type surveysDeleteResponse404 = {
+  data: SurveysDelete404
   status: 404
 }
 
-export type deleteApiSurveysIdResponse500 = {
-  data: DeleteApiSurveysId500
+export type surveysDeleteResponse500 = {
+  data: SurveysDelete500
   status: 500
 }
     
-export type deleteApiSurveysIdResponseComposite = deleteApiSurveysIdResponse200 | deleteApiSurveysIdResponse404 | deleteApiSurveysIdResponse500;
+export type surveysDeleteResponseComposite = surveysDeleteResponse200 | surveysDeleteResponse404 | surveysDeleteResponse500;
     
-export type deleteApiSurveysIdResponse = deleteApiSurveysIdResponseComposite & {
+export type surveysDeleteResponse = surveysDeleteResponseComposite & {
   headers: Headers;
 }
 
-export const getDeleteApiSurveysIdUrl = (id: string,) => {
+export const getSurveysDeleteUrl = (id: string,) => {
 
 
   
@@ -7893,9 +8709,9 @@ export const getDeleteApiSurveysIdUrl = (id: string,) => {
   return createFullURL(`/api/surveys/${id}`)
 }
 
-export const deleteApiSurveysId = async (id: string, options?: RequestInit): Promise<deleteApiSurveysIdResponse> => {
+export const surveysDelete = async (id: string, options?: RequestInit): Promise<surveysDeleteResponse> => {
   
-  const res = await fetch(getDeleteApiSurveysIdUrl(id),
+  const res = await fetch(getSurveysDeleteUrl(id),
   {      
     ...options,
     method: 'DELETE'
@@ -7905,19 +8721,19 @@ export const deleteApiSurveysId = async (id: string, options?: RequestInit): Pro
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text()
-  const data: deleteApiSurveysIdResponse['data'] = body ? JSON.parse(body) : {}
+  const data: surveysDeleteResponse['data'] = body ? JSON.parse(body) : {}
 
-  return { data, status: res.status, headers: res.headers } as deleteApiSurveysIdResponse
+  return { data, status: res.status, headers: res.headers } as surveysDeleteResponse
 }
 
 
 
 
-export const getDeleteApiSurveysIdMutationOptions = <TError = DeleteApiSurveysId404 | DeleteApiSurveysId500,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiSurveysId>>, TError,{id: string}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteApiSurveysId>>, TError,{id: string}, TContext> => {
+export const getSurveysDeleteMutationOptions = <TError = SurveysDelete404 | SurveysDelete500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof surveysDelete>>, TError,{id: string}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof surveysDelete>>, TError,{id: string}, TContext> => {
 
-const mutationKey = ['deleteApiSurveysId'];
+const mutationKey = ['surveysDelete'];
 const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -7927,10 +8743,10 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiSurveysId>>, {id: string}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof surveysDelete>>, {id: string}> = (props) => {
           const {id} = props ?? {};
 
-          return  deleteApiSurveysId(id,fetchOptions)
+          return  surveysDelete(id,fetchOptions)
         }
 
         
@@ -7938,23 +8754,695 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type DeleteApiSurveysIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiSurveysId>>>
+    export type SurveysDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof surveysDelete>>>
     
-    export type DeleteApiSurveysIdMutationError = DeleteApiSurveysId404 | DeleteApiSurveysId500
+    export type SurveysDeleteMutationError = SurveysDelete404 | SurveysDelete500
 
     /**
  * @summary 刪除問卷
  */
-export const useDeleteApiSurveysId = <TError = DeleteApiSurveysId404 | DeleteApiSurveysId500,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiSurveysId>>, TError,{id: string}, TContext>, fetch?: RequestInit}
+export const useSurveysDelete = <TError = SurveysDelete404 | SurveysDelete500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof surveysDelete>>, TError,{id: string}, TContext>, fetch?: RequestInit}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof deleteApiSurveysId>>,
+        Awaited<ReturnType<typeof surveysDelete>>,
         TError,
         {id: string},
         TContext
       > => {
 
-      const mutationOptions = getDeleteApiSurveysIdMutationOptions(options);
+      const mutationOptions = getSurveysDeleteMutationOptions(options);
+
+      return useMutation(mutationOptions );
+    }
+    
+/**
+ * 列出所有預購檔期，支援分頁與狀態篩選
+ * @summary 取得預購檔期列表
+ */
+export type preordersAdminListResponse200 = {
+  data: PreordersAdminList200
+  status: 200
+}
+
+export type preordersAdminListResponse400 = {
+  data: PreordersAdminList400
+  status: 400
+}
+    
+export type preordersAdminListResponseComposite = preordersAdminListResponse200 | preordersAdminListResponse400;
+    
+export type preordersAdminListResponse = preordersAdminListResponseComposite & {
+  headers: Headers;
+}
+
+export const getPreordersAdminListUrl = (params?: PreordersAdminListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? createFullURL(`/api/admin/preorders?${stringifiedParams}`) : createFullURL(`/api/admin/preorders`)
+}
+
+export const preordersAdminList = async (params?: PreordersAdminListParams, options?: RequestInit): Promise<preordersAdminListResponse> => {
+  
+  const res = await fetch(getPreordersAdminListUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: preordersAdminListResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as preordersAdminListResponse
+}
+
+
+
+export const getPreordersAdminListQueryKey = (params?: PreordersAdminListParams,) => {
+    return [`/api/admin/preorders`, ...(params ? [params]: [])] as const;
+    }
+
+    
+export const getPreordersAdminListQueryOptions = <TData = Awaited<ReturnType<typeof preordersAdminList>>, TError = PreordersAdminList400>(params?: PreordersAdminListParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof preordersAdminList>>, TError, TData>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPreordersAdminListQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof preordersAdminList>>> = ({ signal }) => preordersAdminList(params, { signal, ...fetchOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof preordersAdminList>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PreordersAdminListQueryResult = NonNullable<Awaited<ReturnType<typeof preordersAdminList>>>
+export type PreordersAdminListQueryError = PreordersAdminList400
+
+
+/**
+ * @summary 取得預購檔期列表
+ */
+
+export function usePreordersAdminList<TData = Awaited<ReturnType<typeof preordersAdminList>>, TError = PreordersAdminList400>(
+ params?: PreordersAdminListParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof preordersAdminList>>, TError, TData>, fetch?: RequestInit}
+  
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPreordersAdminListQueryOptions(params,options)
+
+  const query = useQuery(queryOptions ) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * 新增一個新的預購檔期，並可選擇是否立即啟用
+ * @summary 建立預購檔期
+ */
+export type preordersAdminCreateResponse201 = {
+  data: PreordersAdminCreate201
+  status: 201
+}
+
+export type preordersAdminCreateResponse400 = {
+  data: PreordersAdminCreate400
+  status: 400
+}
+    
+export type preordersAdminCreateResponseComposite = preordersAdminCreateResponse201 | preordersAdminCreateResponse400;
+    
+export type preordersAdminCreateResponse = preordersAdminCreateResponseComposite & {
+  headers: Headers;
+}
+
+export const getPreordersAdminCreateUrl = () => {
+
+
+  
+
+  return createFullURL(`/api/admin/preorders`)
+}
+
+export const preordersAdminCreate = async (preordersAdminCreateBody: PreordersAdminCreateBody, options?: RequestInit): Promise<preordersAdminCreateResponse> => {
+  
+  const res = await fetch(getPreordersAdminCreateUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      preordersAdminCreateBody,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: preordersAdminCreateResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as preordersAdminCreateResponse
+}
+
+
+
+
+export const getPreordersAdminCreateMutationOptions = <TError = PreordersAdminCreate400,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof preordersAdminCreate>>, TError,{data: PreordersAdminCreateBody}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof preordersAdminCreate>>, TError,{data: PreordersAdminCreateBody}, TContext> => {
+
+const mutationKey = ['preordersAdminCreate'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof preordersAdminCreate>>, {data: PreordersAdminCreateBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  preordersAdminCreate(data,fetchOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PreordersAdminCreateMutationResult = NonNullable<Awaited<ReturnType<typeof preordersAdminCreate>>>
+    export type PreordersAdminCreateMutationBody = PreordersAdminCreateBody
+    export type PreordersAdminCreateMutationError = PreordersAdminCreate400
+
+    /**
+ * @summary 建立預購檔期
+ */
+export const usePreordersAdminCreate = <TError = PreordersAdminCreate400,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof preordersAdminCreate>>, TError,{data: PreordersAdminCreateBody}, TContext>, fetch?: RequestInit}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof preordersAdminCreate>>,
+        TError,
+        {data: PreordersAdminCreateBody},
+        TContext
+      > => {
+
+      const mutationOptions = getPreordersAdminCreateMutationOptions(options);
+
+      return useMutation(mutationOptions );
+    }
+    
+/**
+ * 取得單一預購檔期詳細資料
+ * @summary 取得預購檔期
+ */
+export type preordersAdminGetResponse200 = {
+  data: PreordersAdminGet200
+  status: 200
+}
+
+export type preordersAdminGetResponse404 = {
+  data: PreordersAdminGet404
+  status: 404
+}
+    
+export type preordersAdminGetResponseComposite = preordersAdminGetResponse200 | preordersAdminGetResponse404;
+    
+export type preordersAdminGetResponse = preordersAdminGetResponseComposite & {
+  headers: Headers;
+}
+
+export const getPreordersAdminGetUrl = (id: number,) => {
+
+
+  
+
+  return createFullURL(`/api/admin/preorders/${id}`)
+}
+
+export const preordersAdminGet = async (id: number, options?: RequestInit): Promise<preordersAdminGetResponse> => {
+  
+  const res = await fetch(getPreordersAdminGetUrl(id),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: preordersAdminGetResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as preordersAdminGetResponse
+}
+
+
+
+export const getPreordersAdminGetQueryKey = (id?: number,) => {
+    return [`/api/admin/preorders/${id}`] as const;
+    }
+
+    
+export const getPreordersAdminGetQueryOptions = <TData = Awaited<ReturnType<typeof preordersAdminGet>>, TError = PreordersAdminGet404>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof preordersAdminGet>>, TError, TData>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPreordersAdminGetQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof preordersAdminGet>>> = ({ signal }) => preordersAdminGet(id, { signal, ...fetchOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof preordersAdminGet>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PreordersAdminGetQueryResult = NonNullable<Awaited<ReturnType<typeof preordersAdminGet>>>
+export type PreordersAdminGetQueryError = PreordersAdminGet404
+
+
+/**
+ * @summary 取得預購檔期
+ */
+
+export function usePreordersAdminGet<TData = Awaited<ReturnType<typeof preordersAdminGet>>, TError = PreordersAdminGet404>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof preordersAdminGet>>, TError, TData>, fetch?: RequestInit}
+  
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPreordersAdminGetQueryOptions(id,options)
+
+  const query = useQuery(queryOptions ) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * 更新既有預購檔期內容
+ * @summary 更新預購檔期
+ */
+export type preordersAdminUpdateResponse200 = {
+  data: PreordersAdminUpdate200
+  status: 200
+}
+
+export type preordersAdminUpdateResponse400 = {
+  data: PreordersAdminUpdate400
+  status: 400
+}
+    
+export type preordersAdminUpdateResponseComposite = preordersAdminUpdateResponse200 | preordersAdminUpdateResponse400;
+    
+export type preordersAdminUpdateResponse = preordersAdminUpdateResponseComposite & {
+  headers: Headers;
+}
+
+export const getPreordersAdminUpdateUrl = (id: number,) => {
+
+
+  
+
+  return createFullURL(`/api/admin/preorders/${id}`)
+}
+
+export const preordersAdminUpdate = async (id: number,
+    preordersAdminUpdateBody: PreordersAdminUpdateBody, options?: RequestInit): Promise<preordersAdminUpdateResponse> => {
+  
+  const res = await fetch(getPreordersAdminUpdateUrl(id),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      preordersAdminUpdateBody,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: preordersAdminUpdateResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as preordersAdminUpdateResponse
+}
+
+
+
+
+export const getPreordersAdminUpdateMutationOptions = <TError = PreordersAdminUpdate400,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof preordersAdminUpdate>>, TError,{id: number;data: PreordersAdminUpdateBody}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof preordersAdminUpdate>>, TError,{id: number;data: PreordersAdminUpdateBody}, TContext> => {
+
+const mutationKey = ['preordersAdminUpdate'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof preordersAdminUpdate>>, {id: number;data: PreordersAdminUpdateBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  preordersAdminUpdate(id,data,fetchOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PreordersAdminUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof preordersAdminUpdate>>>
+    export type PreordersAdminUpdateMutationBody = PreordersAdminUpdateBody
+    export type PreordersAdminUpdateMutationError = PreordersAdminUpdate400
+
+    /**
+ * @summary 更新預購檔期
+ */
+export const usePreordersAdminUpdate = <TError = PreordersAdminUpdate400,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof preordersAdminUpdate>>, TError,{id: number;data: PreordersAdminUpdateBody}, TContext>, fetch?: RequestInit}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof preordersAdminUpdate>>,
+        TError,
+        {id: number;data: PreordersAdminUpdateBody},
+        TContext
+      > => {
+
+      const mutationOptions = getPreordersAdminUpdateMutationOptions(options);
+
+      return useMutation(mutationOptions );
+    }
+    
+/**
+ * 刪除預購檔期，若已有訂單則禁止刪除
+ * @summary 刪除預購檔期
+ */
+export type preordersAdminDeleteResponse204 = {
+  data: null
+  status: 204
+}
+
+export type preordersAdminDeleteResponse409 = {
+  data: PreordersAdminDelete409
+  status: 409
+}
+    
+export type preordersAdminDeleteResponseComposite = preordersAdminDeleteResponse204 | preordersAdminDeleteResponse409;
+    
+export type preordersAdminDeleteResponse = preordersAdminDeleteResponseComposite & {
+  headers: Headers;
+}
+
+export const getPreordersAdminDeleteUrl = (id: number,) => {
+
+
+  
+
+  return createFullURL(`/api/admin/preorders/${id}`)
+}
+
+export const preordersAdminDelete = async (id: number, options?: RequestInit): Promise<preordersAdminDeleteResponse> => {
+  
+  const res = await fetch(getPreordersAdminDeleteUrl(id),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: preordersAdminDeleteResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as preordersAdminDeleteResponse
+}
+
+
+
+
+export const getPreordersAdminDeleteMutationOptions = <TError = PreordersAdminDelete409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof preordersAdminDelete>>, TError,{id: number}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof preordersAdminDelete>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['preordersAdminDelete'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof preordersAdminDelete>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  preordersAdminDelete(id,fetchOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PreordersAdminDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof preordersAdminDelete>>>
+    
+    export type PreordersAdminDeleteMutationError = PreordersAdminDelete409
+
+    /**
+ * @summary 刪除預購檔期
+ */
+export const usePreordersAdminDelete = <TError = PreordersAdminDelete409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof preordersAdminDelete>>, TError,{id: number}, TContext>, fetch?: RequestInit}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof preordersAdminDelete>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+
+      const mutationOptions = getPreordersAdminDeleteMutationOptions(options);
+
+      return useMutation(mutationOptions );
+    }
+    
+/**
+ * 提供前台顯示的有效預購檔期資料
+ * @summary 取得可預購檔期
+ */
+export type preordersGetActiveResponse200 = {
+  data: PreordersGetActive200
+  status: 200
+}
+
+export type preordersGetActiveResponse404 = {
+  data: PreordersGetActive404
+  status: 404
+}
+    
+export type preordersGetActiveResponseComposite = preordersGetActiveResponse200 | preordersGetActiveResponse404;
+    
+export type preordersGetActiveResponse = preordersGetActiveResponseComposite & {
+  headers: Headers;
+}
+
+export const getPreordersGetActiveUrl = () => {
+
+
+  
+
+  return createFullURL(`/api/preorders/active`)
+}
+
+export const preordersGetActive = async ( options?: RequestInit): Promise<preordersGetActiveResponse> => {
+  
+  const res = await fetch(getPreordersGetActiveUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: preordersGetActiveResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as preordersGetActiveResponse
+}
+
+
+
+export const getPreordersGetActiveQueryKey = () => {
+    return [`/api/preorders/active`] as const;
+    }
+
+    
+export const getPreordersGetActiveQueryOptions = <TData = Awaited<ReturnType<typeof preordersGetActive>>, TError = PreordersGetActive404>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof preordersGetActive>>, TError, TData>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPreordersGetActiveQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof preordersGetActive>>> = ({ signal }) => preordersGetActive({ signal, ...fetchOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof preordersGetActive>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PreordersGetActiveQueryResult = NonNullable<Awaited<ReturnType<typeof preordersGetActive>>>
+export type PreordersGetActiveQueryError = PreordersGetActive404
+
+
+/**
+ * @summary 取得可預購檔期
+ */
+
+export function usePreordersGetActive<TData = Awaited<ReturnType<typeof preordersGetActive>>, TError = PreordersGetActive404>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof preordersGetActive>>, TError, TData>, fetch?: RequestInit}
+  
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPreordersGetActiveQueryOptions(options)
+
+  const query = useQuery(queryOptions ) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * 根據有效檔期建立預購訂單並扣除名額
+ * @summary 建立預購訂單
+ */
+export type preordersCreateOrderResponse201 = {
+  data: PreordersCreateOrder201
+  status: 201
+}
+
+export type preordersCreateOrderResponse409 = {
+  data: PreordersCreateOrder409
+  status: 409
+}
+    
+export type preordersCreateOrderResponseComposite = preordersCreateOrderResponse201 | preordersCreateOrderResponse409;
+    
+export type preordersCreateOrderResponse = preordersCreateOrderResponseComposite & {
+  headers: Headers;
+}
+
+export const getPreordersCreateOrderUrl = () => {
+
+
+  
+
+  return createFullURL(`/api/preorders/order`)
+}
+
+export const preordersCreateOrder = async (preordersCreateOrderBody: PreordersCreateOrderBody, options?: RequestInit): Promise<preordersCreateOrderResponse> => {
+  
+  const res = await fetch(getPreordersCreateOrderUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      preordersCreateOrderBody,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data: preordersCreateOrderResponse['data'] = body ? JSON.parse(body) : {}
+
+  return { data, status: res.status, headers: res.headers } as preordersCreateOrderResponse
+}
+
+
+
+
+export const getPreordersCreateOrderMutationOptions = <TError = PreordersCreateOrder409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof preordersCreateOrder>>, TError,{data: PreordersCreateOrderBody}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof preordersCreateOrder>>, TError,{data: PreordersCreateOrderBody}, TContext> => {
+
+const mutationKey = ['preordersCreateOrder'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof preordersCreateOrder>>, {data: PreordersCreateOrderBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  preordersCreateOrder(data,fetchOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PreordersCreateOrderMutationResult = NonNullable<Awaited<ReturnType<typeof preordersCreateOrder>>>
+    export type PreordersCreateOrderMutationBody = PreordersCreateOrderBody
+    export type PreordersCreateOrderMutationError = PreordersCreateOrder409
+
+    /**
+ * @summary 建立預購訂單
+ */
+export const usePreordersCreateOrder = <TError = PreordersCreateOrder409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof preordersCreateOrder>>, TError,{data: PreordersCreateOrderBody}, TContext>, fetch?: RequestInit}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof preordersCreateOrder>>,
+        TError,
+        {data: PreordersCreateOrderBody},
+        TContext
+      > => {
+
+      const mutationOptions = getPreordersCreateOrderMutationOptions(options);
 
       return useMutation(mutationOptions );
     }

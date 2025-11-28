@@ -7,7 +7,6 @@ import type { Env } from '../src/env.d.js';
  */
 const createMockD1 = () => {
   const mockPrepare = vi.fn();
-  const mockBind = vi.fn();
   const mockFirst = vi.fn();
   const mockAll = vi.fn();
   const mockRun = vi.fn();

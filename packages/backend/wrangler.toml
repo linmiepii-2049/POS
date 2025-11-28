@@ -9,7 +9,19 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 ENV_NAME = "development"
 API_BASE = "http://localhost:8787"
-CORS_ORIGINS = "http://localhost:3000,http://localhost:3001,http://localhost:5173"
+CORS_ORIGINS = "http://localhost:3000,http://localhost:3001,http://localhost:3100,http://localhost:5173"
+# LINE Pay Sandbox 配置
+# ⚠️ 重要：以下不是 Channel ID 和 Channel Secret！
+# Channel ID 和 Channel Secret 需要從 LINE Pay 商户中心獲取：
+# 1. 登入 https://pay.line.me（使用帳號：test_202511281251@line.pay，密碼：V5gOZ*01gD）
+# 2. 前往「管理付款連結」>「管理連結金鑰」
+# 3. 點擊「查詢」，輸入驗證碼後即可看到 Channel ID 和 Channel Secret Key
+# 4. 將下面的值替換為實際的 Channel ID 和 Channel Secret
+LINE_PAY_CHANNEL_ID = "2008582892"
+LINE_PAY_CHANNEL_SECRET = "6a5fd867149010c6bab642cf950a12a6"
+LINE_PAY_API_BASE = "https://sandbox-api-pay.line.me"
+LINE_PAY_RETURN_URL = "http://localhost:3100/preorder/payment/return"
+LINE_PAY_CANCEL_URL = "http://localhost:3100/preorder/payment/cancel"
 
 # D1 資料庫綁定（本地）
 [[d1_databases]]

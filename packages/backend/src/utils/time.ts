@@ -94,11 +94,31 @@ export const taipeiToUtcEnd = (taipeiTime: string): string => {
 
 /**
  * 將 UTC 時間轉換為台北時間顯示格式
+ * 使用簡單的時間計算，避免在 Cloudflare Workers 中使用 toLocaleString
  */
 export const utcToTaipei = (utcTime: string): string => {
-  const date = new Date(utcTime);
-  const taipeiTime = new Date(date.toLocaleString('en-US', { timeZone: TAIWAN_TIMEZONE }));
-  return taipeiTime.toISOString().replace('T', ' ').replace('Z', '');
+  // 如果時間字符串沒有時區信息，假設它是 UTC 時間
+  let dateStr = utcTime;
+  if (!utcTime.includes('Z') && !utcTime.includes('+') && !utcTime.includes('-')) {
+    dateStr = utcTime + 'Z'; // 添加 UTC 標識
+  }
+  
+  // 創建 UTC 日期對象
+  const date = new Date(dateStr);
+  
+  // 轉換為台北時間 (UTC+8)
+  const taipeiTime = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+  
+  // 格式化為顯示字符串 (YYYY-MM-DD HH:mm:ss)
+  const year = taipeiTime.getUTCFullYear();
+  const month = String(taipeiTime.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(taipeiTime.getUTCDate()).padStart(2, '0');
+  const hours = String(taipeiTime.getUTCHours()).padStart(2, '0');
+  const minutes = String(taipeiTime.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(taipeiTime.getUTCSeconds()).padStart(2, '0');
+  const milliseconds = String(taipeiTime.getUTCMilliseconds()).padStart(3, '0');
+  
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 };
 
 /**

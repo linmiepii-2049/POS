@@ -1,0 +1,560 @@
+import { useMemo, useState, type FormEvent } from 'react';
+import toast from 'react-hot-toast';
+import {
+  usePreordersGetActive,
+  usePreordersCreateOrder,
+  type PreordersGetActive200,
+  type PreordersGetActive200Data,
+  type PreordersGetActive404,
+  type PreordersCreateOrder201,
+  type PreordersCreateOrder409,
+} from '@pos/sdk';
+
+interface CartItem {
+  productId: number;
+  productName: string;
+  productPriceTwd: number;
+  productImageUrl: string | null;
+  quantity: number;
+  remainingQuantity: number;
+}
+
+interface PreorderFormState {
+  pickupDate: string;
+}
+
+const INITIAL_FORM: PreorderFormState = {
+  pickupDate: '',
+};
+
+/**
+ * 生成未來5天的日期選項
+ */
+const generatePickupDateOptions = () => {
+  const options: Array<{ value: string; label: string }> = [];
+  const today = new Date();
+  const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+  
+  for (let i = 1; i <= 5; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const weekday = weekdays[date.getDay()];
+    
+    const value = `${date.getFullYear()}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const label = `${month}/${day}(${weekday})`;
+    
+    options.push({ value, label });
+  }
+  
+  return options;
+};
+
+type PreorderCampaign = PreordersGetActive200Data;
+
+const isActiveResponse = (
+  response: PreordersGetActive200 | PreordersGetActive404 | undefined,
+): response is PreordersGetActive200 => Boolean(response && 'data' in response);
+
+const isCreateOrderSuccess = (
+  response: PreordersCreateOrder201 | PreordersCreateOrder409 | undefined,
+): response is PreordersCreateOrder201 => Boolean(response && 'data' in response);
+
+/**
+ * 預購頁面：顯示檔期資訊並提供訂單建立表單
+ */
+export function PreorderPage() {
+  const pickupDateOptions = generatePickupDateOptions();
+  const [formState, setFormState] = useState<PreorderFormState>({
+    pickupDate: pickupDateOptions[0]?.value || '',
+  });
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [orderSummary, setOrderSummary] = useState<PreordersCreateOrder201['data'] | null>(null);
+  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
+
+  const { data: campaignResponse, isLoading, isError, refetch } = usePreordersGetActive();
+  const campaignPayload = campaignResponse?.data as PreordersGetActive200 | PreordersGetActive404 | undefined;
+
+  const campaign = useMemo<PreorderCampaign | null>(() => {
+    if (isActiveResponse(campaignPayload)) {
+      return campaignPayload.data;
+    }
+    return null;
+  }, [campaignPayload]);
+
+  const orderMutation = usePreordersCreateOrder({
+    mutation: {
+      onSuccess: (response) => {
+        const payload = response?.data as PreordersCreateOrder201 | PreordersCreateOrder409 | undefined;
+        if (isCreateOrderSuccess(payload)) {
+          setOrderSummary(payload.data);
+          toast.success('預購成功，系統已送出網站通知');
+          setCart([]);
+          setFormState(INITIAL_FORM);
+          refetch();
+        }
+      },
+    },
+  });
+
+  /**
+   * 加入購物車
+   */
+  const handleAddToCart = (product: PreorderCampaign['products'][0]) => {
+    if (product.remainingQuantity <= 0) {
+      toast.error('該商品已售罄');
+      return;
+    }
+
+    const existingItem = cart.find((item) => item.productId === product.productId);
+    
+    if (existingItem) {
+      // 如果商品已在購物車中，增加數量
+      if (existingItem.quantity >= product.remainingQuantity) {
+        toast.error('已達該商品最大可預購數量');
+        return;
+      }
+      setCart((prev) =>
+        prev.map((item) =>
+          item.productId === product.productId
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      );
+    } else {
+      // 新增商品到購物車
+      setCart((prev) => [
+        ...prev,
+        {
+          productId: product.productId,
+          productName: product.productName,
+          productPriceTwd: product.productPriceTwd,
+          productImageUrl: product.productImageUrl,
+          quantity: 1,
+          remainingQuantity: product.remainingQuantity,
+        },
+      ]);
+    }
+    toast.success('已加入購物車');
+  };
+
+  /**
+   * 更新購物車商品數量
+   */
+  const handleUpdateQuantity = (productId: number, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      handleRemoveFromCart(productId);
+      return;
+    }
+
+    const item = cart.find((item) => item.productId === productId);
+    if (item && newQuantity > item.remainingQuantity) {
+      toast.error('超過該商品最大可預購數量');
+      return;
+    }
+
+    setCart((prev) =>
+      prev.map((item) =>
+        item.productId === productId ? { ...item, quantity: newQuantity } : item
+      )
+    );
+  };
+
+  /**
+   * 從購物車移除商品
+   */
+  const handleRemoveFromCart = (productId: number) => {
+    setCart((prev) => prev.filter((item) => item.productId !== productId));
+  };
+
+  /**
+   * 計算總金額
+   */
+  const totalAmount = useMemo(() => {
+    return cart.reduce((sum, item) => sum + item.productPriceTwd * item.quantity, 0);
+  }, [cart]);
+
+  const handleChange = (field: keyof PreorderFormState, value: string) => {
+    setFormState((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  /**
+   * 處理點擊送出預購按鈕
+   */
+  const handleCheckoutClick = () => {
+    if (cart.length === 0) {
+      toast.error('請至少選擇一個商品');
+      return;
+    }
+    setIsFormDialogOpen(true);
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!campaign) {
+      toast.error('目前無可預購檔期');
+      return;
+    }
+    if (cart.length === 0) {
+      toast.error('請至少選擇一個商品');
+      return;
+    }
+    if (!formState.pickupDate) {
+      toast.error('請選擇取貨時間');
+      return;
+    }
+
+    // 驗證所有購物車商品
+    for (const item of cart) {
+      const product = campaign.products.find((p) => p.productId === item.productId);
+      if (!product) {
+        toast.error(`商品「${item.productName}」已不存在`);
+        return;
+      }
+      if (item.quantity > product.remainingQuantity) {
+        toast.error(`商品「${item.productName}」預購名額不足`);
+        return;
+      }
+    }
+
+    // 串接 LINE Pay API
+    try {
+      const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8787';
+      
+      // 構建商品列表
+      const items = cart.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+      }));
+      
+      // 1. 請求 LINE Pay 支付
+      const paymentResponse = await fetch(`${apiBase}/api/preorders/payment/request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          campaignId: campaign.id,
+          items,
+          pickupDate: formState.pickupDate,
+        }),
+      });
+      
+      if (!paymentResponse.ok) {
+        const errorData = await paymentResponse.json().catch(() => ({}));
+        console.error('支付請求失敗:', {
+          status: paymentResponse.status,
+          statusText: paymentResponse.statusText,
+          errorData,
+        });
+        
+        // 顯示詳細的錯誤訊息
+        let errorMessage = '支付請求失敗';
+        if (errorData.details && Array.isArray(errorData.details)) {
+          // Zod 驗證錯誤
+          const validationErrors = errorData.details.map((d: any) => `${d.field}: ${d.message}`).join(', ');
+          errorMessage = `請求參數錯誤: ${validationErrors}`;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.error) {
+          errorMessage = errorData.error;
+        }
+        
+        throw new Error(errorMessage);
+      }
+      
+      const paymentData = await paymentResponse.json();
+      
+      if (!paymentData.success || !paymentData.data?.paymentUrl) {
+        throw new Error('支付請求失敗：無效的回應');
+      }
+      
+      // 2. 跳轉到 LINE Pay 支付頁面
+      // 注意：LINE Pay 會在回調 URL 中添加 transactionId 和 orderId 參數
+      // 不需要存儲到 sessionStorage（業界最佳實踐：只依賴 URL 參數和後端查詢）
+      window.location.href = paymentData.data.paymentUrl;
+      
+      setIsFormDialogOpen(false);
+    } catch (error) {
+      const message =
+        typeof error === 'object' && error !== null && 'response' in error
+          ? ((error as { response?: { data?: { message?: string; code?: string } } }).response?.data?.message ??
+            (error as { response?: { data?: { message?: string; code?: string } } }).response?.data?.code ??
+            '支付請求失敗')
+          : error instanceof Error
+            ? error.message
+            : '支付請求失敗';
+      toast.error(message);
+    }
+  };
+
+  const resetForm = () => {
+    setOrderSummary(null);
+    setCart([]);
+    setFormState({
+      pickupDate: pickupDateOptions[0]?.value || '',
+    });
+    setIsFormDialogOpen(false);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+        <div className="animate-pulse space-y-4 w-full max-w-md">
+          <div className="h-8 bg-slate-200 rounded w-1/3" />
+          <div className="h-48 bg-slate-100 rounded" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !campaign) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+        <div className="bg-white rounded-2xl shadow p-6 text-center space-y-4 max-w-md w-full">
+          <p className="text-4xl">🥐</p>
+          <h1 className="text-xl font-bold text-gray-900">目前沒有預購檔期</h1>
+          <p className="text-sm text-gray-600">請稍後再回來看看，或加入官方 LINE 以獲得最新通知。</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white pb-20">
+      {/* 檔期資訊 */}
+      <div className="bg-white shadow-sm sticky top-0 z-10 px-4 py-3 border-b border-gray-200">
+        <p className="text-xs text-blue-600 font-semibold">官方預購檔期</p>
+        <h1 className="text-xl font-bold text-gray-900 mt-1">{campaign.campaignName}</h1>
+        <p className="text-sm text-gray-600 mt-1 line-clamp-2">{campaign.campaignCopy}</p>
+        <p className="text-xs text-gray-500 mt-2">
+          {campaign.startsAtTaipei.split(' ')[0]} 至 {campaign.endsAtTaipei.split(' ')[0]}
+        </p>
+      </div>
+
+      {orderSummary ? (
+        /* 訂單成功頁面 */
+        <div className="px-4 py-6">
+          <div className="bg-white rounded-2xl shadow-lg p-6 text-center space-y-4 max-w-md mx-auto">
+            <div className="text-green-600 text-5xl">✓</div>
+            <h2 className="text-xl font-bold text-gray-900">預購成功</h2>
+            <p className="text-sm text-gray-600">系統已同步網站通知，請保留以下資訊以利取貨。</p>
+            <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
+              <p>訂單編號：<span className="font-semibold">{orderSummary.orderNumber}</span></p>
+              <p>預購數量：{orderSummary.quantity}</p>
+              <p>應付金額：NT${orderSummary.totalTwd}</p>
+            </div>
+            <button
+              type="button"
+              onClick={resetForm}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            >
+              再預購一筆
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* 商品列表 */}
+          <div className="px-4 py-4">
+            <div className="grid grid-cols-2 gap-3">
+              {campaign.products.map((product) => {
+                const cartItem = cart.find((item) => item.productId === product.productId);
+                const isOutOfStock = product.remainingQuantity <= 0;
+                
+                return (
+                  <div
+                    key={product.productId}
+                    onClick={() => !isOutOfStock && handleAddToCart(product)}
+                    className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-200 ${
+                      isOutOfStock
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'cursor-pointer hover:shadow-lg active:scale-95'
+                    }`}
+                  >
+                    {/* 商品圖片 */}
+                    <div className="aspect-square bg-gray-100 flex items-center justify-center relative">
+                      {product.productImageUrl ? (
+                        <img
+                          src={product.productImageUrl}
+                          alt={product.productName}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                          <svg className="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                      {cartItem && (
+                        <div className="absolute top-2 right-2 bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                          {cartItem.quantity}
+                        </div>
+                      )}
+                      {isOutOfStock && (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                          <span className="text-white text-sm font-semibold">已售罄</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 商品資訊 */}
+                    <div className="p-3">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">
+                        {product.productName}
+                      </h3>
+                      <p className="text-base font-bold text-blue-600 mb-1">NT${product.productPriceTwd}</p>
+                      <p className="text-xs text-gray-500">
+                        剩餘：{product.remainingQuantity}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 購物車 */}
+          {cart.length > 0 && (
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-20">
+              <div className="px-4 py-3 max-h-64 overflow-y-auto">
+                <h3 className="text-sm font-semibold text-gray-900 mb-2">購物車 ({cart.length} 項)</h3>
+                <div className="space-y-2">
+                  {cart.map((item) => (
+                    <div key={item.productId} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                      {item.productImageUrl && (
+                        <img
+                          src={item.productImageUrl}
+                          alt={item.productName}
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{item.productName}</p>
+                        <p className="text-xs text-gray-600">NT${item.productPriceTwd}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUpdateQuantity(item.productId, item.quantity - 1);
+                          }}
+                          className="w-7 h-7 bg-gray-200 hover:bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm"
+                        >
+                          −
+                        </button>
+                        <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUpdateQuantity(item.productId, item.quantity + 1);
+                          }}
+                          className="w-7 h-7 bg-gray-200 hover:bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm"
+                          disabled={item.quantity >= item.remainingQuantity}
+                        >
+                          +
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveFromCart(item.productId);
+                          }}
+                          className="w-6 h-6 text-red-500 hover:text-red-700"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-gray-200">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-semibold text-gray-900">總計</span>
+                    <span className="text-lg font-bold text-blue-600">NT${totalAmount}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCheckoutClick}
+                    disabled={cart.length === 0}
+                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm whitespace-nowrap"
+                  >
+                    送出預購
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 表單對話框 */}
+          {isFormDialogOpen && (
+            <div className="fixed inset-0 bg-black/50 z-30 flex items-end md:items-center justify-center">
+              <div className="bg-white rounded-t-2xl md:rounded-2xl shadow-xl w-full max-w-md">
+                <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-gray-900">選擇取貨時間</h2>
+                  <button
+                    type="button"
+                    onClick={() => setIsFormDialogOpen(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <form onSubmit={handleSubmit} className="p-4">
+                  <div className="flex gap-3 items-end">
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">取貨時間</label>
+                      <div className="relative">
+                        <select
+                          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 appearance-none bg-white"
+                          value={formState.pickupDate}
+                          onChange={(event) => handleChange('pickupDate', event.target.value)}
+                          required
+                        >
+                          {pickupDateOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setIsFormDialogOpen(false)}
+                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors whitespace-nowrap"
+                      >
+                        取消
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={orderMutation.isPending}
+                        className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition-colors whitespace-nowrap"
+                      >
+                        {orderMutation.isPending ? '送出中...' : 'LINE PAY結帳'}
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}

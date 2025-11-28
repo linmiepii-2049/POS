@@ -7,12 +7,13 @@ import { AdminProducts } from './AdminProducts';
 // Coupon feature hidden - 優惠券功能已隱藏 (2024-11-11) - May be restored in the future
 // import { AdminCoupons } from './AdminCoupons';
 import { AdminOrders } from './AdminOrders';
+import { AdminPreorders } from './AdminPreorders';
 
 /**
  * Admin 子路由類型
  * Note: 'coupons' route removed - may be restored in the future
  */
-type AdminRoute = 'users' | 'products' | 'orders';
+type AdminRoute = 'users' | 'products' | 'orders' | 'preorders';
 
 /**
  * Admin 主要布局元件
@@ -23,7 +24,7 @@ export function AdminLayout() {
     const urlParams = new URLSearchParams(window.location.search);
     const route = urlParams.get('tab') as AdminRoute;
     // Coupon route removed - 優惠券路由已移除
-    return route && ['users', 'products', 'orders'].includes(route) ? route : 'users';
+    return route && ['users', 'products', 'orders', 'preorders'].includes(route) ? route : 'users';
   };
 
   const [currentRoute, setCurrentRoute] = useState<AdminRoute>(getCurrentRouteFromURL());
@@ -49,6 +50,8 @@ export function AdminLayout() {
         return <AdminUsers />;
       case 'products':
         return <AdminProducts />;
+      case 'preorders':
+        return <AdminPreorders />;
       // Coupon route hidden - 優惠券路由已隱藏 (2024-11-11)
       // case 'coupons':
       //   return <AdminCoupons />;

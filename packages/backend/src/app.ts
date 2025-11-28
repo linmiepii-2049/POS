@@ -13,6 +13,8 @@ import { ordersRouter } from './routes/orders.js';
 import { surveysRouter } from './routes/surveys.js';
 import { r2UploadRouter } from './routes/r2-upload.js';
 import localUploadRouter from './routes/local-upload.js';
+import { preordersRouter } from './routes/preorders.js';
+import { paymentsRouter } from './routes/payments.js';
 
 /**
  * 讀取 package.json 版本資訊
@@ -101,7 +103,7 @@ export const createApp = () => {
   // CORS 設定：從環境變數讀取允許的來源
   app.use('*', async (c, next) => {
     const env = c.env as Env | undefined;
-    const corsOrigins = env?.CORS_ORIGINS || 'http://localhost:3000,http://localhost:3001';
+    const corsOrigins = env?.CORS_ORIGINS || 'http://localhost:3000,http://localhost:3001,http://localhost:3100';
     const allowedOrigins = parseCorsOrigins(corsOrigins);
     
     const origin = c.req.header('Origin');
@@ -233,6 +235,10 @@ export const createApp = () => {
         name: 'Assets',
         description: '檔案存取端點',
       },
+      {
+        name: 'Preorders',
+        description: '預購管理端點',
+      },
     ],
   });
 
@@ -259,6 +265,11 @@ export const createApp = () => {
 
   // 掛載問卷調查路由
   app.route('/api', surveysRouter);
+  // 掛載預購路由
+  app.route('/api', preordersRouter);
+  
+  // 掛載支付路由
+  app.route('/api', paymentsRouter);
 
   // 掛載 R2 上傳路由（生產環境用）
   app.route('/', r2UploadRouter);

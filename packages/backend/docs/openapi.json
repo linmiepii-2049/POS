@@ -47,6 +47,10 @@
     {
       "name": "Assets",
       "description": "檔案存取端點"
+    },
+    {
+      "name": "Preorders",
+      "description": "預購管理端點"
     }
   ],
   "components": {
@@ -454,6 +458,16 @@
                   "type": "string",
                   "example": "王小明",
                   "description": "LINE 顯示名稱"
+                },
+                "ipAddress": {
+                  "type": "string",
+                  "example": "192.168.1.1",
+                  "description": "IP 位址"
+                },
+                "userAgent": {
+                  "type": "string",
+                  "example": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                  "description": "瀏覽器資訊"
                 },
                 "userId": {
                   "type": "integer",
@@ -2386,6 +2400,9 @@
                         "points_yuan_equivalent"
                       ]
                     },
+                    "requestId": {
+                      "type": "string"
+                    },
                     "timestamp": {
                       "type": "string"
                     }
@@ -2393,6 +2410,44 @@
                   "required": [
                     "success",
                     "data",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "請求參數錯誤",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "操作失敗"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "錯誤時間戳"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
                     "timestamp"
                   ]
                 }
@@ -2420,6 +2475,12 @@
                     "timestamp": {
                       "type": "string",
                       "description": "錯誤時間戳"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "nullable": true
                     }
                   },
                   "required": [
@@ -2452,6 +2513,12 @@
                     "timestamp": {
                       "type": "string",
                       "description": "錯誤時間戳"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "nullable": true
                     }
                   },
                   "required": [
@@ -7328,6 +7395,7 @@
         ],
         "summary": "提交問卷",
         "description": "提交 LIFF 問卷調查資料。每個手機號碼只能提交一次。",
+        "operationId": "Surveys_Create",
         "requestBody": {
           "content": {
             "application/json": {
@@ -7541,6 +7609,16 @@
                       "example": "王小明",
                       "description": "LINE 顯示名稱"
                     },
+                    "ipAddress": {
+                      "type": "string",
+                      "example": "192.168.1.1",
+                      "description": "IP 位址"
+                    },
+                    "userAgent": {
+                      "type": "string",
+                      "example": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                      "description": "瀏覽器資訊"
+                    },
                     "userId": {
                       "type": "integer",
                       "minimum": 0,
@@ -7665,8 +7743,7 @@
               }
             }
           }
-        },
-        "operationId": "post--api-surveys"
+        }
       },
       "get": {
         "tags": [
@@ -7674,6 +7751,7 @@
         ],
         "summary": "查詢問卷列表",
         "description": "查詢問卷列表，支援分頁和篩選",
+        "operationId": "Surveys_List",
         "parameters": [
           {
             "schema": {
@@ -7772,8 +7850,7 @@
               }
             }
           }
-        },
-        "operationId": "get--api-surveys"
+        }
       }
     },
     "/api/surveys/by-phone/{memberId}": {
@@ -7783,6 +7860,7 @@
         ],
         "summary": "查詢問卷",
         "description": "根據手機號碼（會員 ID）查詢問卷資料",
+        "operationId": "Surveys_GetByPhone",
         "parameters": [
           {
             "schema": {
@@ -8001,6 +8079,16 @@
                       "example": "王小明",
                       "description": "LINE 顯示名稱"
                     },
+                    "ipAddress": {
+                      "type": "string",
+                      "example": "192.168.1.1",
+                      "description": "IP 位址"
+                    },
+                    "userAgent": {
+                      "type": "string",
+                      "example": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                      "description": "瀏覽器資訊"
+                    },
                     "userId": {
                       "type": "integer",
                       "minimum": 0,
@@ -8093,8 +8181,7 @@
               }
             }
           }
-        },
-        "operationId": "get--api-surveys-by-phone--memberId-"
+        }
       }
     },
     "/api/surveys/stats/summary": {
@@ -8104,6 +8191,7 @@
         ],
         "summary": "問卷統計",
         "description": "取得問卷統計資料（總數、年齡分佈、性別分佈等）",
+        "operationId": "Surveys_GetStats",
         "responses": {
           "200": {
             "description": "統計資料",
@@ -8147,8 +8235,7 @@
               }
             }
           }
-        },
-        "operationId": "get--api-surveys-stats-summary"
+        }
       }
     },
     "/api/surveys/{id}": {
@@ -8158,6 +8245,7 @@
         ],
         "summary": "刪除問卷",
         "description": "刪除指定 ID 的問卷（管理功能）",
+        "operationId": "Surveys_Delete",
         "parameters": [
           {
             "schema": {
@@ -8259,8 +8347,1421 @@
               }
             }
           }
+        }
+      }
+    },
+    "/api/admin/preorders": {
+      "get": {
+        "tags": [
+          "Preorders"
+        ],
+        "summary": "取得預購檔期列表",
+        "description": "列出所有預購檔期，支援分頁與狀態篩選",
+        "operationId": "Preorders_AdminList",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "description": "頁碼"
+            },
+            "required": false,
+            "description": "頁碼",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "description": "每頁筆數"
+            },
+            "required": false,
+            "description": "每頁筆數",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "starts_at",
+                "created_at",
+                "updated_at"
+              ],
+              "default": "created_at",
+              "description": "排序欄位"
+            },
+            "required": false,
+            "description": "排序欄位",
+            "name": "sortBy",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc",
+              "description": "排序方向"
+            },
+            "required": false,
+            "description": "排序方向",
+            "name": "sortDir",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "nullable": true,
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                {
+                  "type": "boolean",
+                  "nullable": true
+                },
+                {
+                  "nullable": true
+                }
+              ],
+              "description": "是否僅顯示啟用檔期"
+            },
+            "required": false,
+            "description": "是否僅顯示啟用檔期",
+            "name": "isActive",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功取得預購檔期列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ],
+                      "description": "操作是否成功"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "exclusiveMinimum": true,
+                            "description": "檔期 ID"
+                          },
+                          "campaignName": {
+                            "type": "string",
+                            "description": "預購名稱"
+                          },
+                          "campaignCopy": {
+                            "type": "string",
+                            "description": "預購文案"
+                          },
+                          "products": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "productId": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "exclusiveMinimum": true,
+                                  "description": "產品 ID"
+                                },
+                                "productName": {
+                                  "type": "string",
+                                  "description": "產品名稱"
+                                },
+                                "productPriceTwd": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "description": "產品單價 (元)"
+                                },
+                                "productImageUrl": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "description": "產品圖片"
+                                },
+                                "supplyQuantity": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "exclusiveMinimum": true,
+                                  "description": "供應數量"
+                                },
+                                "reservedQuantity": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "description": "已預購數量"
+                                },
+                                "remainingQuantity": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "description": "剩餘可預購數量"
+                                }
+                              },
+                              "required": [
+                                "productId",
+                                "productName",
+                                "productPriceTwd",
+                                "productImageUrl",
+                                "supplyQuantity",
+                                "reservedQuantity",
+                                "remainingQuantity"
+                              ]
+                            },
+                            "description": "預購商品列表"
+                          },
+                          "startsAt": {
+                            "type": "string",
+                            "description": "開始時間 (UTC)"
+                          },
+                          "endsAt": {
+                            "type": "string",
+                            "description": "結束時間 (UTC)"
+                          },
+                          "startsAtTaipei": {
+                            "type": "string",
+                            "description": "開始時間 (台北)"
+                          },
+                          "endsAtTaipei": {
+                            "type": "string",
+                            "description": "結束時間 (台北)"
+                          },
+                          "isActive": {
+                            "type": "boolean",
+                            "description": "是否啟用"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "description": "建立時間 (UTC)"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "description": "更新時間 (UTC)"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "campaignName",
+                          "campaignCopy",
+                          "products",
+                          "startsAt",
+                          "endsAt",
+                          "startsAtTaipei",
+                          "endsAtTaipei",
+                          "isActive",
+                          "createdAt",
+                          "updatedAt"
+                        ]
+                      },
+                      "description": "檔期資料"
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "description": "頁碼"
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "description": "每頁筆數"
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "總筆數"
+                        },
+                        "totalPages": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "總頁數"
+                        }
+                      },
+                      "required": [
+                        "page",
+                        "limit",
+                        "total",
+                        "totalPages"
+                      ],
+                      "description": "分頁資訊"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "pagination",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "請求參數錯誤",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "description": "錯誤代碼"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "details": {
+                      "nullable": true,
+                      "description": "錯誤細節"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Preorders"
+        ],
+        "summary": "建立預購檔期",
+        "description": "新增一個新的預購檔期，並可選擇是否立即啟用",
+        "operationId": "Preorders_AdminCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "campaignName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200,
+                    "description": "預購名稱"
+                  },
+                  "campaignCopy": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300,
+                    "description": "預購文案"
+                  },
+                  "products": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "productId": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "description": "產品 ID"
+                        },
+                        "supplyQuantity": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "description": "供應數量"
+                        }
+                      },
+                      "required": [
+                        "productId",
+                        "supplyQuantity"
+                      ]
+                    },
+                    "minItems": 1,
+                    "description": "預購商品列表"
+                  },
+                  "startsAt": {
+                    "type": "string",
+                    "minLength": 10,
+                    "description": "檔期開始日期（台北時間，格式：YYYY-MM-DD）"
+                  },
+                  "endsAt": {
+                    "type": "string",
+                    "minLength": 10,
+                    "description": "檔期結束日期（台北時間，格式：YYYY-MM-DD）"
+                  },
+                  "isActive": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "是否立即啟用"
+                  }
+                },
+                "required": [
+                  "campaignName",
+                  "campaignCopy",
+                  "products",
+                  "startsAt",
+                  "endsAt"
+                ]
+              }
+            }
+          }
         },
-        "operationId": "delete--api-surveys--id-"
+        "responses": {
+          "201": {
+            "description": "成功建立預購檔期",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ],
+                      "description": "操作是否成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "description": "檔期 ID"
+                        },
+                        "campaignName": {
+                          "type": "string",
+                          "description": "預購名稱"
+                        },
+                        "campaignCopy": {
+                          "type": "string",
+                          "description": "預購文案"
+                        },
+                        "products": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "productId": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "exclusiveMinimum": true,
+                                "description": "產品 ID"
+                              },
+                              "productName": {
+                                "type": "string",
+                                "description": "產品名稱"
+                              },
+                              "productPriceTwd": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "產品單價 (元)"
+                              },
+                              "productImageUrl": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "產品圖片"
+                              },
+                              "supplyQuantity": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "exclusiveMinimum": true,
+                                "description": "供應數量"
+                              },
+                              "reservedQuantity": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "已預購數量"
+                              },
+                              "remainingQuantity": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "剩餘可預購數量"
+                              }
+                            },
+                            "required": [
+                              "productId",
+                              "productName",
+                              "productPriceTwd",
+                              "productImageUrl",
+                              "supplyQuantity",
+                              "reservedQuantity",
+                              "remainingQuantity"
+                            ]
+                          },
+                          "description": "預購商品列表"
+                        },
+                        "startsAt": {
+                          "type": "string",
+                          "description": "開始時間 (UTC)"
+                        },
+                        "endsAt": {
+                          "type": "string",
+                          "description": "結束時間 (UTC)"
+                        },
+                        "startsAtTaipei": {
+                          "type": "string",
+                          "description": "開始時間 (台北)"
+                        },
+                        "endsAtTaipei": {
+                          "type": "string",
+                          "description": "結束時間 (台北)"
+                        },
+                        "isActive": {
+                          "type": "boolean",
+                          "description": "是否啟用"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "建立時間 (UTC)"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "description": "更新時間 (UTC)"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "campaignName",
+                        "campaignCopy",
+                        "products",
+                        "startsAt",
+                        "endsAt",
+                        "startsAtTaipei",
+                        "endsAtTaipei",
+                        "isActive",
+                        "createdAt",
+                        "updatedAt"
+                      ],
+                      "description": "檔期資料"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "驗證錯誤",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "description": "錯誤代碼"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "details": {
+                      "nullable": true,
+                      "description": "錯誤細節"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/preorders/{id}": {
+      "get": {
+        "tags": [
+          "Preorders"
+        ],
+        "summary": "取得預購檔期",
+        "description": "取得單一預購檔期詳細資料",
+        "operationId": "Preorders_AdminGet",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "description": "檔期 ID"
+            },
+            "required": true,
+            "description": "檔期 ID",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功取得預購檔期",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ],
+                      "description": "操作是否成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "description": "檔期 ID"
+                        },
+                        "campaignName": {
+                          "type": "string",
+                          "description": "預購名稱"
+                        },
+                        "campaignCopy": {
+                          "type": "string",
+                          "description": "預購文案"
+                        },
+                        "products": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "productId": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "exclusiveMinimum": true,
+                                "description": "產品 ID"
+                              },
+                              "productName": {
+                                "type": "string",
+                                "description": "產品名稱"
+                              },
+                              "productPriceTwd": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "產品單價 (元)"
+                              },
+                              "productImageUrl": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "產品圖片"
+                              },
+                              "supplyQuantity": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "exclusiveMinimum": true,
+                                "description": "供應數量"
+                              },
+                              "reservedQuantity": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "已預購數量"
+                              },
+                              "remainingQuantity": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "剩餘可預購數量"
+                              }
+                            },
+                            "required": [
+                              "productId",
+                              "productName",
+                              "productPriceTwd",
+                              "productImageUrl",
+                              "supplyQuantity",
+                              "reservedQuantity",
+                              "remainingQuantity"
+                            ]
+                          },
+                          "description": "預購商品列表"
+                        },
+                        "startsAt": {
+                          "type": "string",
+                          "description": "開始時間 (UTC)"
+                        },
+                        "endsAt": {
+                          "type": "string",
+                          "description": "結束時間 (UTC)"
+                        },
+                        "startsAtTaipei": {
+                          "type": "string",
+                          "description": "開始時間 (台北)"
+                        },
+                        "endsAtTaipei": {
+                          "type": "string",
+                          "description": "結束時間 (台北)"
+                        },
+                        "isActive": {
+                          "type": "boolean",
+                          "description": "是否啟用"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "建立時間 (UTC)"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "description": "更新時間 (UTC)"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "campaignName",
+                        "campaignCopy",
+                        "products",
+                        "startsAt",
+                        "endsAt",
+                        "startsAtTaipei",
+                        "endsAtTaipei",
+                        "isActive",
+                        "createdAt",
+                        "updatedAt"
+                      ],
+                      "description": "檔期資料"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "檔期不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "description": "錯誤代碼"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "details": {
+                      "nullable": true,
+                      "description": "錯誤細節"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Preorders"
+        ],
+        "summary": "更新預購檔期",
+        "description": "更新既有預購檔期內容",
+        "operationId": "Preorders_AdminUpdate",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "description": "檔期 ID"
+            },
+            "required": true,
+            "description": "檔期 ID",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "campaignName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200,
+                    "description": "預購名稱"
+                  },
+                  "campaignCopy": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300,
+                    "description": "預購文案"
+                  },
+                  "products": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "productId": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "description": "產品 ID"
+                        },
+                        "supplyQuantity": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "description": "供應數量"
+                        }
+                      },
+                      "required": [
+                        "productId",
+                        "supplyQuantity"
+                      ]
+                    },
+                    "minItems": 1,
+                    "description": "預購商品列表"
+                  },
+                  "startsAt": {
+                    "type": "string",
+                    "minLength": 10,
+                    "description": "檔期開始日期（台北時間，格式：YYYY-MM-DD）"
+                  },
+                  "endsAt": {
+                    "type": "string",
+                    "minLength": 10,
+                    "description": "檔期結束日期（台北時間，格式：YYYY-MM-DD）"
+                  },
+                  "isActive": {
+                    "type": "boolean",
+                    "description": "是否啟用"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功更新預購檔期",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ],
+                      "description": "操作是否成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "description": "檔期 ID"
+                        },
+                        "campaignName": {
+                          "type": "string",
+                          "description": "預購名稱"
+                        },
+                        "campaignCopy": {
+                          "type": "string",
+                          "description": "預購文案"
+                        },
+                        "products": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "productId": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "exclusiveMinimum": true,
+                                "description": "產品 ID"
+                              },
+                              "productName": {
+                                "type": "string",
+                                "description": "產品名稱"
+                              },
+                              "productPriceTwd": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "產品單價 (元)"
+                              },
+                              "productImageUrl": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "產品圖片"
+                              },
+                              "supplyQuantity": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "exclusiveMinimum": true,
+                                "description": "供應數量"
+                              },
+                              "reservedQuantity": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "已預購數量"
+                              },
+                              "remainingQuantity": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "剩餘可預購數量"
+                              }
+                            },
+                            "required": [
+                              "productId",
+                              "productName",
+                              "productPriceTwd",
+                              "productImageUrl",
+                              "supplyQuantity",
+                              "reservedQuantity",
+                              "remainingQuantity"
+                            ]
+                          },
+                          "description": "預購商品列表"
+                        },
+                        "startsAt": {
+                          "type": "string",
+                          "description": "開始時間 (UTC)"
+                        },
+                        "endsAt": {
+                          "type": "string",
+                          "description": "結束時間 (UTC)"
+                        },
+                        "startsAtTaipei": {
+                          "type": "string",
+                          "description": "開始時間 (台北)"
+                        },
+                        "endsAtTaipei": {
+                          "type": "string",
+                          "description": "結束時間 (台北)"
+                        },
+                        "isActive": {
+                          "type": "boolean",
+                          "description": "是否啟用"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "建立時間 (UTC)"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "description": "更新時間 (UTC)"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "campaignName",
+                        "campaignCopy",
+                        "products",
+                        "startsAt",
+                        "endsAt",
+                        "startsAtTaipei",
+                        "endsAtTaipei",
+                        "isActive",
+                        "createdAt",
+                        "updatedAt"
+                      ],
+                      "description": "檔期資料"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "驗證錯誤",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "description": "錯誤代碼"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "details": {
+                      "nullable": true,
+                      "description": "錯誤細節"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Preorders"
+        ],
+        "summary": "刪除預購檔期",
+        "description": "刪除預購檔期，若已有訂單則禁止刪除",
+        "operationId": "Preorders_AdminDelete",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "description": "檔期 ID"
+            },
+            "required": true,
+            "description": "檔期 ID",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "成功刪除預購檔期"
+          },
+          "409": {
+            "description": "已有訂單，無法刪除",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "description": "錯誤代碼"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "details": {
+                      "nullable": true,
+                      "description": "錯誤細節"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/preorders/active": {
+      "get": {
+        "tags": [
+          "Preorders"
+        ],
+        "summary": "取得可預購檔期",
+        "description": "提供前台顯示的有效預購檔期資料",
+        "operationId": "Preorders_GetActive",
+        "responses": {
+          "200": {
+            "description": "成功取得檔期",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ],
+                      "description": "操作是否成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "description": "檔期 ID"
+                        },
+                        "campaignName": {
+                          "type": "string",
+                          "description": "預購名稱"
+                        },
+                        "campaignCopy": {
+                          "type": "string",
+                          "description": "預購文案"
+                        },
+                        "products": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "productId": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "exclusiveMinimum": true,
+                                "description": "產品 ID"
+                              },
+                              "productName": {
+                                "type": "string",
+                                "description": "產品名稱"
+                              },
+                              "productPriceTwd": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "產品單價 (元)"
+                              },
+                              "productImageUrl": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "產品圖片"
+                              },
+                              "supplyQuantity": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "exclusiveMinimum": true,
+                                "description": "供應數量"
+                              },
+                              "reservedQuantity": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "已預購數量"
+                              },
+                              "remainingQuantity": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "剩餘可預購數量"
+                              }
+                            },
+                            "required": [
+                              "productId",
+                              "productName",
+                              "productPriceTwd",
+                              "productImageUrl",
+                              "supplyQuantity",
+                              "reservedQuantity",
+                              "remainingQuantity"
+                            ]
+                          },
+                          "description": "預購商品列表"
+                        },
+                        "startsAt": {
+                          "type": "string",
+                          "description": "開始時間 (UTC)"
+                        },
+                        "endsAt": {
+                          "type": "string",
+                          "description": "結束時間 (UTC)"
+                        },
+                        "startsAtTaipei": {
+                          "type": "string",
+                          "description": "開始時間 (台北)"
+                        },
+                        "endsAtTaipei": {
+                          "type": "string",
+                          "description": "結束時間 (台北)"
+                        },
+                        "isActive": {
+                          "type": "boolean",
+                          "description": "是否啟用"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "建立時間 (UTC)"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "description": "更新時間 (UTC)"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "campaignName",
+                        "campaignCopy",
+                        "products",
+                        "startsAt",
+                        "endsAt",
+                        "startsAtTaipei",
+                        "endsAtTaipei",
+                        "isActive",
+                        "createdAt",
+                        "updatedAt"
+                      ],
+                      "description": "可預購檔期"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "目前無檔期",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "description": "錯誤代碼"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "details": {
+                      "nullable": true,
+                      "description": "錯誤細節"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/preorders/order": {
+      "post": {
+        "tags": [
+          "Preorders"
+        ],
+        "summary": "建立預購訂單",
+        "description": "根據有效檔期建立預購訂單並扣除名額",
+        "operationId": "Preorders_CreateOrder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "campaignId": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
+                    "description": "檔期 ID"
+                  },
+                  "productId": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
+                    "description": "商品 ID"
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
+                    "description": "預購數量"
+                  },
+                  "customerName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "取餐人姓名"
+                  },
+                  "customerPhone": {
+                    "type": "string",
+                    "pattern": "^09\\d{8}$",
+                    "description": "取餐人手機"
+                  },
+                  "pickupSlot": {
+                    "type": "string",
+                    "description": "取餐時段（已廢棄，保留相容性）"
+                  },
+                  "customerNote": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "description": "客製備註"
+                  },
+                  "userId": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
+                    "description": "既有會員 ID（可選）"
+                  }
+                },
+                "required": [
+                  "campaignId",
+                  "productId",
+                  "quantity",
+                  "customerName",
+                  "customerPhone"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "成功建立預購訂單",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ],
+                      "description": "操作是否成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "orderNumber": {
+                          "type": "string",
+                          "description": "訂單編號"
+                        },
+                        "campaignId": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "description": "檔期 ID"
+                        },
+                        "quantity": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "description": "預購數量"
+                        },
+                        "remainingQuantity": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "剩餘量"
+                        },
+                        "totalTwd": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "訂單總金額"
+                        }
+                      },
+                      "required": [
+                        "orderNumber",
+                        "campaignId",
+                        "quantity",
+                        "remainingQuantity",
+                        "totalTwd"
+                      ]
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "時間戳"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "名額不足或檔期無效",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "description": "錯誤代碼"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "錯誤訊息"
+                    },
+                    "details": {
+                      "nullable": true,
+                      "description": "錯誤細節"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/uploads/products": {

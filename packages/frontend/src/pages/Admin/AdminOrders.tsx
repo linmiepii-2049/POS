@@ -175,6 +175,23 @@ export function AdminOrders() {
       ),
     },
     {
+      key: 'channel',
+      label: '管道',
+      render: (value) => {
+        const channelDisplay = value === '網路' 
+          ? { text: '網路', className: 'bg-blue-100 text-blue-800' }
+          : { text: '店消', className: 'bg-purple-100 text-purple-800' };
+        return (
+          <span className={clsx(
+            'px-2 py-1 text-xs font-medium rounded-full',
+            channelDisplay.className
+          )}>
+            {channelDisplay.text}
+          </span>
+        );
+      },
+    },
+    {
       key: 'status',
       label: '狀態',
       render: (value) => {

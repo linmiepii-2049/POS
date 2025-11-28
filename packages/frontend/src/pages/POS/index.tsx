@@ -160,6 +160,7 @@ export function POSPage() {
           product_id: item.id,
           quantity: item.quantity,
         })),
+        channel: '店消',
       };
 
       // 只有在有會員時才添加 user_id

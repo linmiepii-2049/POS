@@ -8,7 +8,7 @@ export const SortDirectionSchema = z.enum(['asc', 'desc']);
 /**
  * 訂單排序欄位枚舉
  */
-export const OrderSortBySchema = z.enum(['id', 'order_number', 'user_id', 'subtotal_twd', 'discount_twd', 'total_twd', 'status', 'created_at', 'updated_at']);
+export const OrderSortBySchema = z.enum(['id', 'order_number', 'user_id', 'subtotal_twd', 'discount_twd', 'total_twd', 'status', 'channel', 'created_at', 'updated_at']);
 
 /**
  * 訂單狀態枚舉
@@ -48,6 +48,11 @@ export const CouponRedemptionSchema = z.object({
 });
 
 /**
+ * 訂單管道枚舉
+ */
+export const OrderChannelSchema = z.enum(['店消', '網路']);
+
+/**
  * 訂單基本資訊 Schema
  */
 export const OrderSchema = z.object({
@@ -59,6 +64,7 @@ export const OrderSchema = z.object({
   points_discount_twd: z.number().int().min(0).describe('點數折扣金額 (元)'),
   total_twd: z.number().int().min(0).describe('總金額 (元)'),
   status: z.enum(['created', 'confirmed', 'paid', 'cancelled']).describe('訂單狀態'),
+  channel: OrderChannelSchema.describe('訂單管道（店消/網路）'),
   created_at: z.string().describe('建立時間 (UTC)'),
   updated_at: z.string().describe('更新時間 (UTC)'),
   // 台北時間轉換欄位
@@ -92,6 +98,7 @@ export const CreateOrderRequestSchema = z.object({
   items: z.array(CreateOrderItemRequestSchema).min(1).describe('訂單項目列表'),
   coupon_code_id: z.number().int().positive().optional().describe('優惠券代碼 ID（可選）'),
   points_to_redeem: z.number().int().min(0).optional().describe('欲折抵的點數（可選，僅限 LINE ID 會員）'),
+  channel: OrderChannelSchema.optional().default('店消').describe('訂單管道（店消/網路），預設為店消'),
 });
 
 /**
@@ -103,6 +110,7 @@ export const OrderQuerySchema = z.object({
   sortBy: OrderSortBySchema.default('id').describe('排序欄位'),
   sortDir: SortDirectionSchema.default('desc').describe('排序方向'),
   status: OrderStatusSchema.optional().describe('訂單狀態篩選'),
+  channel: OrderChannelSchema.optional().describe('訂單管道篩選（店消/網路）'),
   user_id: z.coerce.number().int().positive().optional().describe('使用者 ID 篩選'),
   from: z.string().optional().describe('建立時間起始 (台北時間)'),
   to: z.string().optional().describe('建立時間結束 (台北時間)'),

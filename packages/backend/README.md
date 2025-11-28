@@ -113,6 +113,28 @@ pnpm run preflight
   - 回傳所有主要資料表的記錄數量和樣本資料
   - 包含 users, products, orders, order_items, coupons 等表
 
+### 預購模組
+
+預購功能透過 `preorder_campaigns` 與 `preorder_orders` 兩張資料表管理：
+
+- `preorder_campaigns`
+  - `starts_at`、`ends_at` 儲存 UTC 時間，建立或查詢前須使用共用 `time` util 進行台北時間轉換
+  - 以 `is_active` 和唯一索引 `idx_preorder_campaigns_active` 確保同時間僅一個啟用檔期
+  - `pickup_time_slots` 為 JSON 字串，後端由 `PreorderService` 負責序列化/反序列化
+- `preorder_orders`
+  - 每筆訂單綁定單一檔期與 D1 `orders` 訂單，包含備註與取餐時段
+  - 透過外鍵與 `reserved_quantity`觸發器確保名額正確扣減
+
+路由位於 `src/routes/preorders.ts`，主要端點：
+
+- `GET /api/admin/preorders`：管理端列表，支援狀態篩選與分頁
+- `POST /api/admin/preorders`：建立檔期，若 `isActive=true` 會自動停用其他檔期
+- `PUT /api/admin/preorders/:id`、`DELETE /api/admin/preorders/:id`：更新/刪除檔期
+- `GET /api/preorders/active`：前台取得目前有效檔期
+- `POST /api/preorders/order`：建立預購訂單，包含備註與取餐時段驗證，成功後交由 `NotificationService` 記錄網站通知
+
+如需調整 API，可修改 `src/zod/preorders.ts` 的 schema，重新跑 `pnpm run openapi && pnpm run spectral && pnpm run client:gen` 以更新 SDK。
+
 ## 如何更新 SDK
 
 本專案使用 OpenAPI 規格驅動的開發流程，確保 API 文檔與 SDK 保持同步。

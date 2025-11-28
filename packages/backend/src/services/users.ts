@@ -50,30 +50,24 @@ export class UserService {
     // 建立 WHERE 條件
     const conditions: string[] = [];
     const params: unknown[] = [];
-    let _paramIndex = 1;
-
     if (nameOrPhone) {
       conditions.push(`(name LIKE ? OR phone LIKE ?)`);
       params.push(`%${nameOrPhone}%`, `%${nameOrPhone}%`);
-      _paramIndex += 2;
     }
 
     if (is_active !== undefined) {
       conditions.push(`is_active = ?`);
       params.push(is_active);
-      _paramIndex++;
     }
 
     if (from) {
       conditions.push(`created_at >= ?`);
       params.push(this.taipeiToUtc(from));
-      _paramIndex++;
     }
 
     if (to) {
       conditions.push(`created_at <= ?`);
       params.push(this.taipeiToUtc(to));
-      _paramIndex++;
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -268,36 +262,29 @@ export class UserService {
     // 建立更新欄位
     const updateFields: string[] = [];
     const params: unknown[] = [];
-    let _paramIndex = 1;
-
     if (line_id !== undefined) {
       updateFields.push(`line_id = ?`);
       params.push(line_id);
-      _paramIndex++;
     }
 
     if (name !== undefined) {
       updateFields.push(`name = ?`);
       params.push(name);
-      _paramIndex++;
     }
 
     if (phone !== undefined) {
       updateFields.push(`phone = ?`);
       params.push(phone);
-      _paramIndex++;
     }
 
     if (role !== undefined) {
       updateFields.push(`role = ?`);
       params.push(role);
-      _paramIndex++;
     }
 
     if (is_active !== undefined) {
       updateFields.push(`is_active = ?`);
       params.push(is_active);
-      _paramIndex++;
     }
 
     if (updateFields.length === 0) {

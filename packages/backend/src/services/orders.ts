@@ -79,6 +79,7 @@ export class OrderService {
     return {
       ...order,
       points_discount_twd: order.points_discount_twd || 0,
+      channel: order.channel || '店消', // 預設為店消（向後相容）
       created_at_taipei: this.utcToTaipei(order.created_at),
       updated_at_taipei: this.utcToTaipei(order.updated_at),
     };
@@ -280,35 +281,34 @@ export class OrderService {
    * 取得訂單列表（支援分頁、排序、篩選）
    */
   async getOrders(query: OrderQuery): Promise<{ orders: Order[]; pagination: Pagination }> {
-    const { page, limit, sortBy, sortDir, status, user_id, from, to } = query;
+    const { page, limit, sortBy, sortDir, status, channel, user_id, from, to } = query;
     
     // 建立 WHERE 條件
     const conditions: string[] = [];
     const params: unknown[] = [];
-    let _paramIndex = 1;
-
     if (status) {
       conditions.push(`o.status = ?`);
       params.push(status);
-      _paramIndex++;
+    }
+
+    if (channel) {
+      conditions.push(`o.channel = ?`);
+      params.push(channel);
     }
 
     if (user_id) {
       conditions.push(`o.user_id = ?`);
       params.push(user_id);
-      _paramIndex++;
     }
 
     if (from) {
       conditions.push(`o.created_at >= ?`);
       params.push(this.taipeiToUtc(from));
-      _paramIndex++;
     }
 
     if (to) {
       conditions.push(`o.created_at <= ?`);
       params.push(this.taipeiToUtcEnd(to));
-      _paramIndex++;
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -417,7 +417,7 @@ export class OrderService {
    * 建立訂單
    */
   async createOrder(data: CreateOrderRequest): Promise<OrderDetail> {
-    const { user_id, items, coupon_code_id, points_to_redeem } = data;
+    const { user_id, items, coupon_code_id, points_to_redeem, channel = '店消' } = data;
 
     // 如果沒有提供 user_id，使用特殊的非會員 ID (10)
     // 如果提供了 user_id，檢查使用者是否存在
@@ -520,8 +520,8 @@ export class OrderService {
 
       // 建立訂單
       const orderQuery = `
-        INSERT INTO orders (order_number, user_id, subtotal_twd, discount_twd, points_discount_twd, total_twd, status, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, 'paid', datetime('now'), datetime('now'))
+        INSERT INTO orders (order_number, user_id, subtotal_twd, discount_twd, points_discount_twd, total_twd, status, channel, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, 'paid', ?, datetime('now'), datetime('now'))
       `;
       
       const orderResult = await this.db.prepare(orderQuery).bind(
@@ -530,7 +530,8 @@ export class OrderService {
         subtotal,
         discountAmount,
         pointsDiscount,
-        finalTotal
+        finalTotal,
+        channel
       ).run();
 
       if (!orderResult.success) {
