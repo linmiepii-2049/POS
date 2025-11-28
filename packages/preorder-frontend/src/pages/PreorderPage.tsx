@@ -1,14 +1,17 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useState, useEffect, type FormEvent } from 'react';
 import toast from 'react-hot-toast';
 import {
   usePreordersGetActive,
   usePreordersCreateOrder,
+  useUsersGetByLineId,
   type PreordersGetActive200,
   type PreordersGetActive200Data,
   type PreordersGetActive404,
   type PreordersCreateOrder201,
   type PreordersCreateOrder409,
+  type UsersGetByLineId200,
 } from '@pos/sdk';
+import { useLiff } from '../hooks/useLiff';
 
 interface CartItem {
   productId: number;
@@ -26,6 +29,13 @@ interface PreorderFormState {
 const INITIAL_FORM: PreorderFormState = {
   pickupDate: '',
 };
+
+interface UserInfo {
+  id: number;
+  name: string;
+  points: number;
+  points_yuan_equivalent: number;
+}
 
 /**
  * 生成未來5天的日期選項
@@ -73,6 +83,22 @@ export function PreorderPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orderSummary, setOrderSummary] = useState<PreordersCreateOrder201['data'] | null>(null);
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [pointsRedeemAmount, setPointsRedeemAmount] = useState(0); // 要折抵的金額（元）
+
+  // LIFF 整合
+  const { isReady, profile, isLoggedIn, shouldUseLiff } = useLiff();
+
+  // 查詢用戶資訊（當有 LINE ID 時）
+  const { data: userResponse, refetch: refetchUser } = useUsersGetByLineId(
+    profile?.userId || 'dummy',
+    {
+      query: {
+        enabled: false, // 手動觸發
+        queryKey: ['users', 'by-line-id', profile?.userId] as const,
+      },
+    },
+  );
 
   const { data: campaignResponse, isLoading, isError, refetch } = usePreordersGetActive();
   const campaignPayload = campaignResponse?.data as PreordersGetActive200 | PreordersGetActive404 | undefined;
@@ -83,6 +109,28 @@ export function PreorderPage() {
     }
     return null;
   }, [campaignPayload]);
+
+  // 當 LIFF 準備好且有 LINE ID 時，查詢用戶資訊
+  useEffect(() => {
+    if (isReady && shouldUseLiff && isLoggedIn && profile?.userId) {
+      refetchUser();
+    }
+  }, [isReady, shouldUseLiff, isLoggedIn, profile?.userId, refetchUser]);
+
+  // 處理用戶查詢結果
+  useEffect(() => {
+    if (userResponse?.data && 'data' in userResponse.data) {
+      const userData = userResponse.data as UsersGetByLineId200;
+      if (userData.success && userData.data) {
+        setUserInfo({
+          id: userData.data.id,
+          name: userData.data.name,
+          points: userData.data.points,
+          points_yuan_equivalent: userData.data.points_yuan_equivalent,
+        });
+      }
+    }
+  }, [userResponse]);
 
   const orderMutation = usePreordersCreateOrder({
     mutation: {
@@ -176,6 +224,16 @@ export function PreorderPage() {
     return cart.reduce((sum, item) => sum + item.productPriceTwd * item.quantity, 0);
   }, [cart]);
 
+  // 計算點數折抵後的金額
+  const pointsDiscount = useMemo(() => {
+    return pointsRedeemAmount; // 點數折抵金額（元）
+  }, [pointsRedeemAmount]);
+
+  // 最終金額 = 總金額 - 點數折抵
+  const finalAmount = useMemo(() => {
+    return Math.max(0, totalAmount - pointsDiscount);
+  }, [totalAmount, pointsDiscount]);
+
   const handleChange = (field: keyof PreorderFormState, value: string) => {
     setFormState((prev) => ({
       ...prev,
@@ -232,6 +290,9 @@ export function PreorderPage() {
         quantity: item.quantity,
       }));
       
+      // 計算點數折抵（20點 = 1元）
+      const pointsToRedeem = pointsRedeemAmount > 0 ? pointsRedeemAmount * 20 : 0;
+
       // 1. 請求 LINE Pay 支付
       const paymentResponse = await fetch(`${apiBase}/api/preorders/payment/request`, {
         method: 'POST',
@@ -240,6 +301,8 @@ export function PreorderPage() {
           campaignId: campaign.id,
           items,
           pickupDate: formState.pickupDate,
+          userId: userInfo?.id, // 如果有用戶資訊，傳遞 user_id
+          pointsToRedeem: pointsToRedeem > 0 ? pointsToRedeem : undefined, // 如果有折抵，傳遞點數
         }),
       });
       
@@ -475,8 +538,17 @@ export function PreorderPage() {
                 </div>
                 <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-gray-200">
                   <div className="flex items-center gap-2">
-                    <span className="text-base font-semibold text-gray-900">總計</span>
-                    <span className="text-lg font-bold text-blue-600">NT${totalAmount}</span>
+                    <span className="text-base font-semibold text-gray-900">
+                      {pointsRedeemAmount > 0 ? '應付' : '總計'}
+                    </span>
+                    <span className="text-lg font-bold text-blue-600">
+                      NT${pointsRedeemAmount > 0 ? finalAmount : totalAmount}
+                    </span>
+                    {pointsRedeemAmount > 0 && (
+                      <span className="text-xs text-gray-500 line-through">
+                        NT${totalAmount}
+                      </span>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -508,46 +580,102 @@ export function PreorderPage() {
                   </button>
                 </div>
                 
-                <form onSubmit={handleSubmit} className="p-4">
-                  <div className="flex gap-3 items-end">
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">取貨時間</label>
-                      <div className="relative">
-                        <select
-                          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 appearance-none bg-white"
-                          value={formState.pickupDate}
-                          onChange={(event) => handleChange('pickupDate', event.target.value)}
-                          required
-                        >
-                          {pickupDateOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
+                <form onSubmit={handleSubmit} className="p-4 space-y-4">
+                  {/* 取貨時間 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">取貨時間</label>
+                    <div className="relative">
+                      <select
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 appearance-none bg-white"
+                        value={formState.pickupDate}
+                        onChange={(event) => handleChange('pickupDate', event.target.value)}
+                        required
+                      >
+                        {pickupDateOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 點數折抵（僅在有用戶資訊且有點數時顯示） */}
+                  {userInfo && userInfo.points > 0 && (
+                    <div className="border-t border-gray-200 pt-4">
+                      <h3 className="text-sm font-medium text-gray-900 mb-3">點數折抵</h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-3">
+                          <span className="text-gray-600">$</span>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={pointsRedeemAmount || ''}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^0-9]/g, ''); // 只允許數字
+                              const numValue = value ? parseInt(value) : 0;
+                              const maxAmount = Math.min(userInfo.points_yuan_equivalent, totalAmount); // 最大可折抵金額（不能超過總金額）
+                              setPointsRedeemAmount(Math.min(numValue, maxAmount));
+                            }}
+                            placeholder="輸入要折抵的金額"
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-center text-lg font-semibold"
+                          />
+                          <span className="text-gray-600">元</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">使用點數：</span>
+                          <span className="font-medium text-purple-600">{pointsRedeemAmount * 20} 點</span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          * 1元 = 20點，最多可折抵 ${Math.min(userInfo.points_yuan_equivalent, totalAmount)} 元（{userInfo.points} 點）
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setIsFormDialogOpen(false)}
-                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors whitespace-nowrap"
-                      >
-                        取消
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={orderMutation.isPending}
-                        className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition-colors whitespace-nowrap"
-                      >
-                        {orderMutation.isPending ? '送出中...' : 'LINE PAY結帳'}
-                      </button>
+                  )}
+
+                  {/* 金額摘要 */}
+                  <div className="border-t border-gray-200 pt-4 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">商品總額</span>
+                      <span className="text-gray-900">NT${totalAmount}</span>
                     </div>
+                    {pointsRedeemAmount > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">點數折抵</span>
+                        <span className="text-purple-600">-NT${pointsDiscount}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-base font-bold border-t border-gray-200 pt-2">
+                      <span className="text-gray-900">應付金額</span>
+                      <span className="text-blue-600">NT${finalAmount}</span>
+                    </div>
+                  </div>
+
+                  {/* 按鈕 */}
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsFormDialogOpen(false);
+                        setPointsRedeemAmount(0); // 重置點數折抵
+                      }}
+                      className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors"
+                    >
+                      取消
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={orderMutation.isPending || finalAmount <= 0}
+                      className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                    >
+                      {orderMutation.isPending ? '送出中...' : 'LINE PAY結帳'}
+                    </button>
                   </div>
                 </form>
               </div>

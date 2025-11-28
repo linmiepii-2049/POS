@@ -4,6 +4,7 @@ import type { Env } from '../env.d.ts';
 import { LinePayService } from '../services/linepay.js';
 import { PreorderService } from '../services/preorders.js';
 import { OrderService } from '../services/orders.js';
+import { PointsService } from '../services/points.js';
 import { ApiError } from '../utils/api-error.js';
 import { logger } from '../utils/logger.js';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
@@ -212,6 +213,8 @@ const getPaymentInfoRoute = createRoute({
               ),
               totalAmount: z.number().int().positive(),
               pickupDate: z.string(),
+              userId: z.number().int().positive().optional(),
+              pointsToRedeem: z.number().int().min(0).optional(),
             }),
             timestamp: z.string(),
           }),
@@ -253,7 +256,7 @@ paymentsRouter.openapi(getPaymentInfoRoute, async (c) => {
     });
 
     const paymentQuery = `
-      SELECT campaign_id, items_json, total_amount, pickup_date
+      SELECT campaign_id, items_json, total_amount, pickup_date, user_id, points_to_redeem
       FROM preorder_payments
       WHERE transaction_id = ? AND order_id = ?
       LIMIT 1
@@ -343,6 +346,8 @@ const requestPaymentRoute = createRoute({
               .min(1)
               .describe('商品列表'),
             pickupDate: z.string().describe('取貨日期（格式：YYYY-MM-DD）'),
+            userId: z.number().int().positive().optional().describe('使用者 ID（可選，用於點數折抵和回饋）'),
+            pointsToRedeem: z.number().int().min(0).optional().describe('要折抵的點數（可選，僅限 LINE ID 會員）'),
           }),
         },
       },
@@ -389,12 +394,14 @@ paymentsRouter.openapi(requestPaymentRoute, async (c) => {
       throw new ApiError('INVALID_REQUEST', '請求體為空', 400);
     }
 
-    const { campaignId, items, pickupDate } = body;
+    const { campaignId, items, pickupDate, userId, pointsToRedeem } = body;
     
     logger.info('收到支付請求', {
       campaignId,
       items,
       pickupDate,
+      userId,
+      pointsToRedeem,
     });
 
     // 驗證預購檔期和商品
@@ -421,15 +428,43 @@ paymentsRouter.openapi(requestPaymentRoute, async (c) => {
       productNames.push(product.productName);
     }
 
+    // 如果有點數折抵，需要驗證用戶和點數，並計算最終金額
+    let originalAmount = totalAmount; // 保存原始金額（用於記錄）
+    if (pointsToRedeem && pointsToRedeem > 0) {
+      if (!userId) {
+        throw new ApiError('POINTS_REDEEM_REQUIRES_USER', '點數折抵需要用戶 ID', 400);
+      }
+
+      // 驗證點數折抵
+      const pointsService = new PointsService(c.env.DB);
+      const validation = await pointsService.validatePointsRedemption(userId, pointsToRedeem);
+      
+      if (!validation.valid) {
+        throw new ApiError('POINTS_REDEEM_INVALID', validation.error || '點數折抵驗證失敗', 400);
+      }
+
+      // 計算點數折抵金額並從總金額中扣除
+      const pointsDiscount = pointsService.calculatePointsDiscount(pointsToRedeem);
+      totalAmount = Math.max(0, totalAmount - pointsDiscount);
+      
+      logger.info('點數折抵處理', {
+        userId,
+        pointsToRedeem,
+        pointsDiscount,
+        originalAmount,
+        finalAmount: totalAmount,
+      });
+    }
+
     // 生成訂單 ID
     const orderId = `PREORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const packageName = items.length === 1 ? productNames[0] : `預購商品 (${items.length}項)`;
 
-    // 請求 LINE Pay（支援多商品）
+    // 請求 LINE Pay（支援多商品，使用扣除點數折抵後的金額）
     const linePayService = new LinePayService(c.env);
     const paymentResponse = await linePayService.requestPayment(
       orderId,
-      totalAmount,
+      totalAmount, // 使用扣除點數折抵後的金額
       packageName,
       validatedItems,
     );
@@ -462,8 +497,10 @@ paymentsRouter.openapi(requestPaymentRoute, async (c) => {
       campaignId,
       totalAmount,
       pickupDate,
+      userId,
+      pointsToRedeem,
     });
-    
+
     const paymentInsertQuery = `
       INSERT INTO preorder_payments (
         transaction_id,
@@ -472,10 +509,12 @@ paymentsRouter.openapi(requestPaymentRoute, async (c) => {
         items_json,
         total_amount,
         pickup_date,
+        user_id,
+        points_to_redeem,
         status,
         created_at,
         updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, 'pending', datetime('now'), datetime('now'))
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', datetime('now'), datetime('now'))
     `;
     
     try {
@@ -489,6 +528,8 @@ paymentsRouter.openapi(requestPaymentRoute, async (c) => {
         }))),
         totalAmount,
         pickupDate,
+        userId || null, // user_id
+        pointsToRedeem || 0, // points_to_redeem
       ).run();
       
       logger.info('支付交易記錄已存儲', {
@@ -662,7 +703,7 @@ paymentsRouter.openapi(confirmPaymentRoute, async (c) => {
     
     // 從數據庫獲取支付資訊（優先使用數據庫中的資訊）
     const paymentQuery = `
-      SELECT campaign_id, items_json, total_amount, pickup_date, status
+      SELECT campaign_id, items_json, total_amount, pickup_date, status, user_id, points_to_redeem
       FROM preorder_payments
       WHERE transaction_id = ? AND order_id = ?
       LIMIT 1
@@ -674,6 +715,8 @@ paymentsRouter.openapi(confirmPaymentRoute, async (c) => {
     let items: Array<{ productId: number; quantity: number }>;
     let totalAmount: number;
     let pickupDate: string;
+    let userId: number | undefined;
+    let pointsToRedeem: number | undefined;
     
     if (paymentResult) {
       // 使用數據庫中的資訊
@@ -687,6 +730,8 @@ paymentsRouter.openapi(confirmPaymentRoute, async (c) => {
       }
       totalAmount = paymentResult.total_amount as number;
       pickupDate = paymentResult.pickup_date as string;
+      userId = paymentResult.user_id as number | undefined;
+      pointsToRedeem = (paymentResult.points_to_redeem as number | undefined) || undefined;
       
       // 檢查是否已經確認過
       if (paymentResult.status === 'confirmed') {
@@ -791,20 +836,38 @@ paymentsRouter.openapi(confirmPaymentRoute, async (c) => {
       calculatedAmount += product.productPriceTwd * item.quantity;
     }
 
+    // 如果有點數折抵，需要從計算金額中扣除點數折抵金額
+    let finalCalculatedAmount = calculatedAmount;
+    if (pointsToRedeem && pointsToRedeem > 0) {
+      const pointsService = new PointsService(c.env.DB);
+      const pointsDiscount = pointsService.calculatePointsDiscount(pointsToRedeem);
+      finalCalculatedAmount = Math.max(0, calculatedAmount - pointsDiscount);
+      
+      logger.info('支付確認時計算點數折抵', {
+        calculatedAmount,
+        pointsToRedeem,
+        pointsDiscount,
+        finalCalculatedAmount,
+        totalAmount,
+      });
+    }
+
     // 驗證金額是否一致（防止金額被篡改）
     // 允許 1 元的誤差（因為浮點數計算可能會有微小誤差）
-    const amountDifference = Math.abs(calculatedAmount - totalAmount);
+    const amountDifference = Math.abs(finalCalculatedAmount - totalAmount);
     if (amountDifference > 1) {
       logger.error('支付金額不匹配', {
         calculatedAmount,
+        finalCalculatedAmount,
         totalAmount,
+        pointsToRedeem,
         difference: amountDifference,
         transactionId,
         items,
       });
       throw new ApiError(
         'AMOUNT_MISMATCH',
-        `支付金額與訂單金額不匹配：計算金額 ${calculatedAmount} 元，請求金額 ${totalAmount} 元`,
+        `支付金額與訂單金額不匹配：計算金額 ${finalCalculatedAmount} 元，請求金額 ${totalAmount} 元`,
         400,
       );
     }
@@ -964,9 +1027,10 @@ paymentsRouter.openapi(confirmPaymentRoute, async (c) => {
     }));
 
     const orderDetail = await orderService.createOrder({
-      user_id: undefined, // 使用非會員 ID (10)
+      user_id: userId, // 使用從支付資訊中獲取的 user_id（如果有的話）
       items: orderItems,
       channel: '網路',
+      points_to_redeem: pointsToRedeem && pointsToRedeem > 0 ? pointsToRedeem : undefined, // 點數折抵
     });
 
     logger.info('創建多商品訂單成功', {

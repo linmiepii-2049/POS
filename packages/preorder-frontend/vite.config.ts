@@ -12,6 +12,18 @@ export default defineConfig({
     port: 3100,
   },
   envPrefix: 'VITE_',
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'line-liff': ['@line/liff'], // 将 LIFF SDK 单独打包
+        },
+      },
+    },
+  },
+  optimizeDeps: {
+    include: ['@line/liff'],
+  },
 });
 
 

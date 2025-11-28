@@ -266,6 +266,9 @@ importers:
 
   packages/preorder-frontend:
     dependencies:
+      '@line/liff':
+        specifier: ^2.24.0
+        version: 2.27.2
       '@pos/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -3760,7 +3763,7 @@ packages:
       '@vitest/spy': 2.1.9
       estree-walker: 3.0.3
       magic-string: 0.30.19
-      vite: 5.4.20(@types/node@20.19.17)
+      vite: 5.4.20(terser@5.44.0)
     dev: true
 
   /@vitest/pretty-format@2.1.9:
