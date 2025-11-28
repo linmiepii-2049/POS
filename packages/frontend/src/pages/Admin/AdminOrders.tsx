@@ -4,7 +4,7 @@ import {
   useOrdersList,
   useOrdersUpdateStatus,
   type OrdersList200DataItem,
-  type OrdersListQuery,
+  type OrdersListParams,
 } from '../../api/posClient';
 import { formatMoney } from '../../utils/money';
 import { Table, type TableColumn } from '../../components/Table';
@@ -40,7 +40,7 @@ export function AdminOrders() {
   const { data: ordersResponse, isLoading, refetch } = useOrdersList({
     page: 1,
     limit: 100,
-    status: (filters.status || undefined) as OrdersListQuery['status'],
+    status: (filters.status || undefined) as OrdersListParams['status'],
     from: filters.date_from || undefined,
     to: filters.date_to || undefined,
   });
