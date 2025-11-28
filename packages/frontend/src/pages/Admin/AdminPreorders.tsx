@@ -93,7 +93,7 @@ export function AdminPreorders() {
     ? campaignsData.data
     : [];
 
-  const { data: productResponse, isLoading: isLoadingProducts } = useProductsList({
+  const { data: productResponse } = useProductsList({
     page: 1,
     limit: 100, // 後端限制最大值為 100
     is_active: 1,

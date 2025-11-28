@@ -37,12 +37,8 @@ interface ProductRecord {
 
 interface CampaignRecord {
   id: number;
-  product_id: number;
+  campaign_name: string | null;
   campaign_copy: string;
-  note: string | null;
-  pickup_time_slots: string;
-  max_quantity: number;
-  reserved_quantity: number;
   starts_at: string;
   ends_at: string;
   is_active: number;
@@ -57,9 +53,26 @@ interface PreorderOrderRecord {
   quantity: number;
 }
 
+interface CampaignProductRow {
+  product_id: number;
+  product_name: string;
+  product_price_twd: number;
+  product_image_url: string | null;
+  supply_quantity: number;
+  reserved_quantity: number;
+}
+
+interface CampaignProductRecord {
+  campaign_id: number;
+  product_id: number;
+  supply_quantity: number;
+  reserved_quantity: number;
+}
+
 class InMemoryD1 {
   private products = new Map<number, ProductRecord>();
   private campaigns = new Map<number, CampaignRecord>();
+  private campaignProducts = new Map<string, CampaignProductRecord>(); // key: `${campaign_id}_${product_id}`
   private preorderOrders = new Map<number, PreorderOrderRecord>();
   private campaignSeq = 0;
   private preorderSeq = 0;
@@ -71,6 +84,25 @@ class InMemoryD1 {
   insertCampaign(campaign: CampaignRecord) {
     this.campaignSeq = Math.max(this.campaignSeq, campaign.id);
     this.campaigns.set(campaign.id, campaign);
+  }
+
+  insertCampaignProduct(campaignId: number, productId: number, supplyQuantity: number, reservedQuantity = 0) {
+    const key = `${campaignId}_${productId}`;
+    this.campaignProducts.set(key, {
+      campaign_id: campaignId,
+      product_id: productId,
+      supply_quantity: supplyQuantity,
+      reserved_quantity: reservedQuantity,
+    });
+  }
+
+  batch(statements: Array<{ run: () => Promise<unknown> }>) {
+    return Promise.all(
+      statements.map(async (stmt) => {
+        const result = await stmt.run();
+        return { success: true, meta: { changes: 1 }, results: [] };
+      }),
+    );
   }
 
   prepare(query: string) {
@@ -94,37 +126,48 @@ class InMemoryD1 {
     }
 
     if (normalized.startsWith('INSERT INTO preorder_campaigns')) {
-      return createStatement((params) => ({
-        run: async () => {
-          const [
-            productId,
-            campaignCopy,
-            note,
-            pickupSlots,
-            maxQuantity,
-            startsAt,
-            endsAt,
-            isActive,
-          ] = params as [number, string, string | null, string, number, string, string, number];
-          const id = ++this.campaignSeq;
-          const now = new Date().toISOString();
-          this.campaigns.set(id, {
-            id,
-            product_id: Number(productId),
-            campaign_copy: campaignCopy,
-            note: note ?? null,
-            pickup_time_slots: pickupSlots,
-            max_quantity: Number(maxQuantity),
-            reserved_quantity: 0,
-            starts_at: startsAt,
-            ends_at: endsAt,
-            is_active: Number(isActive),
-            created_at: now,
-            updated_at: now,
-          });
-          return { success: true, meta: { last_row_id: id, changes: 1 } };
-        },
-      }));
+      return createStatement((params) => {
+        const [campaignName, campaignCopy, startsAt, endsAt, isActive] = params as [
+          string,
+          string,
+          string,
+          string,
+          number,
+        ];
+        return {
+          run: async () => {
+            const id = ++this.campaignSeq;
+            const now = new Date().toISOString();
+            this.campaigns.set(id, {
+              id,
+              campaign_name: campaignName ?? null,
+              campaign_copy: campaignCopy,
+              starts_at: startsAt,
+              ends_at: endsAt,
+              is_active: Number(isActive),
+              created_at: now,
+              updated_at: now,
+            });
+            return { success: true, meta: { last_row_id: id, changes: 1 } };
+          },
+        };
+      });
+    }
+
+    if (normalized.startsWith('INSERT INTO preorder_campaign_products')) {
+      return createStatement((params) => {
+        const [campaignId, productId, supplyQuantity] = params as [number, number, number];
+        const key = `${campaignId}_${productId}`;
+        this.campaignProducts.set(key, {
+          campaign_id: Number(campaignId),
+          product_id: Number(productId),
+          supply_quantity: Number(supplyQuantity),
+          reserved_quantity: 0,
+        });
+        return {
+          run: async () => ({ success: true, meta: { last_row_id: 0, changes: 1 } }),
+        };
+      });
     }
 
     if (normalized.includes('FROM preorder_campaigns pc') && normalized.includes('WHERE pc.id = ?')) {
@@ -134,15 +177,8 @@ class InMemoryD1 {
           if (!campaign) {
             return null;
           }
-          const product = this.products.get(campaign.product_id);
-          if (!product) {
-            return null;
-          }
           return {
             ...campaign,
-            product_name: product.name,
-            product_price_twd: product.unit_price_twd,
-            product_image_url: product.img_url,
           };
         },
       }));
@@ -253,6 +289,86 @@ class InMemoryD1 {
       }));
     }
 
+    if (normalized === 'SELECT * FROM preorder_campaigns WHERE id = ? LIMIT 1') {
+      return createStatement(([id]) => ({
+        first: async () => {
+          const campaign = this.campaigns.get(Number(id));
+          if (!campaign) {
+            return null;
+          }
+          return {
+            id: campaign.id,
+            campaign_name: campaign.campaign_name ?? null,
+            campaign_copy: campaign.campaign_copy,
+            starts_at: campaign.starts_at,
+            ends_at: campaign.ends_at,
+            is_active: campaign.is_active,
+            created_at: campaign.created_at,
+            updated_at: campaign.updated_at,
+          };
+        },
+      }));
+    }
+
+    if (normalized.startsWith('SELECT') && normalized.includes('FROM preorder_campaign_products') && normalized.includes('WHERE pcp.campaign_id = ?')) {
+      return createStatement(([campaignId]) => ({
+        all: async () => {
+          const results: CampaignProductRow[] = [];
+          for (const [key, cp] of this.campaignProducts.entries()) {
+            if (cp.campaign_id === Number(campaignId)) {
+              const product = this.products.get(cp.product_id);
+              if (product) {
+                results.push({
+                  product_id: cp.product_id,
+                  product_name: product.name,
+                  product_price_twd: product.unit_price_twd,
+                  product_image_url: product.img_url,
+                  supply_quantity: cp.supply_quantity,
+                  reserved_quantity: cp.reserved_quantity,
+                });
+              }
+            }
+          }
+          return { results };
+        },
+      }));
+    }
+
+    if (normalized.startsWith('SELECT MAX(supply_quantity - reserved_quantity, 0) as remaining FROM preorder_campaign_products WHERE campaign_id = ? AND product_id = ?')) {
+      return createStatement(([campaignId, productId]) => ({
+        first: async () => {
+          const key = `${campaignId}_${productId}`;
+          const cp = this.campaignProducts.get(key);
+          if (!cp) {
+            return { remaining: 0 };
+          }
+          return { remaining: Math.max(cp.supply_quantity - cp.reserved_quantity, 0) };
+        },
+      }));
+    }
+
+    if (normalized.startsWith('UPDATE preorder_campaign_products SET reserved_quantity = reserved_quantity + ?')) {
+      return createStatement(([quantity, campaignId, productId]) => {
+        const key = `${campaignId}_${productId}`;
+        const cp = this.campaignProducts.get(key);
+        if (!cp) {
+          return {
+            run: async () => ({ success: false, meta: { changes: 0 } }),
+          };
+        }
+        const qty = Number(quantity);
+        if (cp.reserved_quantity + qty > cp.supply_quantity) {
+          return {
+            run: async () => ({ success: true, meta: { changes: 0 } }),
+          };
+        }
+        cp.reserved_quantity += qty;
+        return {
+          run: async () => ({ success: true, meta: { changes: 1 } }),
+        };
+      });
+    }
+
     if (normalized === 'BEGIN TRANSACTION' || normalized === 'COMMIT' || normalized === 'ROLLBACK') {
       return createStatement(() => ({
         run: async () => ({ success: true, meta: { changes: 0 } }),
@@ -296,12 +412,8 @@ describe('PreorderService', () => {
     });
     db.insertCampaign({
       id: 10,
-      product_id: 1,
-      campaign_copy: '舊檔期',
-      note: null,
-      pickup_time_slots: '["10:00-11:00"]',
-      max_quantity: 50,
-      reserved_quantity: 10,
+      campaign_name: '舊檔期',
+      campaign_copy: '舊檔期文案',
       starts_at: '2025-01-01T00:00:00.000Z',
       ends_at: '2025-01-07T23:59:59.000Z',
       is_active: 1,
@@ -311,18 +423,21 @@ describe('PreorderService', () => {
 
     const service = new PreorderService(db as unknown as D1Database);
     const result = await service.createCampaign({
-      productId: 1,
-      campaignCopy: '新春預購',
-      note: '取餐請提前 10 分鐘報到',
-      pickupTimeSlots: ['12:00-13:00', '13:00-14:00'],
-      maxQuantity: 100,
-      startsAt: '2025-02-01T00:00',
-      endsAt: '2025-02-05T23:00',
+      campaignName: '新春預購',
+      campaignCopy: '新春預購文案',
+      products: [
+        {
+          productId: 1,
+          supplyQuantity: 100,
+        },
+      ],
+      startsAt: '2025-02-01',
+      endsAt: '2025-02-05',
       isActive: true,
     });
 
-    expect(result.campaignCopy).toBe('新春預購');
-    expect(result.pickupTimeSlots).toEqual(['12:00-13:00', '13:00-14:00']);
+    expect(result.campaignName).toBe('新春預購');
+    expect(result.campaignCopy).toBe('新春預購文案');
     expect(result.isActive).toBe(true);
 
     const previous = await service.getCampaignById(10);
@@ -340,24 +455,22 @@ describe('PreorderService', () => {
     });
     db.insertCampaign({
       id: 20,
-      product_id: 2,
-      campaign_copy: '情人節限定',
-      note: null,
-      pickup_time_slots: '["14:00-15:00","15:00-16:00"]',
-      max_quantity: 20,
-      reserved_quantity: 5,
+      campaign_name: '情人節限定',
+      campaign_copy: '情人節限定文案',
       starts_at: '2025-02-10T00:00:00.000Z',
       ends_at: '2026-02-15T23:59:59.000Z',
       is_active: 1,
       created_at: '2025-01-01T00:00:00.000Z',
       updated_at: '2025-01-01T00:00:00.000Z',
     });
+    db.insertCampaignProduct(20, 2, 20, 5);
 
     const mockOrderService = createMockOrderService();
     const service = new PreorderService(db as unknown as D1Database, mockOrderService);
 
     const summary = await service.createPreorderOrder({
       campaignId: 20,
+      productId: 2,
       quantity: 3,
       customerName: '小明',
       customerPhone: '0911222333',

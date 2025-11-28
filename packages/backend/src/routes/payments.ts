@@ -429,7 +429,7 @@ paymentsRouter.openapi(requestPaymentRoute, async (c) => {
     }
 
     // 如果有點數折抵，需要驗證用戶和點數，並計算最終金額
-    let originalAmount = totalAmount; // 保存原始金額（用於記錄）
+            const originalAmount = totalAmount; // 保存原始金額（用於記錄）
     if (pointsToRedeem && pointsToRedeem > 0) {
       if (!userId) {
         throw new ApiError('POINTS_REDEEM_REQUIRES_USER', '點數折抵需要用戶 ID', 400);
