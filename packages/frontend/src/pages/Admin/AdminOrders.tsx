@@ -4,6 +4,7 @@ import {
   useOrdersList,
   useOrdersUpdateStatus,
   type OrdersList200DataItem,
+  type OrdersListQuery,
 } from '../../api/posClient';
 import { formatMoney } from '../../utils/money';
 import { Table, type TableColumn } from '../../components/Table';
@@ -39,7 +40,7 @@ export function AdminOrders() {
   const { data: ordersResponse, isLoading, refetch } = useOrdersList({
     page: 1,
     limit: 100,
-    status: filters.status as any || undefined,
+    status: (filters.status || undefined) as OrdersListQuery['status'],
     from: filters.date_from || undefined,
     to: filters.date_to || undefined,
   });
@@ -58,12 +59,15 @@ export function AdminOrders() {
     try {
       await updateStatusMutation.mutateAsync({
         id: order.id,
-        data: { status: newStatus as any },
+        data: { status: newStatus as 'created' | 'confirmed' | 'paid' | 'cancelled' },
       });
       toast.success('訂單狀態更新成功');
       refetch();
-    } catch (error: any) {
-      toast.error(error?.response?.data?.error || '狀態更新失敗');
+    } catch (error: unknown) {
+      const errorMessage = error && typeof error === 'object' && 'response' in error
+        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error
+        : undefined;
+      toast.error(errorMessage || '狀態更新失敗');
     }
   };
 
