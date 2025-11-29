@@ -429,7 +429,9 @@ paymentsRouter.openapi(requestPaymentRoute, async (c) => {
     }
 
     // 如果有點數折抵，需要驗證用戶和點數，並計算最終金額
-            const originalAmount = totalAmount; // 保存原始金額（用於記錄）
+    const originalAmount = totalAmount; // 保存原始金額（用於記錄）
+    let pointsDiscount = 0; // 點數折抵金額
+    
     if (pointsToRedeem && pointsToRedeem > 0) {
       if (!userId) {
         throw new ApiError('POINTS_REDEEM_REQUIRES_USER', '點數折抵需要用戶 ID', 400);
@@ -444,7 +446,7 @@ paymentsRouter.openapi(requestPaymentRoute, async (c) => {
       }
 
       // 計算點數折抵金額並從總金額中扣除
-      const pointsDiscount = pointsService.calculatePointsDiscount(pointsToRedeem);
+      pointsDiscount = pointsService.calculatePointsDiscount(pointsToRedeem);
       totalAmount = Math.max(0, totalAmount - pointsDiscount);
       
       logger.info('點數折抵處理', {
@@ -467,6 +469,7 @@ paymentsRouter.openapi(requestPaymentRoute, async (c) => {
       totalAmount, // 使用扣除點數折抵後的金額
       packageName,
       validatedItems,
+      pointsDiscount, // 傳入點數折抵金額，用於在 LINE Pay 請求中添加折扣項
     );
 
     if (!paymentResponse.info) {

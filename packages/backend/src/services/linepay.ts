@@ -145,6 +145,7 @@ export class LinePayService {
     amount: number,
     packageName: string,
     items: Array<{ product: { productName: string; productPriceTwd: number }; quantity: number }>,
+    pointsDiscount?: number, // 點數折抵金額（可選）
   ): Promise<LinePayRequestPaymentResponse> {
     const nonce = crypto.randomUUID();
     // 構建商品列表
@@ -153,6 +154,30 @@ export class LinePayService {
       quantity: item.quantity,
       price: item.product.productPriceTwd,
     }));
+
+    // 如果有點數折抵，將折抵金額作為負數商品項添加
+    // 這樣可以確保 packages[].amount == sum(products[].quantity * products[].price)
+    if (pointsDiscount && pointsDiscount > 0) {
+      products.push({
+        name: '點數折抵',
+        quantity: 1,
+        price: -pointsDiscount, // 負數表示折扣
+      });
+    }
+
+    // 計算商品總和以驗證金額一致性
+    const productsSum = products.reduce((sum, p) => sum + p.price * p.quantity, 0);
+    
+    // 驗證：amount 必須等於 products 的總和
+    if (Math.abs(amount - productsSum) > 0.01) {
+      logger.error('LINE Pay 金額驗證失敗', {
+        amount,
+        productsSum,
+        difference: Math.abs(amount - productsSum),
+        products,
+      });
+      throw new ApiError('LINE_PAY_AMOUNT_MISMATCH', `金額不一致：amount (${amount}) != sum(products) (${productsSum})`, 400);
+    }
 
     const requestBody: LinePayRequestPaymentRequest = {
       amount,
