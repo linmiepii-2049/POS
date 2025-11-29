@@ -14,3 +14,4 @@ ALTER TABLE preorder_payments ADD COLUMN points_to_redeem INTEGER DEFAULT 0 CHEC
 -- 注意：SQLite 不支持 ALTER TABLE ADD FOREIGN KEY，所以這裡只添加索引
 CREATE INDEX IF NOT EXISTS idx_preorder_payments_user_id ON preorder_payments(user_id);
 
+

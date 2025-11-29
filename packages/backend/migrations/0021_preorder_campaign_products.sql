@@ -27,3 +27,4 @@ CREATE TABLE preorder_campaign_products (
 CREATE INDEX idx_preorder_campaign_products_campaign ON preorder_campaign_products(campaign_id);
 CREATE INDEX idx_preorder_campaign_products_product ON preorder_campaign_products(product_id);
 
+

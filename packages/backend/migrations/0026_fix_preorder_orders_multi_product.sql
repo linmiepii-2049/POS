@@ -73,3 +73,4 @@ CREATE INDEX IF NOT EXISTS idx_preorder_orders_campaign ON preorder_orders(campa
 CREATE INDEX IF NOT EXISTS idx_preorder_orders_order ON preorder_orders(order_id);
 CREATE INDEX IF NOT EXISTS idx_preorder_orders_product ON preorder_orders(product_id);
 
+
