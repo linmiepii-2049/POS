@@ -6,10 +6,16 @@
 
 | 變數 | 說明 | 預設值 | 備註 |
 | --- | --- | --- | --- |
-| `VITE_API_BASE_URL` | 後端 API 基底 URL | `http://localhost:8787` | 必填 |
+| `VITE_API_BASE_URL` | 後端 API 基底 URL | `http://localhost:8787` | 必填，在 Vercel 部署時必須設定 |
 | `VITE_LIFF_ID` | LINE LIFF ID | - | 僅在需要 LIFF 時設定（staging/production） |
 | `VITE_ENABLE_LIFF` | 是否啟用 LIFF | `false` | `'true'` 或 `'false'`，明確控制是否啟用 LIFF |
 | `VITE_ENV` | 環境標識 | - | `'dev'` / `'staging'` / `'production'`，用於自動判斷是否需要 LIFF |
+
+### ⚠️ Vercel 部署注意事項
+
+**如果部署到 Vercel 後出現 `ERR_CONNECTION_REFUSED` 錯誤**，表示環境變數未正確設定。
+
+請參考 [VERCEL_ENV_SETUP.md](./VERCEL_ENV_SETUP.md) 了解如何在 Vercel Dashboard 設定環境變數。
 
 ### 環境配置範例
 
@@ -23,11 +29,15 @@ VITE_ENABLE_LIFF=false
 
 **Staging 環境 - 需要 LIFF：**
 ```bash
-VITE_API_BASE_URL=https://your-staging-api.com
+VITE_API_BASE_URL=https://pos-backend-staging.survey-api.workers.dev
 VITE_ENV=staging
 VITE_ENABLE_LIFF=true
 VITE_LIFF_ID=your-liff-id-here
 ```
+
+**⚠️ 重要：Vercel 部署時必須設定環境變數**
+
+在 Vercel Dashboard 中設定環境變數，詳細說明請參考 [VERCEL_ENV_SETUP.md](./VERCEL_ENV_SETUP.md)
 
 ### LIFF 啟用邏輯
 
