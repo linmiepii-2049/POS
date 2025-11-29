@@ -119,6 +119,7 @@ export const createApp = () => {
       // 只有在 origin 在允許清單中時才設定 Access-Control-Allow-Origin
       if (origin && allowedOrigins.includes(origin)) {
         corsHeaders['Access-Control-Allow-Origin'] = origin;
+        corsHeaders['Access-Control-Allow-Credentials'] = 'true';
       }
       
       return new Response(null, { 
@@ -130,6 +131,8 @@ export const createApp = () => {
     // 設定 CORS headers（僅在 origin 在允許清單中時）
     if (origin && allowedOrigins.includes(origin)) {
       c.header('Access-Control-Allow-Origin', origin);
+      // 如果需要發送 Cookie 或認證信息，需要設定這個 header
+      c.header('Access-Control-Allow-Credentials', 'true');
     }
     c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
