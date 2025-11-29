@@ -45,7 +45,7 @@ local_protocol = "http"
 # ================================
 [env.staging]
 name = "pos-backend-staging"
-vars = { ENV_NAME = "staging", API_BASE = "https://pos-backend-staging.survey-api.workers.dev", CORS_ORIGINS = "http://localhost:3000,http://localhost:3001,http://localhost:3002,https://pos-frontend-staging.pages.dev,https://linmiepii-2049.github.io,https://pos-member-frontend.vercel.app,https://pos-frontend-cyan-five.vercel.app,https://pos-survey-frontend.vercel.app" }
+vars = { ENV_NAME = "staging", API_BASE = "https://pos-backend-staging.survey-api.workers.dev", CORS_ORIGINS = "http://localhost:3000,http://localhost:3001,http://localhost:3002,https://pos-frontend-staging.pages.dev,https://linmiepii-2049.github.io,https://pos-member-frontend.vercel.app,https://pos-frontend-cyan-five.vercel.app,https://pos-survey-frontend.vercel.app,https://pos-preorder-frontend.vercel.app" }
 
 # D1 資料庫綁定（Staging）
 [[env.staging.d1_databases]]
@@ -70,7 +70,7 @@ bucket_name = "pos-assets-staging"
 # ================================
 [env.production]
 name = "pos-backend-prod"
-vars = { ENV_NAME = "production", API_BASE = "https://pos-backend-prod.survey-api.workers.dev", CORS_ORIGINS = "https://pos-frontend-prod.pages.dev,https://linmiepii-2049.github.io,https://pos-member-frontend.vercel.app,https://pos-frontend-cyan-five.vercel.app,https://pos-survey-frontend.vercel.app" }
+vars = { ENV_NAME = "production", API_BASE = "https://pos-backend-prod.survey-api.workers.dev", CORS_ORIGINS = "https://pos-frontend-prod.pages.dev,https://linmiepii-2049.github.io,https://pos-member-frontend.vercel.app,https://pos-frontend-cyan-five.vercel.app,https://pos-survey-frontend.vercel.app,https://pos-preorder-frontend.vercel.app" }
 
 # D1 資料庫綁定（Production）
 [[env.production.d1_databases]]

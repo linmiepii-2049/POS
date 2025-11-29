@@ -100,15 +100,51 @@ export function PreorderPage() {
     },
   );
 
-  const { data: campaignResponse, isLoading, isError, error, refetch } = usePreordersGetActive();
+  const { data: campaignResponse, isLoading, isError, error, refetch } = usePreordersGetActive({
+    query: {
+      // 404 不應該被視為錯誤，這是正常的業務邏輯（沒有活躍檔期）
+      retry: (failureCount: number, error: any) => {
+        // 如果響應狀態是 404，不重試
+        if (error?.status === 404 || error?.response?.status === 404) {
+          return false;
+        }
+        // 網絡錯誤不重試（可能是 CORS 或其他配置問題）
+        if (error?.message?.includes('fetch') || error?.message?.includes('network') || error?.message?.includes('Load failed')) {
+          console.error('網絡錯誤，不重試:', error);
+          return false;
+        }
+        // 其他錯誤最多重試 1 次
+        return failureCount < 1;
+      },
+      // 不要將非 2xx 響應視為錯誤
+      // React Query 會自動將拋出的錯誤視為錯誤，但我們的 SDK 不會拋出錯誤
+      // 所以需要自定義錯誤判斷邏輯
+      throwOnError: false,
+      // 確保不會因為缺少 queryKey 而報錯
+    } as any,
+  });
   
-  // 調試日誌（僅在開發環境）
+  // 調試日誌（生產環境也記錄，以便診斷問題）
   useEffect(() => {
-    if (import.meta.env.DEV) {
-      console.log('Campaign Response:', campaignResponse);
-      console.log('Is Loading:', isLoading);
-      console.log('Is Error:', isError);
-      console.log('Error:', error);
+    console.log('🔍 預購檔期查詢狀態:', {
+      isLoading,
+      isError,
+      hasResponse: !!campaignResponse,
+      responseStatus: campaignResponse?.status,
+      error: error ? {
+        message: error instanceof Error ? error.message : String(error),
+        type: error?.constructor?.name,
+        stack: error instanceof Error ? error.stack : undefined,
+      } : null,
+      apiBaseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8787',
+    });
+    
+    if (campaignResponse) {
+      console.log('📦 Campaign Response:', campaignResponse);
+    }
+    
+    if (error) {
+      console.error('❌ Campaign Query Error:', error);
     }
   }, [campaignResponse, isLoading, isError, error]);
   
@@ -424,16 +460,52 @@ export function PreorderPage() {
 
   // 顯示空狀態：只有在加載完成且確實沒有數據時才顯示
   if (!isLoading && !campaign) {
+    // 判斷是真實的 404（沒有檔期）還是其他錯誤
+    const isReal404 = campaignResponse?.status === 404 || 
+                     (campaignPayload && 'code' in campaignPayload && campaignPayload.code === 'PREORDER_INACTIVE');
+    const isNetworkError = isError && error && (
+      error instanceof TypeError || 
+      (error instanceof Error && (
+        error.message.includes('fetch') || 
+        error.message.includes('network') || 
+        error.message.includes('Load failed') ||
+        error.message.includes('Failed to fetch')
+      ))
+    );
+    
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
         <div className="bg-white rounded-2xl shadow p-6 text-center space-y-4 max-w-md w-full">
           <p className="text-4xl">🥐</p>
           <h1 className="text-xl font-bold text-gray-900">目前沒有預購檔期</h1>
           <p className="text-sm text-gray-600">請稍後再回來看看，或加入官方 LINE 以獲得最新通知。</p>
-          {isError && error && (
-            <p className="text-xs text-red-600 mt-2">
-              錯誤：{error instanceof Error ? error.message : String(error)}
-            </p>
+          
+          {/* 顯示網絡錯誤 */}
+          {isNetworkError && (
+            <div className="text-xs text-red-600 mt-2 space-y-1">
+              <p className="font-semibold">⚠️ 連線錯誤：</p>
+              <p>
+                {error instanceof Error ? error.message : String(error)}
+              </p>
+              <p className="text-gray-500 mt-1">
+                API URL: {import.meta.env.VITE_API_BASE_URL || '未設定'}
+              </p>
+            </div>
+          )}
+          
+          {/* 顯示其他錯誤 */}
+          {isError && error && !isNetworkError && !isReal404 && (
+            <div className="text-xs text-red-600 mt-2 space-y-1">
+              <p className="font-semibold">錯誤：</p>
+              <p>
+                {error instanceof Error 
+                  ? error.message 
+                  : typeof error === 'object' && error !== null
+                    ? JSON.stringify(error, null, 2)
+                    : String(error)
+                }
+              </p>
+            </div>
           )}
         </div>
       </div>
