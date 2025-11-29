@@ -24,7 +24,7 @@
     "d1:seed:full": "wrangler d1 execute --local pos-local --file seeds/0005_complete_data_seed.sql",
     "d1:seed:script": "bash scripts/seed-data.sh",
     "d1:console": "wrangler d1 execute --local pos-local",
-    "d1:migrate:staging": "wrangler d1 migrations apply --env staging pos-db-staging",
+    "d1:migrate:staging": "wrangler d1 migrations apply DB --env staging --remote",
     "d1:seed:staging": "wrangler d1 execute --env staging pos-db-staging --file seeds/0005_complete_data_seed.sql"
   },
   "dependencies": {
