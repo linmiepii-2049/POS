@@ -88,8 +88,13 @@ const listRoute = createRoute({
 preordersRouter.openapi(listRoute, async (c) => {
   try {
     const query = c.req.valid('query');
+    logger.info('預購檔期列表請求', { query });
     const service = new PreorderService(c.env.DB);
     const result = await service.listCampaigns(query);
+    logger.info('預購檔期列表請求成功', { 
+      campaignsCount: result.campaigns.length,
+      total: result.pagination.total,
+    });
     return c.json<ListResponse, 200>(
       {
         success: true,
@@ -100,6 +105,11 @@ preordersRouter.openapi(listRoute, async (c) => {
       200,
     );
   } catch (error) {
+    logger.error('預購檔期列表 API 錯誤', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      query: c.req.valid('query'),
+    });
     return handleError(c, error);
   }
 });

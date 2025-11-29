@@ -40,31 +40,58 @@ export class PreorderService {
   }
 
   private async loadCampaignProducts(campaignId: number): Promise<PreorderCampaignProduct[]> {
-    const query = `
-      SELECT
-        pcp.product_id,
-        p.name as product_name,
-        p.unit_price_twd as product_price_twd,
-        p.img_url as product_image_url,
-        pcp.supply_quantity,
-        pcp.reserved_quantity
-      FROM preorder_campaign_products pcp
-      JOIN products p ON p.id = pcp.product_id
-      WHERE pcp.campaign_id = ?
-      ORDER BY pcp.id
-    `;
-    const result = await this.db.prepare(query).bind(campaignId).all<CampaignProductRow>();
-    const rows = (result.results as unknown as CampaignProductRow[]) ?? [];
+    try {
+      const query = `
+        SELECT
+          pcp.product_id,
+          p.name as product_name,
+          p.unit_price_twd as product_price_twd,
+          p.img_url as product_image_url,
+          pcp.supply_quantity,
+          pcp.reserved_quantity
+        FROM preorder_campaign_products pcp
+        JOIN products p ON p.id = pcp.product_id
+        WHERE pcp.campaign_id = ?
+        ORDER BY pcp.id
+      `;
+      logger.info('載入預購檔期商品', { campaignId, query });
+      const result = await this.db.prepare(query).bind(campaignId).all<CampaignProductRow>();
+      
+      if (!result) {
+        logger.warn('載入預購檔期商品查詢結果為空', { campaignId });
+        return [];
+      }
+      
+      const rows = (result.results as unknown as CampaignProductRow[]) ?? [];
+      logger.info('載入預購檔期商品成功', { campaignId, count: rows.length });
 
-    return rows.map((row) => ({
-      productId: row.product_id,
-      productName: row.product_name,
-      productPriceTwd: row.product_price_twd,
-      productImageUrl: row.product_image_url,
-      supplyQuantity: row.supply_quantity,
-      reservedQuantity: row.reserved_quantity,
-      remainingQuantity: Math.max(row.supply_quantity - row.reserved_quantity, 0),
-    }));
+      return rows.map((row) => ({
+        productId: row.product_id,
+        productName: row.product_name,
+        productPriceTwd: row.product_price_twd,
+        productImageUrl: row.product_image_url,
+        supplyQuantity: row.supply_quantity,
+        reservedQuantity: row.reserved_quantity,
+        remainingQuantity: Math.max(row.supply_quantity - row.reserved_quantity, 0),
+      }));
+    } catch (error) {
+      logger.error('載入預購檔期商品失敗', {
+        campaignId,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      
+      // 如果商品表不存在或查詢失敗，返回空陣列而不是拋出錯誤
+      // 這樣即使沒有商品，檔期資料仍能正常顯示
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('no such table') || errorMessage.includes('does not exist')) {
+        logger.warn('預購商品表不存在，返回空商品列表', { campaignId });
+        return [];
+      }
+      
+      // 其他錯誤仍然拋出，但提供更詳細的錯誤資訊
+      throw new ApiError('LOAD_PRODUCTS_FAILED', `載入預購檔期商品失敗: ${errorMessage}`, 500);
+    }
   }
 
   private async mapCampaign(row: CampaignRow): Promise<PreorderCampaign> {
@@ -110,45 +137,86 @@ export class PreorderService {
   }
 
   async listCampaigns(query: PreorderCampaignQuery): Promise<{ campaigns: PreorderCampaign[]; pagination: { page: number; limit: number; total: number; totalPages: number } }> {
-    const { page, limit, sortBy, sortDir, isActive } = query;
-    const offset = (page - 1) * limit;
-    const conditions: string[] = [];
-    const params: unknown[] = [];
+    try {
+      const { page, limit, sortBy, sortDir, isActive } = query;
+      const offset = (page - 1) * limit;
+      const conditions: string[] = [];
+      const params: unknown[] = [];
 
-    if (typeof isActive === 'boolean') {
-      conditions.push('pc.is_active = ?');
-      params.push(isActive ? 1 : 0);
+      if (typeof isActive === 'boolean') {
+        conditions.push('pc.is_active = ?');
+        params.push(isActive ? 1 : 0);
+      }
+
+      const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+      const countQuery = `SELECT COUNT(*) as total FROM preorder_campaigns pc ${whereClause}`;
+      logger.info('執行預購檔期數量查詢', { query: countQuery, params });
+      const countResult = await this.db.prepare(countQuery).bind(...params).first();
+      
+      if (!countResult) {
+        logger.error('預購檔期數量查詢失敗', { query: countQuery, params });
+        throw new ApiError('DATABASE_ERROR', '無法取得預購檔期數量', 500);
+      }
+      
+      const total = (countResult.total as number) || 0;
+      const totalPages = Math.ceil(total / limit);
+
+      const sortColumn = ['starts_at', 'created_at', 'updated_at'].includes(sortBy) ? sortBy : 'created_at';
+      const listQuery = `
+        SELECT pc.*
+        FROM preorder_campaigns pc
+        ${whereClause}
+        ORDER BY pc.${sortColumn} ${sortDir.toUpperCase()}
+        LIMIT ? OFFSET ?
+      `;
+
+      logger.info('執行預購檔期列表查詢', { query: listQuery, params: [...params, limit, offset] });
+      const listResult = await this.db.prepare(listQuery).bind(...params, limit, offset).all<CampaignRow>();
+      
+      if (!listResult) {
+        logger.error('預購檔期列表查詢失敗', { query: listQuery, params: [...params, limit, offset] });
+        throw new ApiError('DATABASE_ERROR', '無法取得預購檔期列表', 500);
+      }
+      
+      const rows = (listResult.results as unknown as CampaignRow[]) ?? [];
+      logger.info('開始映射預購檔期資料', { count: rows.length });
+      
+      const campaigns = await Promise.all(rows.map((row) => this.mapCampaign(row)));
+
+      logger.info('預購檔期列表查詢成功', { total, campaignsCount: campaigns.length });
+      return {
+        campaigns,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+        },
+      };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      
+      logger.error('listCampaigns 執行失敗', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        query,
+      });
+      
+      // 檢查是否是資料表不存在的錯誤
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('no such table') || errorMessage.includes('does not exist')) {
+        throw new ApiError('DATABASE_SCHEMA_ERROR', '預購檔期資料表不存在，請執行資料庫遷移', 500, {
+          message: errorMessage,
+        });
+      }
+      
+      throw new ApiError('LIST_CAMPAIGNS_FAILED', '取得預購檔期列表失敗', 500, {
+        message: errorMessage,
+      });
     }
-
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-
-    const countQuery = `SELECT COUNT(*) as total FROM preorder_campaigns pc ${whereClause}`;
-    const countResult = await this.db.prepare(countQuery).bind(...params).first();
-    const total = (countResult?.total as number) || 0;
-    const totalPages = Math.ceil(total / limit);
-
-    const sortColumn = ['starts_at', 'created_at', 'updated_at'].includes(sortBy) ? sortBy : 'created_at';
-    const listQuery = `
-      SELECT pc.*
-      FROM preorder_campaigns pc
-      ${whereClause}
-      ORDER BY pc.${sortColumn} ${sortDir.toUpperCase()}
-      LIMIT ? OFFSET ?
-    `;
-
-    const listResult = await this.db.prepare(listQuery).bind(...params, limit, offset).all<CampaignRow>();
-    const rows = (listResult.results as unknown as CampaignRow[]) ?? [];
-    const campaigns = await Promise.all(rows.map((row) => this.mapCampaign(row)));
-
-    return {
-      campaigns,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages,
-      },
-    };
   }
 
   async getCampaignById(id: number): Promise<PreorderCampaign> {
