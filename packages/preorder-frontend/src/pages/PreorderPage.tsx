@@ -112,19 +112,49 @@ export function PreorderPage() {
     }
   }, [campaignResponse, isLoading, isError, error]);
   
+  // 調試日誌：記錄完整響應結構
+  useEffect(() => {
+    if (import.meta.env.DEV && campaignResponse) {
+      console.log('Full Campaign Response:', JSON.stringify(campaignResponse, null, 2));
+      console.log('Campaign Response Data:', campaignResponse?.data);
+      console.log('Campaign Response Status:', campaignResponse?.status);
+    }
+  }, [campaignResponse]);
+  
   const campaignPayload = campaignResponse?.data as PreordersGetActive200 | PreordersGetActive404 | undefined;
 
   const campaign = useMemo<PreorderCampaign | null>(() => {
     if (!campaignPayload) {
+      if (import.meta.env.DEV) {
+        console.log('No campaign payload');
+      }
       return null;
     }
     
-    // 檢查是否是成功響應（200）
+    // 調試日誌
+    if (import.meta.env.DEV) {
+      console.log('Campaign Payload:', campaignPayload);
+      console.log('Has data field:', 'data' in campaignPayload);
+      console.log('Is active response:', isActiveResponse(campaignPayload));
+    }
+    
+    // 檢查是否是成功響應（200）- 有 data 字段表示成功
     if (isActiveResponse(campaignPayload)) {
+      if (import.meta.env.DEV) {
+        console.log('Campaign data:', campaignPayload.data);
+      }
       return campaignPayload.data;
     }
     
-    // 如果不是成功響應，返回 null
+    // 如果是 404 錯誤響應
+    if (campaignPayload && 'code' in campaignPayload) {
+      if (import.meta.env.DEV) {
+        console.log('404 Response:', campaignPayload);
+      }
+      return null;
+    }
+    
+    // 其他情況返回 null
     return null;
   }, [campaignPayload]);
 
