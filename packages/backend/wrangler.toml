@@ -45,7 +45,8 @@ local_protocol = "http"
 # ================================
 [env.staging]
 name = "pos-backend-staging"
-vars = { ENV_NAME = "staging", API_BASE = "https://pos-backend-staging.survey-api.workers.dev", CORS_ORIGINS = "http://localhost:3000,http://localhost:3001,http://localhost:3002,https://pos-frontend-staging.pages.dev,https://linmiepii-2049.github.io,https://pos-member-frontend.vercel.app,https://pos-frontend-cyan-five.vercel.app,https://pos-survey-frontend.vercel.app,https://pos-preorder-frontend.vercel.app" }
+# LINE Pay Sandbox 配置（Staging 環境使用沙盒）
+vars = { ENV_NAME = "staging", API_BASE = "https://pos-backend-staging.survey-api.workers.dev", CORS_ORIGINS = "http://localhost:3000,http://localhost:3001,http://localhost:3002,https://pos-frontend-staging.pages.dev,https://linmiepii-2049.github.io,https://pos-member-frontend.vercel.app,https://pos-frontend-cyan-five.vercel.app,https://pos-survey-frontend.vercel.app,https://pos-preorder-frontend.vercel.app", LINE_PAY_CHANNEL_ID = "2008582892", LINE_PAY_CHANNEL_SECRET = "6a5fd867149010c6bab642cf950a12a6", LINE_PAY_API_BASE = "https://sandbox-api-pay.line.me", LINE_PAY_RETURN_URL = "https://pos-preorder-frontend.vercel.app/preorder/payment/return", LINE_PAY_CANCEL_URL = "https://pos-preorder-frontend.vercel.app/preorder/payment/cancel" }
 
 # D1 資料庫綁定（Staging）
 [[env.staging.d1_databases]]
