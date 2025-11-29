@@ -100,13 +100,31 @@ export function PreorderPage() {
     },
   );
 
-  const { data: campaignResponse, isLoading, isError, refetch } = usePreordersGetActive();
+  const { data: campaignResponse, isLoading, isError, error, refetch } = usePreordersGetActive();
+  
+  // 調試日誌（僅在開發環境）
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log('Campaign Response:', campaignResponse);
+      console.log('Is Loading:', isLoading);
+      console.log('Is Error:', isError);
+      console.log('Error:', error);
+    }
+  }, [campaignResponse, isLoading, isError, error]);
+  
   const campaignPayload = campaignResponse?.data as PreordersGetActive200 | PreordersGetActive404 | undefined;
 
   const campaign = useMemo<PreorderCampaign | null>(() => {
+    if (!campaignPayload) {
+      return null;
+    }
+    
+    // 檢查是否是成功響應（200）
     if (isActiveResponse(campaignPayload)) {
       return campaignPayload.data;
     }
+    
+    // 如果不是成功響應，返回 null
     return null;
   }, [campaignPayload]);
 
@@ -374,16 +392,27 @@ export function PreorderPage() {
     );
   }
 
-  if (isError || !campaign) {
+  // 顯示空狀態：只有在加載完成且確實沒有數據時才顯示
+  if (!isLoading && !campaign) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
         <div className="bg-white rounded-2xl shadow p-6 text-center space-y-4 max-w-md w-full">
           <p className="text-4xl">🥐</p>
           <h1 className="text-xl font-bold text-gray-900">目前沒有預購檔期</h1>
           <p className="text-sm text-gray-600">請稍後再回來看看，或加入官方 LINE 以獲得最新通知。</p>
+          {isError && error && (
+            <p className="text-xs text-red-600 mt-2">
+              錯誤：{error instanceof Error ? error.message : String(error)}
+            </p>
+          )}
         </div>
       </div>
     );
+  }
+
+  // 如果還在加載中或沒有 campaign，不渲染內容（由上面的條件處理）
+  if (isLoading || !campaign) {
+    return null;
   }
 
   return (
